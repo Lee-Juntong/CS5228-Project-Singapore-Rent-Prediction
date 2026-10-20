@@ -1,3 +1,5 @@
+> **Superseded.** This is the earlier plan from 22 September 2026. The current plan is `docs/final-report-plan.md`. Where the two differ, follow the current plan.
+
 # CS5228 Final Project Plan
 ## Predicting Singapore HDB Monthly Rent
 

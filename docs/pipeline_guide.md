@@ -63,7 +63,7 @@ The one function every model goes through.
 * `target_mode`: `"raw"` trains on rent. `"index"` trains on rent divided by a monthly rent index.
 * `log=False` prints the scores but writes nothing. Use it for quick trials.
 
-Returns the logged row: `rmse`, `mae`, `mape`, `bias`, `rmse_std` (spread over folds), `rmse_window` (see `compare_splits`), timings and the git commit. When logging it writes:
+Returns the logged row. The columns of `results/results.csv` are `run_id`, `timestamp`, `member`, `model`, `feature_set`, `n_features`, `split`, `target_mode`, `n_fit`, `n_valid`, `rmse`, `rmse_std` (spread over folds), `mae`, `mape` (in percent), `bias`, `rmse_window` (see `compare_splits`), `train_seconds`, `predict_seconds`, `seed`, `git_commit` and `notes`. When logging it writes:
 
 * `results/runs/<run_id>.csv`, one row. Commit it.
 * `results/results.csv`, rebuilt from all run files.

@@ -22,6 +22,7 @@ from src.data_preprocessing import (
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = PROJECT_ROOT / "data"
+needs_raw_data = pytest.mark.skipif(not (DATA_DIR / "train.csv").exists(), reason="Kaggle files are not in data/, see data/README.md")
 
 
 def test_text_normalization_and_flat_type_mapping() -> None:
@@ -75,6 +76,7 @@ def test_haversine_nearest_distance_and_radius_counts() -> None:
     assert counts[2.0].tolist() == [1, 1]
 
 
+@needs_raw_data
 def test_coe_lags_exclude_the_current_month() -> None:
     raw = pd.read_csv(DATA_DIR / "auxiliary" / "sg-coe-prices.csv")
     monthly = prepare_coe_monthly(raw).set_index("RENT_APPROVAL_DATE")
@@ -92,6 +94,7 @@ def test_coe_lags_exclude_the_current_month() -> None:
     assert monthly.loc[pd.Timestamp("2021-04-01"), "COE_A_PREMIUM_LAGGED_3M_MEAN"] == pytest.approx(expected)
 
 
+@needs_raw_data
 def test_stock_lags_and_fixed_universe() -> None:
     raw = pd.read_csv(DATA_DIR / "auxiliary" / "sg-stock-prices.csv")
     monthly = prepare_stock_monthly(raw).set_index("RENT_APPROVAL_DATE")
@@ -101,6 +104,7 @@ def test_stock_lags_and_fixed_universe() -> None:
     )
 
 
+@needs_raw_data
 def test_auxiliary_sentinels_and_internal_time_gaps_are_validated() -> None:
     hdb = pd.read_csv(
         DATA_DIR / "auxiliary" / "sg-hdb-block.csv",
@@ -149,6 +153,7 @@ def test_smoothed_target_encoder_uses_leave_one_out_and_unseen_fallback() -> Non
     assert unseen.iloc[0] == pytest.approx(target.mean())
 
 
+@needs_raw_data
 def test_full_pipeline_removes_exact_train_duplicates_and_preserves_test(tmp_path: Path) -> None:
     result = run_pipeline(
         DATA_DIR,

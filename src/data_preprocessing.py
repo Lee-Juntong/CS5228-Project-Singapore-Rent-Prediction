@@ -17,6 +17,8 @@ import numpy as np
 import pandas as pd
 from sklearn.neighbors import BallTree
 
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+
 
 EARTH_RADIUS_KM = 6_371.0088
 BASE_MONTH = pd.Timestamp("2021-01-01")
@@ -1235,9 +1237,9 @@ def _json_default(value: Any) -> Any:
 
 
 def run_pipeline(
-    data_dir: str | Path = "data",
-    processed_dir: str | Path = "data/processed",
-    audit_dir: str | Path = "artifacts/data_audit",
+    data_dir: str | Path = PROJECT_ROOT / "data",
+    processed_dir: str | Path = PROJECT_ROOT / "data" / "processed",
+    audit_dir: str | Path = PROJECT_ROOT / "artifacts" / "data_audit",
 ) -> dict[str, Any]:
     """Run the complete target-free preprocessing workflow and save outputs."""
 

@@ -2,7 +2,7 @@
 
 Add your model as a zero-argument function that returns an object with
 `fit(X, y)` and `predict(X)`, then register it in MODELS so the command line
-runner can find it. Use SEED for any random state.
+runner can find it. Pass random_state=SEED (from src.config) to every model that has one, or results will not reproduce. Torch models also need torch.manual_seed(SEED).
 """
 
 from __future__ import annotations

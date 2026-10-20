@@ -1,6 +1,6 @@
 # Data
 
-Large and Kaggle supplied files are not in git. Put them here before running anything.
+Large and Kaggle supplied files are not in git. Put them here before running anything. Four tests in `tests/test_data_preprocessing.py` are skipped until `train.csv` is present.
 
 | Path | Source | In git |
 |---|---|---|
