@@ -12,7 +12,7 @@ cd CS5228-Project-Singapore-Rent-Prediction
 python3.10 -m venv .venv
 ```
 
-Activate the environment. On Windows run `.venv\Scriptsctivate`. On macOS or Linux run `source .venv/bin/activate`. Then install the packages:
+Activate the environment. On Windows run `.venv\Scripts\activate`. On macOS or Linux run `source .venv/bin/activate`. Then install the packages:
 
 ```bash
 pip install -r requirements.txt
