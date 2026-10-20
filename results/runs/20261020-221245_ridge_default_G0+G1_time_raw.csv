@@ -1,0 +1,2 @@
+run_id,timestamp,member,model,feature_set,n_features,split,target_mode,n_fit,n_valid,rmse,rmse_std,mae,mape,bias,rmse_window,train_seconds,predict_seconds,seed,git_commit,notes
+20261020-221245_ridge_default_G0+G1_time_raw,2026-10-20T22:12:45,A,ridge_default,G0+G1,39,time,raw,132538,17037,574.905109572291,0.0,418.34219972335165,16.87020175516679,330.37578178576945,574.905109572291,2.856118700001389,0.055488500045612454,5228,7dec8fc+dirty,"Split comparison, decision 1"

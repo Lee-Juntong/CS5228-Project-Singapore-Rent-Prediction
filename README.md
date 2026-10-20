@@ -14,7 +14,7 @@ Then put the Kaggle files in `data/` and build the processed data as described i
 
 ## Shared experiment setup (Phase 0)
 
-Every model goes through one function, so all results are comparable.
+Every model goes through one function, so all results are comparable. [docs/pipeline_guide.md](docs/pipeline_guide.md) lists every reusable function with its inputs, outputs and an example.
 
 * **Split.** `time` (the main one): fit on Jan 2021 to Sep 2024, validate on Oct 2024 to Mar 2025. `random5`: shuffled 5 fold CV, reported once to show how much a random split overstates performance.
 * **Metrics.** RMSE (primary, as on Kaggle), MAE, MAPE and mean bias. For the time split, RMSE per flat type and per validation month is saved too.
@@ -47,6 +47,26 @@ run_experiment("ridge", lambda: sklearn_tabular(Ridge(alpha=1.0)),
 ```
 
 Register it in `MODELS` in `src/models.py` if you want it on the command line.
+
+### Random CV against the time holdout
+
+`compare_splits` runs both splits for one model and scores the random CV on the same Oct 2024 to Mar 2025 rows as the time holdout. Run it once on your best model.
+
+```python
+from src.evaluation import compare_splits
+compare_splits("ridge", lambda: sklearn_tabular(Ridge(alpha=1.0)), member="B", data=data)
+```
+
+Or from the shell: `python -m scripts.run_experiment --model lightgbm_default --compare-splits`. `split_comparison()` rebuilds the table from `results/results.csv`.
+
+Current numbers on G0+G1, raw target:
+
+| model | time holdout RMSE | random CV RMSE, all rows | random CV RMSE, holdout rows | optimism |
+|---|---|---|---|---|
+| lightgbm_default | 457.3 | 478.9 | 455.3 | 2.0 |
+| ridge_default | 574.9 | 509.2 | 501.6 | 73.3 |
+
+Random CV flatters Ridge by 73 RMSE because Ridge extends a straight month trend into the holdout and overpredicts by 330 on average there. LightGBM keeps the last level it saw, and rents were flat in late 2024, so random CV barely flatters it. The all rows random CV number is higher than the holdout for LightGBM only because it includes 2023, when rents varied most.
 
 ### Where results go
 

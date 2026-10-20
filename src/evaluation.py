@@ -220,6 +220,9 @@ def collect_results() -> pd.DataFrame:
     files = sorted(RUNS_DIR.glob("*.csv"))
     table = pd.concat([pd.read_csv(f) for f in files], ignore_index=True) if files else pd.DataFrame(columns=RESULT_COLUMNS)
     table = table.reindex(columns=RESULT_COLUMNS).sort_values("timestamp")
+    # Runs logged before rmse_window existed: for the time split it equals rmse.
+    is_time = table["split"] == "time"
+    table.loc[is_time, "rmse_window"] = table.loc[is_time, "rmse_window"].fillna(table.loc[is_time, "rmse"])
     RESULTS_CSV.parent.mkdir(parents=True, exist_ok=True)
     table.to_csv(RESULTS_CSV, index=False)
     return table
