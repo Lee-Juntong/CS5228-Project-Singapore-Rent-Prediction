@@ -1,0 +1,80 @@
+feature,dtype,role,group,availability,source,definition,expected_missingness
+ROW_ID,int64,identifier,key,observed,generated,Zero-based source row position; unchanged through every join.,none
+RENT_APPROVAL_DATE,datetime64[ns],feature,core temporal,observed,train/test,Source YYYY-MM approval value converted to the first calendar day of that month.,none
+TOWN,string,feature,core,observed,train/test,"Source town after lowercase conversion, trimming, and whitespace collapse.",none
+BLOCK,string,feature,core,observed,train/test,"Source HDB block identifier after lowercase conversion, trimming, and whitespace collapse.",none
+STREET,string,feature,core,observed,train/test,"Source street after lowercase conversion, trimming, and whitespace collapse.",none
+FLAT_TYPE,string,feature,core,observed,train/test,Canonical flat label: 1-room through 5-room or executive.,none
+FLAT_MODEL,string,feature,core,observed,train/test,"Source flat model after lowercase conversion, trimming, and whitespace collapse.",none
+FLOOR_AREA_SQM,float64,feature,core,observed,train/test,Source floor area in square metres; must be positive.,none
+LEASE_COMMENCE_DATE,int64,feature,core,observed,train/test,"Source lease commencement year retained unchanged, including the flagged inconsistent row.",none
+APPROVAL_YEAR,int16,feature,core temporal,derived,train/test,Calendar year extracted from RENT_APPROVAL_DATE.,none
+APPROVAL_MONTH,int8,feature,core temporal,derived,train/test,"Calendar month number from RENT_APPROVAL_DATE, from 1 to 12.",none
+APPROVAL_QUARTER,int8,feature,core temporal,derived,train/test,"Calendar quarter from RENT_APPROVAL_DATE, from 1 to 4.",none
+MONTH_INDEX,int16,feature,core temporal,derived,train/test,Whole months since January 2021: 12*(year-2021)+(month-1).,none
+MONTH_SIN,float32,feature,core temporal,derived,train/test,Annual cyclic encoding sin(2*pi*(approval_month-1)/12).,none
+MONTH_COS,float32,feature,core temporal,derived,train/test,Annual cyclic encoding cos(2*pi*(approval_month-1)/12).,none
+FLAT_TYPE_ORDINAL,int8,feature,core structural,derived,train/test,Flat-type proxy mapping 1-room..5-room to 1..5 and executive to 6.,none
+FLOOR_AREA_PER_ROOM_PROXY,float32,feature,core structural,derived,train/test,FLOOR_AREA_SQM divided by FLAT_TYPE_ORDINAL; executive uses divisor 6.,none
+INVALID_LEASE_DATE_FLAG,int8,feature,core structural,derived,train/test,1 when LEASE_COMMENCE_DATE exceeds APPROVAL_YEAR; otherwise 0.,none
+FLAT_AGE_YEARS,float32,feature,core structural,derived,train/test,APPROVAL_YEAR minus LEASE_COMMENCE_DATE; missing when INVALID_LEASE_DATE_FLAG=1.,Only rows where INVALID_LEASE_DATE_FLAG=1.
+REMAINING_LEASE_PROXY_YEARS,float32,feature,core structural,derived,train/test,"max(0, 99-FLAT_AGE_YEARS); a proxy rather than an observed lease balance.",Only rows where INVALID_LEASE_DATE_FLAG=1.
+ADDRESS_KEY,object,feature,core structural,derived,train/test,"Normalized TOWN, BLOCK, and STREET joined with vertical bars.",none
+HDB_POSTAL_CODE,string,feature,HDB block,static snapshot,sg-hdb-block.csv,Six-character postal code joined on normalized town/block/street; source NIL becomes missing.,Rows where HDB_POSTAL_CODE_MISSING_FLAG=1.
+HDB_LATITUDE,float64,feature,HDB block,static snapshot,sg-hdb-block.csv,Supplied HDB-block latitude in decimal degrees.,none
+HDB_LONGITUDE,float64,feature,HDB block,static snapshot,sg-hdb-block.csv,Supplied HDB-block longitude in decimal degrees.,none
+HDB_MAX_FLOOR,float32,feature,HDB block,static snapshot,sg-hdb-block.csv,Supplied maximum block floor; source sentinel -1 becomes missing.,Rows where HDB_MAX_FLOOR_MISSING_FLAG=1.
+HDB_YEAR_COMPLETED,float32,feature,HDB block,static snapshot,sg-hdb-block.csv,Supplied block completion year; source sentinel -1 becomes missing.,Rows where HDB_YEAR_COMPLETED_MISSING_FLAG=1.
+HDB_SUBZONE,string,feature,HDB block,static snapshot,sg-hdb-block.csv,Supplied subzone after lowercase conversion and whitespace normalization.,none
+HDB_PLANNING_AREA,string,feature,HDB block,static snapshot,sg-hdb-block.csv,Supplied planning area after lowercase conversion and whitespace normalization.,none
+HDB_REGION,string,feature,HDB block,static snapshot,sg-hdb-block.csv,Supplied region after lowercase conversion and whitespace normalization.,none
+HDB_POSTAL_CODE_MISSING_FLAG,int8,feature,HDB block,static diagnostic,sg-hdb-block.csv,"1 when the source postal code is NIL, none, or blank; otherwise 0.",none
+HDB_MAX_FLOOR_MISSING_FLAG,int8,feature,HDB block,static diagnostic,sg-hdb-block.csv,1 when source MAX_FLOOR uses sentinel -1; otherwise 0.,none
+HDB_YEAR_COMPLETED_MISSING_FLAG,int8,feature,HDB block,static diagnostic,sg-hdb-block.csv,1 when source YEAR_COMPLETED uses sentinel -1; otherwise 0.,none
+DISTANCE_TO_RAFFLES_PLACE_KM,float32,feature,geospatial,static snapshot,sg-hdb-block.csv + sg-mrt-stations.csv,Haversine distance in km from the block to the supplied Raffles Place MRT coordinates.,none
+NEAREST_OPEN_MRT_KM,float32,feature,geospatial,static snapshot,sg-mrt-stations.csv,Haversine distance in km to the nearest physical station with STATUS=open.,none
+OPEN_MRT_COUNT_500M,int16,feature,geospatial,static snapshot,sg-mrt-stations.csv,Number of distinct physical open MRT stations within 0.5 km Haversine distance.,none
+OPEN_MRT_COUNT_1KM,int16,feature,geospatial,static snapshot,sg-mrt-stations.csv,Number of distinct physical open MRT stations within 1 km Haversine distance.,none
+OPEN_MRT_COUNT_2KM,int16,feature,geospatial,static snapshot,sg-mrt-stations.csv,Number of distinct physical open MRT stations within 2 km Haversine distance.,none
+NEAREST_OPEN_INTERCHANGE_KM,float32,feature,geospatial,static snapshot,sg-mrt-stations.csv,Haversine distance in km to the nearest open physical station represented by at least two open station codes.,none
+NEAREST_PLANNED_MRT_KM,float32,feature,geospatial,static snapshot,sg-mrt-stations.csv,Haversine distance in km to the nearest physical station entry with STATUS=planned; planned connectivity at open sites remains separate from open features.,none
+PLANNED_MRT_COUNT_1KM,int16,feature,geospatial,static snapshot,sg-mrt-stations.csv,Number of distinct physical planned-status MRT station entries within 1 km.,none
+PLANNED_MRT_COUNT_2KM,int16,feature,geospatial,static snapshot,sg-mrt-stations.csv,Number of distinct physical planned-status MRT station entries within 2 km.,none
+NEAREST_SCHOOL_KM,float32,feature,geospatial,static snapshot,sg-schools.csv,Haversine distance in km to the nearest distinct supplied school of any level.,none
+SCHOOL_COUNT_1KM,int16,feature,geospatial,static snapshot,sg-schools.csv,Number of distinct supplied schools of any level within 1 km.,none
+SCHOOL_COUNT_2KM,int16,feature,geospatial,static snapshot,sg-schools.csv,Number of distinct supplied schools of any level within 2 km.,none
+NEAREST_PRIMARY_SCHOOL_KM,float32,feature,geospatial,static snapshot,sg-schools.csv,Haversine distance in km to the nearest school whose MAINLEVEL_CODE starts with primary or includes P1.,none
+PRIMARY_SCHOOL_COUNT_1KM,int16,feature,geospatial,static snapshot,sg-schools.csv,Number of primary-inclusive supplied schools within 1 km.,none
+PRIMARY_SCHOOL_COUNT_2KM,int16,feature,geospatial,static snapshot,sg-schools.csv,Number of primary-inclusive supplied schools within 2 km.,none
+NEAREST_MALL_KM,float32,feature,geospatial,static snapshot,sg-shopping-malls.csv,Haversine distance in km to the nearest distinct supplied shopping mall.,none
+MALL_COUNT_1KM,int16,feature,geospatial,static snapshot,sg-shopping-malls.csv,Number of distinct supplied shopping malls within 1 km.,none
+MALL_COUNT_2KM,int16,feature,geospatial,static snapshot,sg-shopping-malls.csv,Number of distinct supplied shopping malls within 2 km.,none
+HDB_BLOCK_AGE_YEARS,float32,feature,HDB block,derived,sg-hdb-block.csv + train/test,APPROVAL_YEAR minus HDB_YEAR_COMPLETED.,Rows where HDB_YEAR_COMPLETED_MISSING_FLAG=1.
+COE_A_PREMIUM_CURRENT,float64,feature,macro COE,competition-only current month,sg-coe-prices.csv,COE Category A mean quota premium across rounds for the approval month.,none
+COE_A_DEMAND_RATIO_CURRENT,float64,feature,macro COE,competition-only current month,sg-coe-prices.csv,COE Category A total bids divided by total quota across rounds for the approval month.,none
+COE_B_PREMIUM_CURRENT,float64,feature,macro COE,competition-only current month,sg-coe-prices.csv,COE Category B mean quota premium across rounds for the approval month.,none
+COE_B_DEMAND_RATIO_CURRENT,float64,feature,macro COE,competition-only current month,sg-coe-prices.csv,COE Category B total bids divided by total quota across rounds for the approval month.,none
+COE_A_PREMIUM_LAG1,float64,feature,macro COE,lagged/deployment,sg-coe-prices.csv,COE Category A mean quota premium across rounds from the previous calendar month.,Only months where COE_LAG1_AVAILABLE=0.
+COE_A_PREMIUM_LAGGED_3M_MEAN,float64,feature,macro COE,lagged/deployment,sg-coe-prices.csv,COE Category A mean quota premium across rounds mean of the three complete calendar months before approval.,Only months where COE_LAGGED_3M_AVAILABLE=0.
+COE_A_DEMAND_RATIO_LAG1,float64,feature,macro COE,lagged/deployment,sg-coe-prices.csv,COE Category A total bids divided by total quota across rounds from the previous calendar month.,Only months where COE_LAG1_AVAILABLE=0.
+COE_A_DEMAND_RATIO_LAGGED_3M_MEAN,float64,feature,macro COE,lagged/deployment,sg-coe-prices.csv,COE Category A total bids divided by total quota across rounds mean of the three complete calendar months before approval.,Only months where COE_LAGGED_3M_AVAILABLE=0.
+COE_B_PREMIUM_LAG1,float64,feature,macro COE,lagged/deployment,sg-coe-prices.csv,COE Category B mean quota premium across rounds from the previous calendar month.,Only months where COE_LAG1_AVAILABLE=0.
+COE_B_PREMIUM_LAGGED_3M_MEAN,float64,feature,macro COE,lagged/deployment,sg-coe-prices.csv,COE Category B mean quota premium across rounds mean of the three complete calendar months before approval.,Only months where COE_LAGGED_3M_AVAILABLE=0.
+COE_B_DEMAND_RATIO_LAG1,float64,feature,macro COE,lagged/deployment,sg-coe-prices.csv,COE Category B total bids divided by total quota across rounds from the previous calendar month.,Only months where COE_LAG1_AVAILABLE=0.
+COE_B_DEMAND_RATIO_LAGGED_3M_MEAN,float64,feature,macro COE,lagged/deployment,sg-coe-prices.csv,COE Category B total bids divided by total quota across rounds mean of the three complete calendar months before approval.,Only months where COE_LAGGED_3M_AVAILABLE=0.
+COE_CURRENT_AVAILABLE,int8,feature,macro COE,diagnostic flag,sg-coe-prices.csv,1 when all four current Category A/B premium and demand-ratio features are present for the row; otherwise 0.,none
+COE_LAG1_AVAILABLE,int8,feature,macro COE,diagnostic flag,sg-coe-prices.csv,1 when all four one-month-lagged COE features are present for the row; otherwise 0.,none
+COE_LAGGED_3M_AVAILABLE,int8,feature,macro COE,diagnostic flag,sg-coe-prices.csv,1 when all four prior-three-month COE means are present for the row; otherwise 0.,none
+STOCK_SG_MARKET_RETURN_CURRENT,float64,feature,macro stock,competition-only current month,sg-stock-prices.csv,"cross-sectional median adjusted-close return across the fixed .SI universe present in January 2021, for the approval month.",January 2021 only because December 2020 prices are unavailable.
+STOCK_SG_POSITIVE_BREADTH_CURRENT,float64,feature,macro stock,competition-only current month,sg-stock-prices.csv,"share of the fixed .SI universe with a positive adjusted-close monthly return, for the approval month.",January 2021 only because December 2020 prices are unavailable.
+STOCK_BANK_RETURN_CURRENT,float64,feature,macro stock,competition-only current month,sg-stock-prices.csv,"median adjusted-close monthly return across DBS, OCBC, and UOB, for the approval month.",January 2021 only because December 2020 prices are unavailable.
+STOCK_SG_MARKET_RETURN_LAG1,float64,feature,macro stock,lagged/deployment,sg-stock-prices.csv,"cross-sectional median adjusted-close return across the fixed .SI universe present in January 2021, from the previous calendar month.",Only months where STOCK_LAG1_AVAILABLE=0.
+STOCK_SG_MARKET_RETURN_LAGGED_3M_MEAN,float64,feature,macro stock,lagged/deployment,sg-stock-prices.csv,"cross-sectional median adjusted-close return across the fixed .SI universe present in January 2021, mean of the three complete calendar months before approval.",Only months where STOCK_LAGGED_3M_AVAILABLE=0.
+STOCK_SG_POSITIVE_BREADTH_LAG1,float64,feature,macro stock,lagged/deployment,sg-stock-prices.csv,"share of the fixed .SI universe with a positive adjusted-close monthly return, from the previous calendar month.",Only months where STOCK_LAG1_AVAILABLE=0.
+STOCK_SG_POSITIVE_BREADTH_LAGGED_3M_MEAN,float64,feature,macro stock,lagged/deployment,sg-stock-prices.csv,"share of the fixed .SI universe with a positive adjusted-close monthly return, mean of the three complete calendar months before approval.",Only months where STOCK_LAGGED_3M_AVAILABLE=0.
+STOCK_BANK_RETURN_LAG1,float64,feature,macro stock,lagged/deployment,sg-stock-prices.csv,"median adjusted-close monthly return across DBS, OCBC, and UOB, from the previous calendar month.",Only months where STOCK_LAG1_AVAILABLE=0.
+STOCK_BANK_RETURN_LAGGED_3M_MEAN,float64,feature,macro stock,lagged/deployment,sg-stock-prices.csv,"median adjusted-close monthly return across DBS, OCBC, and UOB, mean of the three complete calendar months before approval.",Only months where STOCK_LAGGED_3M_AVAILABLE=0.
+STOCK_CURRENT_AVAILABLE,int8,feature,macro stock,diagnostic flag,sg-stock-prices.csv,1 when all three current-month stock composites are present for the row; otherwise 0.,none
+STOCK_LAG1_AVAILABLE,int8,feature,macro stock,diagnostic flag,sg-stock-prices.csv,1 when all three one-month-lagged stock composites are present for the row; otherwise 0.,none
+STOCK_LAGGED_3M_AVAILABLE,int8,feature,macro stock,diagnostic flag,sg-stock-prices.csv,1 when all three prior-three-month stock means are present for the row; otherwise 0.,none
+MONTHLY_RENT,int64,target,target,training only,train.csv,Observed monthly rent in SGD; copied without clipping or transformation.,none

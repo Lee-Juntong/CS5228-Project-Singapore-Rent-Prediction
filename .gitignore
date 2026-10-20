@@ -1,0 +1,24 @@
+# Kaggle data and large files stay out of git. See data/README.md.
+data/*.csv
+data/processed/
+data/auxiliary/*
+!data/auxiliary/sg-cpi.csv
+!data/auxiliary/sg-tertiary-institutions.csv
+
+# Per run validation predictions are large. Rows in results/runs and the
+# combined results/results.csv are committed.
+results/predictions/
+submissions/
+
+# Local build output
+__pycache__/
+*.pyc
+.pytest_cache/
+.ipynb_checkpoints/
+.codex-build/
+.chart-data-*/
+*.inspect.ndjson
+*.zip
+.DS_Store
+.venv/
+venv/

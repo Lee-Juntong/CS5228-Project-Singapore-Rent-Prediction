@@ -1,0 +1,79 @@
+# CS5228 Team 55: Singapore HDB rent prediction
+
+Predict `MONTHLY_RENT` for HDB rentals. Training covers Jan 2021 to Mar 2025 and the test set covers Mar 2025 to Jul 2026, so the task is forecasting future rents. The team plan is in [docs/final-report-plan.md](docs/final-report-plan.md).
+
+## Setup
+
+Python 3.10.
+
+```bash
+pip install -r requirements.txt
+```
+
+Then put the Kaggle files in `data/` and build the processed data as described in [data/README.md](data/README.md).
+
+## Shared experiment setup (Phase 0)
+
+Every model goes through one function, so all results are comparable.
+
+* **Split.** `time` (the main one): fit on Jan 2021 to Sep 2024, validate on Oct 2024 to Mar 2025. `random5`: shuffled 5 fold CV, reported once to show how much a random split overstates performance.
+* **Metrics.** RMSE (primary, as on Kaggle), MAE, MAPE and mean bias. For the time split, RMSE per flat type and per validation month is saved too.
+* **Feature groups.** Fixed in `src/features.py`. G0 core, G1 location, G2 block, G3 market. Named sets are `G0`, `G0+G1`, `G0+G1+G2` and `ALL`. Phase 1 uses `G0+G1`.
+* **Trend handling.** `target_mode="raw"` trains on rent directly. `target_mode="index"` divides rent by a monthly rent index (training median per month, extended by a straight line fitted to the last 12 months), then multiplies back.
+* **Seed.** 5228, set before every fit.
+* **Feature handling table.** [docs/feature_handling.md](docs/feature_handling.md).
+
+### Run a registered model
+
+```bash
+python -m scripts.run_experiment --model lightgbm_default --features "G0+G1" --member A
+```
+
+`--features`, `--split` and `--target-mode` each take several values and run every combination. Add `--no-log` for a quick trial that should not enter the results table.
+
+### Add your own model
+
+Write a function with no arguments that returns an object with `fit(X, y)` and `predict(X)`. X is a DataFrame with categorical columns as pandas `category` and possible NaN in numeric columns. For scikit-learn models, `sklearn_tabular` in `src/models.py` adds one hot encoding, imputation and scaling.
+
+```python
+from sklearn.linear_model import Ridge
+from src.evaluation import run_experiment
+from src.features import load_modeling_data
+from src.models import sklearn_tabular
+
+data = load_modeling_data()
+run_experiment("ridge", lambda: sklearn_tabular(Ridge(alpha=1.0)),
+               feature_set="G0+G1", member="B", data=data)
+```
+
+Register it in `MODELS` in `src/models.py` if you want it on the command line.
+
+### Where results go
+
+* `results/runs/<run_id>.csv`: one row per run. Commit these.
+* `results/results.csv`: all runs combined, rebuilt after every run. If it conflicts in a merge, take either side and rerun `python -c "from src.evaluation import collect_results; collect_results()"`.
+* `results/breakdowns/<run_id>.csv`: RMSE, MAE and MAPE per flat type and per month.
+* `results/predictions/<run_id>.parquet`: validation predictions for error analysis. Not in git.
+
+### Kaggle submission
+
+```python
+from src.evaluation import make_submission
+from src.models import make_lightgbm
+make_submission(make_lightgbm, "G0+G1", path="submissions/lightgbm.csv")
+```
+
+## Tests
+
+```bash
+python -m pytest -q
+```
+
+## Layout
+
+* `src/data_preprocessing.py`: cleaning, block join, geospatial and macro features
+* `src/external_features.py`: CPI, rail line and tertiary features
+* `src/features.py`, `src/evaluation.py`, `src/models.py`: shared experiment interface
+* `scripts/run_experiment.py`: command line runner
+* `notebooks/`: EDA
+* `templates/latex/`: course report template

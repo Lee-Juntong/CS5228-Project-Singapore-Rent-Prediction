@@ -1,0 +1,437 @@
+{
+  "datasets": {
+    "train": {
+      "rows": 150000,
+      "columns": 11,
+      "column_names": [
+        "RENT_APPROVAL_DATE",
+        "TOWN",
+        "BLOCK",
+        "STREET",
+        "FLAT_TYPE",
+        "FLAT_MODEL",
+        "FLOOR_AREA_SQM",
+        "FURNISHED",
+        "LEASE_COMMENCE_DATE",
+        "FEE",
+        "MONTHLY_RENT"
+      ],
+      "dtypes": {
+        "RENT_APPROVAL_DATE": "object",
+        "TOWN": "string",
+        "BLOCK": "string",
+        "STREET": "string",
+        "FLAT_TYPE": "string",
+        "FLAT_MODEL": "string",
+        "FLOOR_AREA_SQM": "float64",
+        "FURNISHED": "string",
+        "LEASE_COMMENCE_DATE": "int64",
+        "FEE": "float64",
+        "MONTHLY_RENT": "int64"
+      },
+      "missing_values": {},
+      "exact_duplicate_rows": 425
+    },
+    "test": {
+      "rows": 50000,
+      "columns": 10,
+      "column_names": [
+        "RENT_APPROVAL_DATE",
+        "TOWN",
+        "BLOCK",
+        "STREET",
+        "FLAT_TYPE",
+        "FLAT_MODEL",
+        "FLOOR_AREA_SQM",
+        "FURNISHED",
+        "LEASE_COMMENCE_DATE",
+        "FEE"
+      ],
+      "dtypes": {
+        "RENT_APPROVAL_DATE": "object",
+        "TOWN": "string",
+        "BLOCK": "string",
+        "STREET": "string",
+        "FLAT_TYPE": "string",
+        "FLAT_MODEL": "string",
+        "FLOOR_AREA_SQM": "float64",
+        "FURNISHED": "string",
+        "LEASE_COMMENCE_DATE": "int64",
+        "FEE": "float64"
+      },
+      "missing_values": {},
+      "exact_duplicate_rows": 5508
+    },
+    "example_submission": {
+      "rows": 50000,
+      "columns": 2,
+      "column_names": [
+        "Id",
+        "Predicted"
+      ],
+      "dtypes": {
+        "Id": "int64",
+        "Predicted": "float64"
+      },
+      "missing_values": {},
+      "exact_duplicate_rows": 0
+    },
+    "hdb": {
+      "rows": 9464,
+      "columns": 11,
+      "column_names": [
+        "TOWN",
+        "BLOCK",
+        "STREET",
+        "POSTAL_CODE",
+        "LATITUDE",
+        "LONGITUDE",
+        "MAX_FLOOR",
+        "YEAR_COMPLETED",
+        "SUBZONE",
+        "PLANNING_AREA",
+        "REGION"
+      ],
+      "dtypes": {
+        "TOWN": "string",
+        "BLOCK": "string",
+        "STREET": "string",
+        "POSTAL_CODE": "string",
+        "LATITUDE": "float64",
+        "LONGITUDE": "float64",
+        "MAX_FLOOR": "int64",
+        "YEAR_COMPLETED": "int64",
+        "SUBZONE": "object",
+        "PLANNING_AREA": "object",
+        "REGION": "object"
+      },
+      "missing_values": {},
+      "exact_duplicate_rows": 0
+    },
+    "mrt": {
+      "rows": 243,
+      "columns": 8,
+      "column_names": [
+        "CODE",
+        "NAME",
+        "STATUS",
+        "LATITUDE",
+        "LONGITUDE",
+        "SUBZONE",
+        "PLANNING_AREA",
+        "REGION"
+      ],
+      "dtypes": {
+        "CODE": "object",
+        "NAME": "object",
+        "STATUS": "object",
+        "LATITUDE": "float64",
+        "LONGITUDE": "float64",
+        "SUBZONE": "object",
+        "PLANNING_AREA": "object",
+        "REGION": "object"
+      },
+      "missing_values": {},
+      "exact_duplicate_rows": 0
+    },
+    "schools": {
+      "rows": 337,
+      "columns": 14,
+      "column_names": [
+        "NAME",
+        "URL",
+        "STREET",
+        "POSTAL_CODE",
+        "MRT_STATIONS",
+        "BUS_LINES",
+        "PLANNING_AREA",
+        "REGION",
+        "TYPE_CODE",
+        "NATRUE_CODE",
+        "SESSION_CODE",
+        "MAINLEVEL_CODE",
+        "LATITUDE",
+        "LONGITUDE"
+      ],
+      "dtypes": {
+        "NAME": "object",
+        "URL": "object",
+        "STREET": "object",
+        "POSTAL_CODE": "string",
+        "MRT_STATIONS": "object",
+        "BUS_LINES": "object",
+        "PLANNING_AREA": "object",
+        "REGION": "object",
+        "TYPE_CODE": "object",
+        "NATRUE_CODE": "object",
+        "SESSION_CODE": "object",
+        "MAINLEVEL_CODE": "object",
+        "LATITUDE": "float64",
+        "LONGITUDE": "float64"
+      },
+      "missing_values": {},
+      "exact_duplicate_rows": 0
+    },
+    "malls": {
+      "rows": 113,
+      "columns": 3,
+      "column_names": [
+        "NAME",
+        "LATITUDE",
+        "LONGITUDE"
+      ],
+      "dtypes": {
+        "NAME": "object",
+        "LATITUDE": "float64",
+        "LONGITUDE": "float64"
+      },
+      "missing_values": {},
+      "exact_duplicate_rows": 0
+    },
+    "coe": {
+      "rows": 539,
+      "columns": 8,
+      "column_names": [
+        "YEAR",
+        "CATEGORY",
+        "MONTH",
+        "ROUND",
+        "QUOTA_PREMIUM",
+        "PREVAILING_QUOTA_PREMIUM",
+        "QUOTA",
+        "BIDS_RECEIVED"
+      ],
+      "dtypes": {
+        "YEAR": "int64",
+        "CATEGORY": "object",
+        "MONTH": "object",
+        "ROUND": "int64",
+        "QUOTA_PREMIUM": "object",
+        "PREVAILING_QUOTA_PREMIUM": "object",
+        "QUOTA": "object",
+        "BIDS_RECEIVED": "object"
+      },
+      "missing_values": {},
+      "exact_duplicate_rows": 0
+    },
+    "stocks": {
+      "rows": 91642,
+      "columns": 9,
+      "column_names": [
+        "NAME",
+        "SYMBOL",
+        "DATE",
+        "OPEN",
+        "HIGH",
+        "LOW",
+        "CLOSE",
+        "ADJUSTED_CLOSE",
+        "VOLUME"
+      ],
+      "dtypes": {
+        "NAME": "object",
+        "SYMBOL": "object",
+        "DATE": "object",
+        "OPEN": "float64",
+        "HIGH": "float64",
+        "LOW": "float64",
+        "CLOSE": "float64",
+        "ADJUSTED_CLOSE": "float64",
+        "VOLUME": "float64"
+      },
+      "missing_values": {
+        "OPEN": 85,
+        "HIGH": 85,
+        "LOW": 85,
+        "CLOSE": 85,
+        "ADJUSTED_CLOSE": 85,
+        "VOLUME": 85
+      },
+      "exact_duplicate_rows": 0
+    }
+  },
+  "core": {
+    "train_date_min": "2021-01",
+    "train_date_max": "2025-03",
+    "test_date_min": "2025-03",
+    "test_date_max": "2026-07",
+    "overlap_months": [
+      "2025-03"
+    ],
+    "march_2025_train_rows": 3032,
+    "march_2025_test_rows": 380,
+    "train_flat_type_labels": [
+      "1 room",
+      "1-room",
+      "2 room",
+      "2-room",
+      "3 room",
+      "3-room",
+      "4 room",
+      "4-room",
+      "5 room",
+      "5-room",
+      "executive"
+    ],
+    "test_flat_type_labels": [
+      "1-room",
+      "2-room",
+      "3-room",
+      "4-room",
+      "5-room",
+      "executive"
+    ],
+    "constant_columns": {
+      "FURNISHED": [
+        "yes"
+      ],
+      "FEE": [
+        0.0
+      ]
+    },
+    "train_exact_duplicates": 425,
+    "test_exact_duplicates": 5508,
+    "repeated_predictor_groups": 13434,
+    "repeated_groups_with_different_rents": 13191,
+    "rows_in_conflicting_repeated_groups": 28493,
+    "invalid_lease_date_rows": 1,
+    "invalid_lease_row_ids": [
+      31739
+    ]
+  },
+  "target": {
+    "minimum": 300,
+    "maximum": 7600,
+    "mean": 2719.0368933333334,
+    "median": 2700.0,
+    "standard_deviation": 749.7310963563276,
+    "low_rent_rows_below_1000": 374
+  },
+  "hdb_join_coverage": {
+    "train_raw": {
+      "rows": 150000,
+      "matched_rows": 119219,
+      "unmatched_rows": 30781,
+      "coverage_rate": 0.7947933333333334
+    },
+    "train_normalized": {
+      "rows": 150000,
+      "matched_rows": 150000,
+      "unmatched_rows": 0,
+      "coverage_rate": 1.0
+    },
+    "test_raw": {
+      "rows": 50000,
+      "matched_rows": 39518,
+      "unmatched_rows": 10482,
+      "coverage_rate": 0.79036
+    },
+    "test_normalized": {
+      "rows": 50000,
+      "matched_rows": 50000,
+      "unmatched_rows": 0,
+      "coverage_rate": 1.0
+    }
+  },
+  "auxiliary_validation": {
+    "hdb": {
+      "normalized_address_keys_unique": true,
+      "coordinates_valid": true,
+      "max_floor_sentinel_rows": 11,
+      "completion_year_sentinel_rows": 11,
+      "postal_code_nil_rows": 285,
+      "unexpected_max_floor_values": 0,
+      "unexpected_completion_year_values": 0
+    },
+    "points_of_interest": {
+      "mrt": {
+        "rows": 243,
+        "coordinates_valid": true,
+        "duplicate_coordinate_pairs": 51
+      },
+      "schools": {
+        "rows": 337,
+        "coordinates_valid": true,
+        "duplicate_coordinate_pairs": 4
+      },
+      "malls": {
+        "rows": 113,
+        "coordinates_valid": true,
+        "duplicate_coordinate_pairs": 0
+      }
+    },
+    "coe": {
+      "composite_keys_unique": true,
+      "positive_quota": true,
+      "nonnegative_bids": true
+    },
+    "stocks": {
+      "symbol_date_keys_unique": true,
+      "invalid_dates": 0,
+      "missing_adjusted_close_rows": 85,
+      "positive_observed_adjusted_closes": true
+    }
+  },
+  "feature_engineering": {
+    "hdb_blocks_enriched": 9464,
+    "stock_universe_size": 42,
+    "coe_months": 68,
+    "stock_months": 67,
+    "target_derived_features_saved": false,
+    "parquet_round_trip_exact": true
+  },
+  "cleaning": {
+    "raw_training_rows": 150000,
+    "exact_duplicate_training_rows_removed": 425,
+    "training_rows_after_exact_deduplication": 149575,
+    "deduplication_policy": "Keep the first exact training row in original order",
+    "test_rows_removed": 0
+  },
+  "final_validation": {
+    "raw_train_rows": 150000,
+    "train_rows_after_exact_deduplication": 149575,
+    "train_exact_duplicate_rows_removed": 425,
+    "test_rows": 50000,
+    "predictor_columns": 78,
+    "retained_train_target_unchanged": true,
+    "train_test_schema_aligned": true,
+    "retained_train_row_order_preserved": true,
+    "test_row_order_preserved": true,
+    "infinite_numeric_values": 0,
+    "expected_missing_values": {
+      "train": {
+        "COE_A_DEMAND_RATIO_LAG1": 3129,
+        "COE_A_DEMAND_RATIO_LAGGED_3M_MEAN": 9514,
+        "COE_A_PREMIUM_LAG1": 3129,
+        "COE_A_PREMIUM_LAGGED_3M_MEAN": 9514,
+        "COE_B_DEMAND_RATIO_LAG1": 3129,
+        "COE_B_DEMAND_RATIO_LAGGED_3M_MEAN": 9514,
+        "COE_B_PREMIUM_LAG1": 3129,
+        "COE_B_PREMIUM_LAGGED_3M_MEAN": 9514,
+        "FLAT_AGE_YEARS": 1,
+        "HDB_BLOCK_AGE_YEARS": 159,
+        "HDB_MAX_FLOOR": 159,
+        "HDB_POSTAL_CODE": 5241,
+        "HDB_YEAR_COMPLETED": 159,
+        "REMAINING_LEASE_PROXY_YEARS": 1,
+        "STOCK_BANK_RETURN_CURRENT": 3129,
+        "STOCK_BANK_RETURN_LAG1": 5809,
+        "STOCK_BANK_RETURN_LAGGED_3M_MEAN": 12515,
+        "STOCK_SG_MARKET_RETURN_CURRENT": 3129,
+        "STOCK_SG_MARKET_RETURN_LAG1": 5809,
+        "STOCK_SG_MARKET_RETURN_LAGGED_3M_MEAN": 12515,
+        "STOCK_SG_POSITIVE_BREADTH_CURRENT": 3129,
+        "STOCK_SG_POSITIVE_BREADTH_LAG1": 5809,
+        "STOCK_SG_POSITIVE_BREADTH_LAGGED_3M_MEAN": 12515
+      },
+      "test": {
+        "HDB_POSTAL_CODE": 1739
+      }
+    }
+  },
+  "outputs": {
+    "train_features": "E:/NUS/mcomp/CS5228/Project/data/processed/train_features.parquet",
+    "test_features": "E:/NUS/mcomp/CS5228/Project/data/processed/test_features.parquet",
+    "feature_dictionary": "E:/NUS/mcomp/CS5228/Project/artifacts/data_audit/feature_dictionary.csv"
+  }
+}
