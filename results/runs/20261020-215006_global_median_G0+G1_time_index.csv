@@ -1,0 +1,2 @@
+run_id,timestamp,member,model,feature_set,n_features,split,target_mode,n_fit,n_valid,rmse,rmse_std,mae,mape,bias,train_seconds,predict_seconds,seed,git_commit,notes
+20261020-215006_global_median_G0+G1_time_index,2026-10-20T21:50:06,A,global_median,G0+G1,39,time,index,132538,17037,641.5389585262171,0.0,489.2081500116366,17.957996536448913,-7.204347510211949,0.007425600022543222,0.0012852999498136342,5228,f6d62eb,Phase 0 reference run

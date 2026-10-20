@@ -1,0 +1,2 @@
+run_id,timestamp,member,model,feature_set,n_features,split,target_mode,n_fit,n_valid,rmse,rmse_std,mae,mape,bias,train_seconds,predict_seconds,seed,git_commit,notes
+20261020-215014_lightgbm_default_ALL_time_raw,2026-10-20T21:50:14,A,lightgbm_default,ALL,54,time,raw,132538,17037,456.9985203966695,0.0,334.2548058267251,12.629759888108552,-30.593887577831595,0.8120350000099279,0.01692289998754859,5228,f6d62eb,Phase 0 reference run
