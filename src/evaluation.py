@@ -2,9 +2,12 @@
 
 Usage from any notebook or script:
 
-    from src.evaluation import run_experiment
+    from src.evaluation import run_experiment, compare_splits
     from src.models import make_lightgbm
     run_experiment("lightgbm_default", make_lightgbm, feature_set="G0+G1", member="C")
+    compare_splits("lightgbm_default", make_lightgbm, member="C")  # time vs random5
+
+See docs/pipeline_guide.md for every reusable function with examples.
 
 `make_model` is any zero-argument function that returns an object with
 `fit(X, y)` and `predict(X)`. X is a DataFrame of the chosen feature columns.
@@ -49,6 +52,11 @@ TARGET_MODES = ("raw", "index")
 
 
 def regression_metrics(y_true, y_pred) -> dict[str, float]:
+    """RMSE, MAE, MAPE (in percent) and mean bias (prediction minus truth).
+
+    A positive bias means the model predicts too high on average.
+    """
+
     y_true = np.asarray(y_true, dtype=float)
     y_pred = np.asarray(y_pred, dtype=float)
     error = y_pred - y_true
@@ -92,13 +100,24 @@ class Fold:
 def time_holdout_masks(train: pd.DataFrame) -> tuple[np.ndarray, np.ndarray]:
     """Fit on Jan 2021 to Sep 2024, validate on Oct 2024 to Mar 2025."""
 
-    month = train["RENT_APPROVAL_DATE"]
-    fit = (month <= TIME_FIT_END).to_numpy()
-    valid = ((month >= TIME_VALID_START) & (month <= TIME_VALID_END)).to_numpy()
-    return fit, valid
+    fit = (train["RENT_APPROVAL_DATE"] <= TIME_FIT_END).to_numpy()
+    return fit, in_time_valid_window(train)
+
+
+def in_time_valid_window(frame: pd.DataFrame) -> np.ndarray:
+    """True for rows whose approval month is in the time holdout window."""
+
+    month = frame["RENT_APPROVAL_DATE"]
+    return ((month >= TIME_VALID_START) & (month <= TIME_VALID_END)).to_numpy()
 
 
 def iter_folds(train: pd.DataFrame, split: str) -> Iterator[Fold]:
+    """Yield the folds of a split as row positions into `train`.
+
+    "time" gives one fold (the holdout). "random5" gives five shuffled folds
+    that together cover every row once.
+    """
+
     if split == "time":
         fit, valid = time_holdout_masks(train)
         yield Fold("time", np.flatnonzero(fit), np.flatnonzero(valid))
@@ -175,7 +194,7 @@ def fit_predict(make_model: Callable, fit_frame: pd.DataFrame, predict_frame: pd
 
 RESULT_COLUMNS = [
     "run_id", "timestamp", "member", "model", "feature_set", "n_features", "split",
-    "target_mode", "n_fit", "n_valid", "rmse", "rmse_std", "mae", "mape", "bias",
+    "target_mode", "n_fit", "n_valid", "rmse", "rmse_std", "mae", "mape", "bias", "rmse_window",
     "train_seconds", "predict_seconds", "seed", "git_commit", "notes",
 ]
 
@@ -212,6 +231,12 @@ def run_experiment(model_name: str, make_model: Callable, feature_set: str = "G0
                    save_predictions: bool = True, log: bool = True) -> dict:
     """Evaluate one model on one split and log a row to the shared results.
 
+    Returns the logged row as a dict. `rmse` is the mean over folds.
+    `rmse_window` is the RMSE on the rows dated Oct 2024 to Mar 2025 only,
+    pooled over folds. For the time split it equals `rmse`. For random5 it
+    scores the same rows the time holdout scores, so the two splits can be
+    compared fairly.
+
     Pass `data=load_modeling_data()` when running many experiments in one
     session to avoid reloading. Set `log=False` for quick trials that should
     not appear in the results table.
@@ -219,10 +244,11 @@ def run_experiment(model_name: str, make_model: Callable, feature_set: str = "G0
 
     train, _ = data if data is not None else load_modeling_data()
     columns = feature_columns(feature_set)
-    fold_rows, predictions, breakdowns = [], [], []
+    fold_rows, predictions, breakdowns, in_window = [], [], [], []
     for fold in iter_folds(train, split):
         fit_frame = train.iloc[fold.fit_index]
         valid_frame = train.iloc[fold.valid_index]
+        in_window.append(in_time_valid_window(valid_frame))
         prediction, fit_s, predict_s = fit_predict(make_model, fit_frame, valid_frame, columns, target_mode)
         fold_rows.append({"n_fit": len(fit_frame), "n_valid": len(valid_frame), "train_seconds": fit_s,
                           "predict_seconds": predict_s, **regression_metrics(valid_frame[TARGET], prediction)})
@@ -232,6 +258,9 @@ def run_experiment(model_name: str, make_model: Callable, feature_set: str = "G0
             breakdowns.append(segment_metrics(valid_frame, prediction))
 
     folds = pd.DataFrame(fold_rows)
+    pooled = pd.concat(predictions, ignore_index=True)
+    window = np.concatenate(in_window)
+    rmse_window = regression_metrics(pooled["y_true"][window], pooled["y_pred"][window])["rmse"] if window.any() else np.nan
     stamp = datetime.now()
     run_id = re.sub(r"[^A-Za-z0-9_.+-]", "-", f"{stamp:%Y%m%d-%H%M%S}_{model_name}_{feature_set}_{split}_{target_mode}")
     row = {
@@ -240,6 +269,7 @@ def run_experiment(model_name: str, make_model: Callable, feature_set: str = "G0
         "target_mode": target_mode, "n_fit": int(folds["n_fit"].mean()), "n_valid": int(folds["n_valid"].sum()),
         "rmse": folds["rmse"].mean(), "rmse_std": folds["rmse"].std(ddof=0), "mae": folds["mae"].mean(),
         "mape": folds["mape"].mean(), "bias": folds["bias"].mean(),
+        "rmse_window": rmse_window,
         "train_seconds": folds["train_seconds"].sum(), "predict_seconds": folds["predict_seconds"].sum(),
         "seed": SEED, "git_commit": _git_commit(), "notes": notes,
     }
@@ -257,6 +287,54 @@ def run_experiment(model_name: str, make_model: Callable, feature_set: str = "G0
           f"RMSE {row['rmse']:8.2f}  MAE {row['mae']:8.2f}  MAPE {row['mape']:6.2f}%  "
           f"fit {row['train_seconds']:.1f}s")
     return row
+
+
+def compare_splits(model_name: str, make_model: Callable, feature_set: str = "G0+G1",
+                   target_mode: str = "raw", member: str = "", notes: str = "",
+                   data: tuple[pd.DataFrame, pd.DataFrame] | None = None, log: bool = True) -> pd.DataFrame:
+    """Run the time holdout and random 5 fold CV for one model and compare them.
+
+    Both runs are logged like any other run. Returns one row with:
+    `rmse_time` (time holdout), `rmse_random5` (random CV over all rows),
+    `rmse_random5_window` (random CV scored only on the holdout window rows)
+    and `optimism`, which is rmse_time minus rmse_random5_window. A positive
+    optimism is how much a random split flatters the model on the same rows.
+    """
+
+    data = data if data is not None else load_modeling_data()
+    kwargs = dict(feature_set=feature_set, target_mode=target_mode, member=member,
+                  notes=notes, data=data, log=log)
+    time_row = run_experiment(model_name, make_model, split="time", **kwargs)
+    random_row = run_experiment(model_name, make_model, split="random5", **kwargs)
+    table = pd.DataFrame([{
+        "model": model_name, "feature_set": feature_set, "target_mode": target_mode,
+        "rmse_time": time_row["rmse"], "rmse_random5": random_row["rmse"],
+        "rmse_random5_std": random_row["rmse_std"], "rmse_random5_window": random_row["rmse_window"],
+        "optimism": time_row["rmse"] - random_row["rmse_window"],
+    }])
+    print(table.round(2).to_string(index=False))
+    return table
+
+
+def split_comparison(results: pd.DataFrame | None = None) -> pd.DataFrame:
+    """Pair the latest time and random5 runs per model, feature set and mode.
+
+    Reads results/results.csv unless a table is given. Use it to build the
+    report table without rerunning anything.
+    """
+
+    table = results if results is not None else pd.read_csv(RESULTS_CSV)
+    keys = ["model", "feature_set", "target_mode"]
+    latest = table.sort_values("timestamp").groupby(keys + ["split"]).tail(1)
+    time_runs = latest[latest["split"] == "time"].set_index(keys)
+    random_runs = latest[latest["split"] == "random5"].set_index(keys)
+    out = pd.DataFrame({
+        "rmse_time": time_runs["rmse"],
+        "rmse_random5": random_runs["rmse"],
+        "rmse_random5_window": random_runs["rmse_window"],
+    }).dropna()
+    out["optimism"] = out["rmse_time"] - out["rmse_random5_window"]
+    return out.reset_index()
 
 
 def make_submission(make_model: Callable, feature_set: str, target_mode: str = "raw",

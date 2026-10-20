@@ -98,3 +98,18 @@ def test_run_experiment_writes_one_run_file(tmp_path, monkeypatch):
     table = pd.read_csv(tmp_path / "results.csv")
     assert len(table) == 1 and table.loc[0, "rmse"] == pytest.approx(row["rmse"])
     assert len(list((tmp_path / "BREAKDOWNS_DIR").glob("*.csv"))) == 1
+
+
+def test_compare_splits_scores_random_cv_on_the_holdout_rows(tmp_path, monkeypatch):
+    for name in ("RUNS_DIR", "BREAKDOWNS_DIR", "PREDICTIONS_DIR"):
+        monkeypatch.setattr(evaluation, name, tmp_path / name)
+    monkeypatch.setattr(evaluation, "RESULTS_CSV", tmp_path / "results.csv")
+    monkeypatch.setattr(evaluation, "feature_columns", lambda _: ["FLOOR_AREA_SQM", "MONTH_INDEX"])
+    train = synthetic_train(1200)
+    table = evaluation.compare_splits("ridge", lambda: sklearn_tabular(Ridge()), data=(train, None))
+    runs = pd.read_csv(tmp_path / "results.csv")
+    time_run = runs[runs["split"] == "time"].iloc[0]
+    assert time_run["rmse_window"] == pytest.approx(time_run["rmse"])
+    assert np.isfinite(table.loc[0, "rmse_random5_window"])
+    paired = evaluation.split_comparison(runs)
+    assert paired.loc[0, "optimism"] == pytest.approx(table.loc[0, "optimism"])

@@ -1,2 +1,0 @@
-run_id,timestamp,member,model,feature_set,n_features,split,target_mode,n_fit,n_valid,rmse,rmse_std,mae,mape,bias,train_seconds,predict_seconds,seed,git_commit,notes
-20261020-215021_lightgbm_default_G0+G1_random5_raw,2026-10-20T21:50:21,A,lightgbm_default,G0+G1,39,random5,raw,119660,149575,478.8797204217939,1.8230765477052147,361.08624724301933,14.946453001078027,0.08561579971099235,2.8336407000315376,0.13836740009719506,5228,f6d62eb,"Random CV, reported once"

@@ -64,7 +64,20 @@ def make_lightgbm():
     return LGBMRegressor(random_state=SEED, n_jobs=-1, verbose=-1)
 
 
+def make_ridge():
+    """Ridge (alpha 1) on every column, one hot categories, scaled numerics.
+
+    A simple linear reference for the split comparison. Phase 1 linear models
+    with chosen columns belong to their owner and can replace it.
+    """
+
+    from sklearn.linear_model import Ridge
+
+    return sklearn_tabular(Ridge(alpha=1.0))
+
+
 MODELS = {
     "global_median": make_global_median,
     "lightgbm_default": make_lightgbm,
+    "ridge_default": make_ridge,
 }
