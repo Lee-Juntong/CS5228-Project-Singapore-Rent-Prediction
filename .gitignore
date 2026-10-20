@@ -22,3 +22,6 @@ __pycache__/
 .DS_Store
 .venv/
 venv/
+
+# Tests stay local
+tests/

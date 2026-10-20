@@ -83,12 +83,6 @@ from src.models import make_lightgbm
 make_submission(make_lightgbm, "G0+G1", path="submissions/lightgbm.csv")
 ```
 
-## Tests
-
-```bash
-python -m pytest -q
-```
-
 ## Layout
 
 * `src/data_preprocessing.py`: cleaning, block join, geospatial and macro features
