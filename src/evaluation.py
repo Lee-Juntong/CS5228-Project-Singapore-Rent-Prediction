@@ -22,6 +22,7 @@ import subprocess
 import time
 from dataclasses import dataclass
 from datetime import datetime
+from pathlib import Path
 from typing import Callable, Iterator
 
 import numpy as np
@@ -348,5 +349,6 @@ def make_submission(make_model: Callable, feature_set: str, target_mode: str = "
     prediction, _, _ = fit_predict(make_model, train, test, feature_columns(feature_set), target_mode)
     submission = pd.DataFrame({"Id": test["ROW_ID"].to_numpy(), "Predicted": prediction})
     if path is not None:
+        Path(path).parent.mkdir(parents=True, exist_ok=True)
         submission.to_csv(path, index=False)
     return submission

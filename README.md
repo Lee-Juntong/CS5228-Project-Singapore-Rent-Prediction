@@ -4,13 +4,29 @@ Predict `MONTHLY_RENT` for HDB rentals. Training covers Jan 2021 to Mar 2025 and
 
 ## Setup
 
-Python 3.10.
+Use Python 3.10. Python 3.13 fails to install the pinned numpy.
+
+```bash
+git clone https://github.com/Lee-Juntong/CS5228-Project-Singapore-Rent-Prediction.git
+cd CS5228-Project-Singapore-Rent-Prediction
+python3.10 -m venv .venv
+```
+
+Activate the environment. On Windows run `.venv\Scriptsctivate`. On macOS or Linux run `source .venv/bin/activate`. Then install the packages:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-Then put the Kaggle files in `data/` and build the processed data as described in [data/README.md](data/README.md).
+This includes torch (CPU build) for neural models such as TabM.
+
+Then put the Kaggle files in `data/` and build the processed data as described in [data/README.md](data/README.md). Preprocessing takes about 20 seconds on Juntong's PC.
+
+### Working together
+
+* Run `git pull` before you push.
+* Commit only your own files in `results/runs/` and `results/breakdowns/`.
+* Pass your member letter as `--member` (or `member=` in Python) so every run shows who made it.
 
 ## Shared experiment setup (Phase 0)
 
@@ -82,6 +98,8 @@ from src.evaluation import make_submission
 from src.models import make_lightgbm
 make_submission(make_lightgbm, "G0+G1", path="submissions/lightgbm.csv")
 ```
+
+The `submissions/` folder is created if it does not exist. It is not in git.
 
 ## Layout
 
