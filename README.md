@@ -75,15 +75,18 @@ compare_splits("ridge", lambda: sklearn_tabular(Ridge(alpha=1.0)), member="B", d
 
 Or from the shell: `python -m scripts.run_experiment --model lightgbm_default --compare-splits`. `split_comparison()` rebuilds the table from `results/results.csv`.
 
-Current numbers on G0+G1, raw target:
+Current numbers on G0+G1, raw target, sorted by time holdout RMSE:
 
 | model | time holdout RMSE | random CV RMSE, all rows | random CV RMSE, holdout rows | optimism |
 |---|---|---|---|---|
+| lightgbm_tuned | 449.9 | 478.8 | 451.9 | -2.0 |
+| catboost_tuned | 450.2 | 475.3 | 450.3 | -0.0 |
 | catboost_default | 452.7 | 476.4 | 451.6 | 1.2 |
 | lightgbm_default | 457.3 | 478.9 | 455.3 | 2.0 |
 | ridge_default | 574.9 | 509.2 | 501.6 | 73.3 |
+| global_median | 837.1 | 752.0 | 794.6 | 42.5 |
 
-Random CV flatters Ridge by 73 RMSE because Ridge extends a straight month trend into the holdout and overpredicts by 330 on average there. LightGBM keeps the last level it saw, and rents were flat in late 2024, so random CV barely flatters it. The all rows random CV number is higher than the holdout for LightGBM only because it includes 2023, when rents varied most.
+`global_median` (predict the training median for every row) is the sanity floor; every learned model clears it by a wide margin. Compare each model's time holdout RMSE with its random CV holdout rows number: both score the same Oct 2024 to Mar 2025 rows, so the gap (optimism) is only the effect of the split. Random CV flatters Ridge by 73 RMSE because Ridge extends a straight month trend into the holdout and overpredicts by 330 on average there. The boosting models have optimism near zero: they keep the last level they saw, rents were flat in late 2024, so the random split barely helps them, and the tuned ones even score marginally better on the honest future window than on the random folds. The all rows random CV number is not comparable to the other two columns because it covers all of 2021 to 2025, including 2023 when rents varied most.
 
 Tuned boosting models (30 Optuna trials each on the time holdout, G0+G1). Time holdout RMSE:
 
