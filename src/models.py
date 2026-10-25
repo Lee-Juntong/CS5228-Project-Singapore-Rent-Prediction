@@ -64,6 +64,50 @@ def make_lightgbm():
     return LGBMRegressor(random_state=SEED, n_jobs=-1, verbose=-1)
 
 
+class _CatBoostTabular:
+    """CatBoost wrapper that declares categorical columns by dtype at fit time.
+
+    CatBoost needs its categorical features named rather than inferred, and it
+    cannot take NaN in a categorical column. We pick the pandas `category`
+    columns of the incoming X (the same four across every feature set), fill
+    their missing values with a constant string, and let CatBoost handle numeric
+    NaN natively. The same columns are rebuilt on predict.
+    """
+
+    _CAT_FILL = "__missing__"
+
+    def __init__(self, **params):
+        self.params = params
+        self.cat_features_: list[str] = []
+
+    def _prepare(self, X: pd.DataFrame) -> pd.DataFrame:
+        X = X.copy()
+        for col in self.cat_features_:
+            X[col] = X[col].astype("object").where(X[col].notna(), self._CAT_FILL).astype(str)
+        return X
+
+    def fit(self, X: pd.DataFrame, y) -> "_CatBoostTabular":
+        from catboost import CatBoostRegressor
+
+        self.cat_features_ = [
+            c for c in X.columns if isinstance(X[c].dtype, pd.CategoricalDtype)
+        ]
+        self.model_ = CatBoostRegressor(
+            random_seed=SEED, verbose=0, allow_writing_files=False, **self.params
+        )
+        self.model_.fit(self._prepare(X), y, cat_features=self.cat_features_)
+        return self
+
+    def predict(self, X: pd.DataFrame) -> np.ndarray:
+        return np.asarray(self.model_.predict(self._prepare(X)), dtype=float)
+
+
+def make_catboost():
+    """CatBoost with default settings, categorical columns declared by dtype."""
+
+    return _CatBoostTabular()
+
+
 def make_ridge():
     """Ridge (alpha 1) on every column, one hot categories, scaled numerics.
 
@@ -79,5 +123,6 @@ def make_ridge():
 MODELS = {
     "global_median": make_global_median,
     "lightgbm_default": make_lightgbm,
+    "catboost_default": make_catboost,
     "ridge_default": make_ridge,
 }

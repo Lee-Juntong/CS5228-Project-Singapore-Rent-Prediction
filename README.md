@@ -79,6 +79,7 @@ Current numbers on G0+G1, raw target:
 
 | model | time holdout RMSE | random CV RMSE, all rows | random CV RMSE, holdout rows | optimism |
 |---|---|---|---|---|
+| catboost_default | 452.7 | 476.4 | 451.6 | 1.2 |
 | lightgbm_default | 457.3 | 478.9 | 455.3 | 2.0 |
 | ridge_default | 574.9 | 509.2 | 501.6 | 73.3 |
 
