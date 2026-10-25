@@ -85,6 +85,15 @@ Current numbers on G0+G1, raw target:
 
 Random CV flatters Ridge by 73 RMSE because Ridge extends a straight month trend into the holdout and overpredicts by 330 on average there. LightGBM keeps the last level it saw, and rents were flat in late 2024, so random CV barely flatters it. The all rows random CV number is higher than the holdout for LightGBM only because it includes 2023, when rents varied most.
 
+Tuned boosting models (30 Optuna trials each on the time holdout, G0+G1). Time holdout RMSE:
+
+| model | raw target | index target |
+|---|---|---|
+| lightgbm_tuned | 449.9 | 445.8 |
+| catboost_tuned | 450.2 | 449.2 |
+
+Tuning cuts LightGBM from 457.3 to 449.9 and CatBoost from 452.7 to 450.2, so the two converge to about the same place. The index target mode (dividing rent by a monthly rent index, decision 5) helps LightGBM most: tuned LightGBM on index is the best single result at 445.8. Build the configs with `python -m scripts.tune_boosting`; the best parameters are saved to `configs/<model>_tuned.json`.
+
 ### Where results go
 
 * `results/runs/<run_id>.csv`: one row per run. Commit these.

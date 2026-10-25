@@ -1,0 +1,18 @@
+{
+  "model": "lightgbm",
+  "feature_set": "G0+G1",
+  "target_mode": "raw",
+  "seed": 5228,
+  "holdout_rmse": 449.9037,
+  "params": {
+    "n_estimators": 500,
+    "learning_rate": 0.034444722990075456,
+    "num_leaves": 205,
+    "min_child_samples": 51,
+    "feature_fraction": 0.896120311553904,
+    "bagging_fraction": 0.9140610646856642,
+    "bagging_freq": 1,
+    "reg_alpha": 0.06967366091057987,
+    "reg_lambda": 0.0014734013092790143
+  }
+}

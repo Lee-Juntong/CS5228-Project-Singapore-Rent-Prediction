@@ -7,6 +7,8 @@ runner can find it. Pass random_state=SEED (from src.config) to every model that
 
 from __future__ import annotations
 
+import json
+
 import numpy as np
 import pandas as pd
 from sklearn.compose import ColumnTransformer
@@ -14,7 +16,7 @@ from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline, make_pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
-from src.config import SEED
+from src.config import CONFIG_DIR, SEED
 
 
 class GlobalMedian:
@@ -64,7 +66,7 @@ def make_lightgbm():
     return LGBMRegressor(random_state=SEED, n_jobs=-1, verbose=-1)
 
 
-class _CatBoostTabular:
+class CatBoostModel:
     """CatBoost wrapper that declares categorical columns by dtype at fit time.
 
     CatBoost needs its categorical features named rather than inferred, and it
@@ -86,7 +88,7 @@ class _CatBoostTabular:
             X[col] = X[col].astype("object").where(X[col].notna(), self._CAT_FILL).astype(str)
         return X
 
-    def fit(self, X: pd.DataFrame, y) -> "_CatBoostTabular":
+    def fit(self, X: pd.DataFrame, y) -> "CatBoostModel":
         from catboost import CatBoostRegressor
 
         self.cat_features_ = [
@@ -105,7 +107,7 @@ class _CatBoostTabular:
 def make_catboost():
     """CatBoost with default settings, categorical columns declared by dtype."""
 
-    return _CatBoostTabular()
+    return CatBoostModel()
 
 
 def make_ridge():
@@ -120,9 +122,40 @@ def make_ridge():
     return sklearn_tabular(Ridge(alpha=1.0))
 
 
+def _load_tuned_params(name: str) -> dict:
+    """Read the params written by scripts/tune_boosting.py, or {} if absent.
+
+    Falling back to an empty dict means a tuned factory reverts to library
+    defaults until the tuner has run, so the model is always importable.
+    """
+
+    path = CONFIG_DIR / f"{name}_tuned.json"
+    if not path.exists():
+        return {}
+    return json.loads(path.read_text()).get("params", {})
+
+
+def make_lightgbm_tuned():
+    """LightGBM with the parameters from configs/lightgbm_tuned.json."""
+
+    from lightgbm import LGBMRegressor
+
+    return LGBMRegressor(
+        random_state=SEED, n_jobs=-1, verbose=-1, **_load_tuned_params("lightgbm")
+    )
+
+
+def make_catboost_tuned():
+    """CatBoost with the parameters from configs/catboost_tuned.json."""
+
+    return CatBoostModel(**_load_tuned_params("catboost"))
+
+
 MODELS = {
     "global_median": make_global_median,
     "lightgbm_default": make_lightgbm,
     "catboost_default": make_catboost,
+    "lightgbm_tuned": make_lightgbm_tuned,
+    "catboost_tuned": make_catboost_tuned,
     "ridge_default": make_ridge,
 }

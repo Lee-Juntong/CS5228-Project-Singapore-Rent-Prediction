@@ -1,0 +1,15 @@
+{
+  "model": "catboost",
+  "feature_set": "G0+G1",
+  "target_mode": "raw",
+  "seed": 5228,
+  "holdout_rmse": 450.2324,
+  "params": {
+    "iterations": 2000,
+    "learning_rate": 0.03653531196048584,
+    "depth": 8,
+    "l2_leaf_reg": 1.61781108389419,
+    "random_strength": 0.03267910167078582,
+    "bagging_temperature": 0.494426714976102
+  }
+}
