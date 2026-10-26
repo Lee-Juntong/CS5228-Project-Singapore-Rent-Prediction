@@ -97,6 +97,17 @@ Tuned boosting models (30 Optuna trials each on the time holdout, G0+G1). Time h
 
 Tuning cuts LightGBM from 457.3 to 449.9 and CatBoost from 452.7 to 448.8, so the two land close together. The index target mode (dividing rent by a monthly rent index, decision 5) helps LightGBM most: tuned LightGBM on index is the best single result at 445.8, while it barely moves CatBoost. Build the configs with `python -m scripts.tune_boosting`; the best parameters are saved to `configs/<model>_tuned.json`.
 
+Feature-group ablation (tuned models, time holdout, raw target). The tuned hyperparameters are held fixed at the `G0+G1` values while the feature set varies, so each row isolates the contribution of a feature group:
+
+| feature set | features | catboost_tuned | lightgbm_tuned |
+|---|---|---|---|
+| G0 (core) | 13 | 462.7 | 460.2 |
+| G0+G1 (+location) | 39 | 448.8 | 449.9 |
+| G0+G1+G2 (+block) | 44 | 448.5 | 449.8 |
+| ALL (+market) | 54 | 450.1 | 452.4 |
+
+Location (G1) is the only group that clearly helps: it cuts about 12 to 14 RMSE for both models. Block attributes (G2) add almost nothing (0.1 to 0.3). The market group (G3: current-month COE, CPI and stock values) makes both models worse, by 1.6 to 2.6 RMSE, even though those values would not be known at prediction time. This supports decision 6: the leaky macro features are not worth keeping, and `G0+G1+G2` is the best feature recipe.
+
 ### Where results go
 
 * `results/runs/<run_id>.csv`: one row per run. Commit these.
