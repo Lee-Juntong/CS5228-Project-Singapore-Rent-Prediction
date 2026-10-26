@@ -47,13 +47,15 @@ def _lightgbm_space(trial: optuna.Trial) -> dict:
 
 
 def _catboost_space(trial: optuna.Trial) -> dict:
+    # Keep CatBoost's default CPU bootstrap (MVS). bagging_temperature is a no-op
+    # under MVS; subsample is the sampling rate that MVS honours.
     return {
         "iterations": trial.suggest_int("iterations", 200, 2000, step=100),
         "learning_rate": trial.suggest_float("learning_rate", 0.01, 0.3, log=True),
         "depth": trial.suggest_int("depth", 4, 10),
         "l2_leaf_reg": trial.suggest_float("l2_leaf_reg", 1.0, 20.0, log=True),
         "random_strength": trial.suggest_float("random_strength", 1e-3, 10.0, log=True),
-        "bagging_temperature": trial.suggest_float("bagging_temperature", 0.0, 1.0),
+        "subsample": trial.suggest_float("subsample", 0.5, 1.0),
     }
 
 
