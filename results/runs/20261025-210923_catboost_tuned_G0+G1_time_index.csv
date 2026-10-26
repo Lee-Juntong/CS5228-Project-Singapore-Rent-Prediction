@@ -1,2 +1,0 @@
-run_id,timestamp,member,model,feature_set,n_features,split,target_mode,n_fit,n_valid,rmse,rmse_std,mae,mape,bias,rmse_window,train_seconds,predict_seconds,seed,git_commit,notes
-20261025-210923_catboost_tuned_G0+G1_time_index,2026-10-25T21:09:23,C,catboost_tuned,G0+G1,39,time,index,132538,17037,449.2191765485354,0.0,328.5952589789837,12.396083760650829,-35.265000318291115,449.2191765485354,41.684240041999146,0.023653707990888506,5228,94e568e+dirty,

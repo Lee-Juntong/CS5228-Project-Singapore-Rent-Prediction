@@ -79,8 +79,8 @@ Current numbers on G0+G1, raw target, sorted by time holdout RMSE:
 
 | model | time holdout RMSE | random CV RMSE, all rows | random CV RMSE, holdout rows | optimism |
 |---|---|---|---|---|
+| catboost_tuned | 448.8 | 475.4 | 451.0 | -2.1 |
 | lightgbm_tuned | 449.9 | 478.8 | 451.9 | -2.0 |
-| catboost_tuned | 450.2 | 475.3 | 450.3 | -0.0 |
 | catboost_default | 452.7 | 476.4 | 451.6 | 1.2 |
 | lightgbm_default | 457.3 | 478.9 | 455.3 | 2.0 |
 | ridge_default | 574.9 | 509.2 | 501.6 | 73.3 |
@@ -92,10 +92,10 @@ Tuned boosting models (30 Optuna trials each on the time holdout, G0+G1). Time h
 
 | model | raw target | index target |
 |---|---|---|
+| catboost_tuned | 448.8 | 449.0 |
 | lightgbm_tuned | 449.9 | 445.8 |
-| catboost_tuned | 450.2 | 449.2 |
 
-Tuning cuts LightGBM from 457.3 to 449.9 and CatBoost from 452.7 to 450.2, so the two converge to about the same place. The index target mode (dividing rent by a monthly rent index, decision 5) helps LightGBM most: tuned LightGBM on index is the best single result at 445.8. Build the configs with `python -m scripts.tune_boosting`; the best parameters are saved to `configs/<model>_tuned.json`.
+Tuning cuts LightGBM from 457.3 to 449.9 and CatBoost from 452.7 to 448.8, so the two land close together. The index target mode (dividing rent by a monthly rent index, decision 5) helps LightGBM most: tuned LightGBM on index is the best single result at 445.8, while it barely moves CatBoost. Build the configs with `python -m scripts.tune_boosting`; the best parameters are saved to `configs/<model>_tuned.json`.
 
 ### Where results go
 
