@@ -165,21 +165,30 @@ python -m scripts.save_final_model --model lightgbm_tuned --features G0+G1 --tar
 
 ## 6. Suspicious-row ablation
 
-EDA (`preprocessing/findings.md`, `decisions.md`) flagged a
-**`suspect_rent_low_for_area`** subset — "big flat, tiny rent" rows — with
-Method 2: fit `rent ~ FLOOR_AREA_SQM` with a global degree-1 line, z-score the
-residual, flag rows with residual z < −3 (e.g. a 176 sqm executive flat at
-$750). These are individually plausible but inconsistent with their size. The
-team decided to keep + flag them and let a with/without RMSE test decide
-(`decisions.md`, "Outlier handling"); this is that test.
+EDA (`preprocessing/findings.md`, `decisions.md`, `correlations.ipynb`) flags
+rows that are individually plausible but inconsistent with each other, using two
+methods. The team decided to keep + flag them and let a with/without RMSE test
+decide (`decisions.md`, "Outlier handling"); this section runs that test.
 
+| flag | definition | catches | count (our data) |
+|---|---|---|---|
+| **M1** (`suspect_m1`) | rent extreme *within* its FLAT_TYPE and FLAT_TYPE×TOWN group (IQR fence AND \|z\|>3) | "wrong price for this *type*" (cheap executive, pricey 1-room) | 331 |
+| **M2 low** (`suspect_rent_low_for_area`) | `rent ~ FLOOR_AREA_SQM` degree-1 fit, residual z < −3 | "big flat, tiny rent" — error candidates | 49 |
+| **M2 high** (`suspect_rent_high_for_area`) | same fit, residual z > +3 | "expensive for area" — usually legit prime-location premiums | 506 |
+| **both** (`suspect_both`) | M1 ∩ M2 low | flagged by both → high-confidence errors | 12 |
+
+We drop only the flagged rows in the **fit window** (≤ Sep 2024), so the Oct
+2024–Mar 2025 validation set is identical to the baseline runs and the RMSE delta
+reflects only the cleaner training data. All runs use the final model
+(lightgbm_tuned, G0+G1). Reproduce with
+`python -m scripts.suspicious_row_ablation --flag {m2,both,m1}`.
+
+### M2 low — "big flat, tiny rent" (49 rows)
+
+The `suspect_rent_low_for_area` subset (e.g. a 176 sqm executive flat at $750).
 Reproducing the flag on our 149,575-row training frame (the EDA ran on the raw
-150k) gives **49 rows**, of which **44 fall in the fit window** (≤ Sep 2024) and
-5 in the Oct 2024–Mar 2025 validation window. We drop only the 44 fit-window
-rows, so the validation set is identical to the baseline runs and the RMSE delta
-reflects only the cleaner training data.
-
-Final model (lightgbm_tuned, G0+G1), time holdout:
+150k) gives **49 rows**, of which **44 fall in the fit window** and 5 in the
+validation window; we drop the 44 fit-window rows.
 
 | target | with suspect rows (baseline) | without (44 dropped) | Δ |
 |---|---|---|---|
@@ -190,28 +199,26 @@ Final model (lightgbm_tuned, G0+G1), time holdout:
 it even slightly *hurts* the raw target). This confirms the EDA hypothesis that
 tree models are robust to these ~50 outliers, so removal buys nothing.
 **Decision: keep the rows** — consistent with the preprocessing decision, now
-backed by the A/B.
+backed by the A/B. We also submitted the without-suspect model to Kaggle: public
+LB 434.0 vs 434.4 with the rows (§7) — the leaderboard confirms the holdout verdict.
 
-We also submitted the without-suspect model to Kaggle: public LB 434.0 vs 434.4
-with the rows (§7) — the leaderboard confirms the holdout verdict.
+### both — high-confidence rows (M1 ∩ M2 low, 12 rows)
 
-### High-confidence rows (M1 ∩ M2)
+Rows flagged by **both** methods (wrong for their *type* and wrong for their
+*size*, in the error direction). Our data has **12** such rows (10 in the fit
+window). The notebook's "243" counts M1 ∩ (M2 low ∪ M2 high), but ~230 of those
+are M1 ∩ *high* — the "expensive for area" premiums the EDA itself flags as
+legitimate ("keep") — so the 12 low-side rows are the genuine high-confidence
+error candidates.
 
-The notebook's other candidate is `suspect_both` — rows flagged by **both** M1
-(rent extreme within its FLAT_TYPE / FLAT_TYPE×TOWN group, IQR and |z|>3) and M2.
-Restricting M2 to the error-direction low tail (`suspect_rent_low_for_area`), our
-data has **12** such rows (10 in the fit window). The notebook's "243" counts
-M1 ∩ (low ∪ high), but ~230 of those are M1 ∩ *high* — the "expensive for area"
-premiums the EDA itself flags as legitimate ("keep") — so the 12 low-side rows
-are the genuine high-confidence error candidates.
+| target | with suspect rows (baseline) | without (10 dropped) | Δ |
+|---|---|---|---|
+| raw | 449.9 | 449.9 | ~0 |
+| index | 445.8 | 446.1 | +0.3 (worse) |
 
-Dropping the 10 fit-window rows: raw 449.9 → 449.9 (~0), index 445.8 → 446.1
-(+0.3, slightly worse). **Same verdict — no benefit; keep the rows.** Two
-independent outlier definitions both say the data's statistical outliers are not
-worth removing for a tree model.
-
-Reproduce either with `python -m scripts.suspicious_row_ablation --flag m2`
-(default) or `--flag both`.
+**Same verdict — no benefit; keep the rows.** Two independent outlier
+definitions both say the data's statistical outliers are not worth removing for
+a tree model.
 
 ---
 
