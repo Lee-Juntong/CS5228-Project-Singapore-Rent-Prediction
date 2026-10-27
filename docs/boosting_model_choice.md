@@ -163,7 +163,38 @@ python -m scripts.save_final_model --model lightgbm_tuned --features G0+G1 --tar
 
 ---
 
-## 6. Kaggle Results
+## 6. Suspicious-row ablation
+
+EDA (`preprocessing/findings.md`, `decisions.md`) flagged a
+**`suspect_rent_low_for_area`** subset — "big flat, tiny rent" rows — with
+Method 2: fit `rent ~ FLOOR_AREA_SQM` with a global degree-1 line, z-score the
+residual, flag rows with residual z < −3 (e.g. a 176 sqm executive flat at
+$750). These are individually plausible but inconsistent with their size. The
+team decided to keep + flag them and let a with/without RMSE test decide
+(`decisions.md`, "Outlier handling"); this is that test.
+
+Reproducing the flag on our 149,575-row training frame (the EDA ran on the raw
+150k) gives **49 rows**, of which **44 fall in the fit window** (≤ Sep 2024) and
+5 in the Oct 2024–Mar 2025 validation window. We drop only the 44 fit-window
+rows, so the validation set is identical to the baseline runs and the RMSE delta
+reflects only the cleaner training data.
+
+Final model (lightgbm_tuned, G0+G1), time holdout:
+
+| target | with suspect rows (baseline) | without (44 dropped) | Δ |
+|---|---|---|---|
+| raw | 449.9 | 450.1 | +0.2 (worse) |
+| index | 445.8 | 445.7 | −0.1 (better) |
+
+**Verdict: no meaningful effect** (±0.1–0.2 RMSE, within run-to-run noise, and
+it even slightly *hurts* the raw target). This confirms the EDA hypothesis that
+tree models are robust to these ~50 outliers, so removal buys nothing.
+**Decision: keep the rows** — consistent with the preprocessing decision, now
+backed by the A/B.
+
+---
+
+## 7. Kaggle Results
 
 ### Tue 27 Oct 2026 11:09:34 — lightgbm_tuned, G0+G1, index
 
