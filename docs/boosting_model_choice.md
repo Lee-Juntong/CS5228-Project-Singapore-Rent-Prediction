@@ -210,3 +210,17 @@ That is reassuring rather than suspicious: the validation window (Oct 2024–Mar
 2025) and the public test rows are different months, and the model generalized at
 least as well on the test data. It also confirms the model is not overfit to the
 validation split (consistent with the near-zero optimism in §3).
+
+### Tue 27 Oct 2026 — lightgbm_tuned, G0+G1, index, without suspect rows
+
+| field | value |
+|---|---|
+| model | lightgbm_tuned, G0+G1, index, trained without the 49 suspect rows |
+| submission file | `submissions/lightgbm_tuned_G0G1_index_nosuspect.csv` |
+| time-holdout RMSE (val) | 445.7 |
+| public LB RMSE | **434.0** |
+
+Dropping the suspect rows gives public LB 434.0 vs 434.4 with them — 0.45 apart,
+i.e. noise. The leaderboard confirms the §6 ablation: the ~50 "big flat, tiny
+rent" rows do not matter either way, so we keep them (simpler, matches the
+preprocessing decision).
