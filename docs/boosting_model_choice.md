@@ -192,6 +192,27 @@ tree models are robust to these ~50 outliers, so removal buys nothing.
 **Decision: keep the rows** — consistent with the preprocessing decision, now
 backed by the A/B.
 
+We also submitted the without-suspect model to Kaggle: public LB 434.0 vs 434.4
+with the rows (§7) — the leaderboard confirms the holdout verdict.
+
+### High-confidence rows (M1 ∩ M2)
+
+The notebook's other candidate is `suspect_both` — rows flagged by **both** M1
+(rent extreme within its FLAT_TYPE / FLAT_TYPE×TOWN group, IQR and |z|>3) and M2.
+Restricting M2 to the error-direction low tail (`suspect_rent_low_for_area`), our
+data has **12** such rows (10 in the fit window). The notebook's "243" counts
+M1 ∩ (low ∪ high), but ~230 of those are M1 ∩ *high* — the "expensive for area"
+premiums the EDA itself flags as legitimate ("keep") — so the 12 low-side rows
+are the genuine high-confidence error candidates.
+
+Dropping the 10 fit-window rows: raw 449.9 → 449.9 (~0), index 445.8 → 446.1
+(+0.3, slightly worse). **Same verdict — no benefit; keep the rows.** Two
+independent outlier definitions both say the data's statistical outliers are not
+worth removing for a tree model.
+
+Reproduce either with `python -m scripts.suspicious_row_ablation --flag m2`
+(default) or `--flag both`.
+
 ---
 
 ## 7. Kaggle Results

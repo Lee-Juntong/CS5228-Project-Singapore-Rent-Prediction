@@ -1,44 +1,72 @@
-"""A/B test: does dropping the ~50 "big flat, tiny rent" rows help the model?
+"""A/B test: does dropping EDA-flagged suspicious rows help the model?
 
-EDA (../cs5228/project/preprocessing/findings.md, decisions.md) flagged a
-`suspect_rent_low_for_area` subset via Method 2: fit rent ~ FLOOR_AREA_SQM with a
-global degree-1 line, z-score the residual, flag rows with residual z < -3 ("big
-flat, tiny rent"). The team decided to keep + flag these and let a with/without
-RMSE comparison decide. This script runs that comparison for the final boosting
-model.
+EDA (../cs5228/project/preprocessing/correlations.ipynb, findings.md,
+decisions.md) flags rows that are individually plausible but inconsistent with
+each other, via two methods:
 
-The suspicious rows are dropped from the TRAINING rows only; the Oct 2024–Mar
-2025 validation window is left untouched, so the "with" (baseline, already
-logged) and "without" runs score the identical rows and the RMSE delta reflects
-only the cleaner training data. No change to the shared interface: the cleaned
-frame is passed via `run_experiment(..., data=(train_clean, test))`.
+* **M1** (`suspect_m1`) — rent extreme *within* its FLAT_TYPE group, and within
+  its FLAT_TYPE×TOWN group (IQR fence AND |z| > 3). "Wrong price for this type."
+* **M2** (`suspect_rent_low_for_area`) — "big flat, tiny rent": fit rent ~
+  FLOOR_AREA_SQM with a global degree-1 line, z-score the residual, flag
+  residual z < -3. "Wrong price for this size (too cheap)."
+* **both** (`suspect_both` = M1 ∩ M2) — the notebook's high-confidence error
+  candidates and its recommended review subset.
 
-    python -m scripts.suspicious_row_ablation
+The team decided to keep + flag these and let a with/without RMSE comparison
+decide. This script runs that A/B for the final model (lightgbm_tuned, G0+G1).
+Rows are dropped from the TRAINING fit window only; the Oct 2024–Mar 2025
+validation window is left untouched, so the "with" (baseline, already logged)
+and "without" runs score the identical rows and the RMSE delta reflects only the
+cleaner training data. No change to the shared interface: the cleaned frame is
+passed via `run_experiment(..., data=(train_clean, test))`.
+
+    python -m scripts.suspicious_row_ablation --flag m2     # default
+    python -m scripts.suspicious_row_ablation --flag both   # ~243 high-confidence rows
+    python -m scripts.suspicious_row_ablation --flag m1
 """
 
 from __future__ import annotations
 
+import argparse
+
 import numpy as np
+import pandas as pd
 
 from src.config import TARGET
 from src.evaluation import run_experiment, time_holdout_masks
 from src.features import load_modeling_data
 from src.models import MODELS
 
-# The final-model config. "with" numbers are the existing baseline runs.
 MODEL = "lightgbm_tuned"
 FEATURE_SET = "G0+G1"
 TARGET_MODES = ("raw", "index")
-NOTES = "drop suspect_rent_low_for_area"
 
 
-def suspect_rent_low_for_area(train) -> np.ndarray:
-    """Reproduce the EDA Method-2 flag on our training rows (numpy only).
+def _iqr_outlier(series: pd.Series) -> pd.Series:
+    q1, q3 = series.quantile(0.25), series.quantile(0.75)
+    iqr = q3 - q1
+    return (series < q1 - 1.5 * iqr) | (series > q3 + 1.5 * iqr)
 
-    coef = polyfit(area, rent, 1); resid = rent - fit; flag resid z-score < -3.
-    Recomputed on our 149,575-row frame (the EDA ran on the raw 150k), so the
-    count may differ slightly from the notebook's ~50 — we report what we get.
-    """
+
+def _zscore_outlier(series: pd.Series, thresh: float = 3.0) -> pd.Series:
+    sd = series.std()
+    if sd == 0 or np.isnan(sd):
+        return pd.Series(False, index=series.index)
+    return (series - series.mean()).abs() / sd > thresh
+
+
+def suspect_m1(train: pd.DataFrame) -> np.ndarray:
+    """Rent extreme within FLAT_TYPE or FLAT_TYPE×TOWN (IQR and |z|>3). Notebook M1."""
+
+    g_type = train.groupby("FLAT_TYPE", observed=True)[TARGET]
+    g_type_town = train.groupby(["FLAT_TYPE", "TOWN"], observed=True)[TARGET]
+    in_type = g_type.transform(_iqr_outlier) & g_type.transform(_zscore_outlier)
+    in_type_town = g_type_town.transform(_iqr_outlier) & g_type_town.transform(_zscore_outlier)
+    return (in_type | in_type_town).to_numpy()
+
+
+def suspect_rent_low_for_area(train: pd.DataFrame) -> np.ndarray:
+    """Big flat, tiny rent: rent~area degree-1 residual z < -3 (numpy only). Notebook M2 low tail."""
 
     area = train["FLOOR_AREA_SQM"].to_numpy(dtype=float)
     rent = train[TARGET].to_numpy(dtype=float)
@@ -48,29 +76,40 @@ def suspect_rent_low_for_area(train) -> np.ndarray:
     return z < -3
 
 
-def main() -> None:
-    train, test = load_modeling_data()
-    flag = suspect_rent_low_for_area(train)
-    fit_mask, valid_mask = time_holdout_masks(train)
-    n_total = int(flag.sum())
-    n_in_fit = int((flag & fit_mask).sum())
-    n_in_valid = int((flag & valid_mask).sum())
-    print(f"suspect_rent_low_for_area: {n_total} rows "
-          f"({n_in_fit} in fit window, {n_in_valid} in valid window)")
+FLAGS = {
+    "m1": ("suspect_m1", suspect_m1),
+    "m2": ("suspect_rent_low_for_area", suspect_rent_low_for_area),
+    "both": ("suspect_both", lambda t: suspect_m1(t) & suspect_rent_low_for_area(t)),
+}
 
-    # Drop only the flagged rows that sit in the fit window, so the Oct 2024–Mar
-    # 2025 validation set is identical to the baseline runs.
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--flag", default="m2", choices=list(FLAGS))
+    args = parser.parse_args()
+    name, detector = FLAGS[args.flag]
+
+    train, test = load_modeling_data()
+    flag = detector(train)
+    fit_mask, valid_mask = time_holdout_masks(train)
+    print(f"{name}: {int(flag.sum())} rows "
+          f"({int((flag & fit_mask).sum())} in fit window, "
+          f"{int((flag & valid_mask).sum())} in valid window)")
+
+    # Drop only the flagged rows in the fit window, so the Oct 2024–Mar 2025
+    # validation set is identical to the baseline runs.
     drop_mask = flag & fit_mask
     train_clean = train.loc[~drop_mask].reset_index(drop=True)
     print(f"training rows: {len(train)} -> {len(train_clean)} "
           f"(dropped {len(train) - len(train_clean)})")
 
     data_clean = (train_clean, test)
+    notes = f"drop {name}"
     for target_mode in TARGET_MODES:
         row = run_experiment(MODEL, MODELS[MODEL], feature_set=FEATURE_SET,
-                             target_mode=target_mode, member="C", notes=NOTES,
+                             target_mode=target_mode, member="C", notes=notes,
                              data=data_clean)
-        print(f"  without suspect rows | {target_mode:5s} | "
+        print(f"  without {name} | {target_mode:5s} | "
               f"RMSE {row['rmse']:.2f} (n_valid {row['n_valid']})")
 
 
