@@ -88,14 +88,16 @@ Current numbers on G0+G1, raw target, sorted by time holdout RMSE:
 
 `global_median` (predict the training median for every row) is the sanity floor; every learned model clears it by a wide margin. Compare each model's time holdout RMSE with its random CV holdout rows number: both score the same Oct 2024 to Mar 2025 rows, so the gap (optimism) is only the effect of the split. Random CV flatters Ridge by 73 RMSE because Ridge extends a straight month trend into the holdout and overpredicts by 330 on average there. The boosting models have optimism near zero: they keep the last level they saw, rents were flat in late 2024, so the random split barely helps them, and the tuned ones even score marginally better on the honest future window than on the random folds. The all rows random CV number is not comparable to the other two columns because it covers all of 2021 to 2025, including 2023 when rents varied most.
 
-Tuned boosting models (30 Optuna trials each on the time holdout, G0+G1). Time holdout RMSE:
+Tuned boosting models (30 Optuna trials each on the time holdout). Time holdout RMSE by feature set and target mode:
 
-| model | raw target | index target |
-|---|---|---|
-| catboost_tuned | 448.8 | 449.0 |
-| lightgbm_tuned | 449.9 | 445.8 |
+| model | feature set | raw target | index target |
+|---|---|---|---|
+| lightgbm_tuned | G0+G1 | 449.9 | 445.8 |
+| lightgbm_tuned | G0+G1+G2 | 449.8 | 446.2 |
+| catboost_tuned | G0+G1 | 448.8 | 449.0 |
+| catboost_tuned | G0+G1+G2 | 448.5 | 448.4 |
 
-Tuning cuts LightGBM from 457.3 to 449.9 and CatBoost from 452.7 to 448.8, so the two land close together. The index target mode (dividing rent by a monthly rent index, decision 5) helps LightGBM most: tuned LightGBM on index is the best single result at 445.8, while it barely moves CatBoost. Build the configs with `python -m scripts.tune_boosting`; the best parameters are saved to `configs/<model>_tuned.json`.
+Tuning cuts LightGBM from 457.3 to 449.9 and CatBoost from 452.7 to 448.8. The index target mode (dividing rent by a monthly rent index, decision 5) helps LightGBM by about 4 RMSE but barely moves CatBoost. The best single result is **lightgbm_tuned on G0+G1 with index mode, 445.8**, which is the final submission model: index mode extends the rent trend into the future, and that matters most on the long Kaggle horizon (to Jul 2026) where tree models cannot extrapolate on their own. Adding the block group (G2) does not help either model here. Build the configs with `python -m scripts.tune_boosting`; the best parameters are saved to `configs/<model>_tuned.json`.
 
 Feature-group ablation (tuned models, time holdout, raw target). The tuned hyperparameters are held fixed at the `G0+G1` values while the feature set varies, so each row isolates the contribution of a feature group:
 
@@ -119,11 +121,21 @@ Location (G1) is the only group that clearly helps: it cuts about 12 to 14 RMSE 
 
 ```python
 from src.evaluation import make_submission
-from src.models import make_lightgbm
-make_submission(make_lightgbm, "G0+G1", path="submissions/lightgbm.csv")
+from src.models import make_lightgbm_tuned
+# The final model: tuned LightGBM on G0+G1 with index trend handling (val RMSE 445.8).
+make_submission(make_lightgbm_tuned, "G0+G1", target_mode="index",
+                path="submissions/lightgbm_tuned_G0G1_index.csv")
 ```
 
-The `submissions/` folder is created if it does not exist. It is not in git.
+The `submissions/` folder is created if it does not exist. It is not in git. Each submission is logged in `results/kaggle_log.csv` (date, model, feature set, target mode, validation RMSE, public leaderboard score, notes); record the validation RMSE before reading the public score so the leaderboard does not drive model selection.
+
+### Saved model weights
+
+```bash
+python -m scripts.save_final_model --model lightgbm_tuned --features G0+G1 --target-mode index
+```
+
+Fits the model on all training rows and saves the fitted model to `models/` (gitignored) with a JSON provenance sidecar, so a reported submission can be reloaded and replayed later. See `models/README.md` to reload one.
 
 ## Layout
 
