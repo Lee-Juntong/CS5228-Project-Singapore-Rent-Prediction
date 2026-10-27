@@ -160,3 +160,22 @@ Rebuild with:
 ```sh
 python -m scripts.save_final_model --model lightgbm_tuned --features G0+G1 --target-mode index
 ```
+
+---
+
+## 6. Kaggle Results
+
+### Tue 27 Oct 2026 11:09:34 — lightgbm_tuned, G0+G1, index
+
+| field | value |
+|---|---|
+| model | lightgbm_tuned, G0+G1, index target |
+| submission file | `submissions/lightgbm_tuned_G0G1_index.csv` |
+| time-holdout RMSE (val) | 445.8 |
+| public LB RMSE | **434.4** |
+
+Public LB (434.4) comes in about 11 better than the 445.8 validation estimate.
+That is reassuring rather than suspicious: the validation window (Oct 2024–Mar
+2025) and the public test rows are different months, and the model generalized at
+least as well on the test data. It also confirms the model is not overfit to the
+validation split (consistent with the near-zero optimism in §3).
