@@ -202,6 +202,23 @@ tree models are robust to these ~50 outliers, so removal buys nothing.
 backed by the A/B. We also submitted the without-suspect model to Kaggle: public
 LB 434.0 vs 434.4 with the rows (§7) — the leaderboard confirms the holdout verdict.
 
+### M1 — rent extreme within its group (331 rows)
+
+The `suspect_m1` subset: rent beyond the IQR fence *and* |z|>3 within its
+FLAT_TYPE or FLAT_TYPE×TOWN group. Unlike M2 low, this is *symmetric* — it flags
+both too-cheap and too-expensive rows. 331 rows, 276 in the fit window.
+
+| target | with suspect rows (baseline) | without (276 dropped) | Δ |
+|---|---|---|---|
+| raw | 449.9 | 452.6 | +2.7 (worse) |
+| index | 445.8 | 447.9 | +2.1 (worse) |
+
+**Removing M1 rows clearly hurts** (+2–3 RMSE on both targets) — the most
+decisive of the three ablations. M1 sweeps in *legitimate* extremes, notably the
+`central` 5-room premiums the EDA flagged as real signal (not errors), so
+dropping them throws away information the model uses. This is the cautionary
+case: blunt within-group outlier removal is actively harmful here.
+
 ### both — high-confidence rows (M1 ∩ M2 low, 12 rows)
 
 Rows flagged by **both** methods (wrong for their *type* and wrong for their
@@ -219,6 +236,12 @@ error candidates.
 **Same verdict — no benefit; keep the rows.** Two independent outlier
 definitions both say the data's statistical outliers are not worth removing for
 a tree model.
+
+**Summary across the three ablations** (lightgbm_tuned, G0+G1 index target,
+baseline 445.8): M2 low 445.7 (~0), both 446.1 (+0.3), M1 447.9 (+2.1). Removing
+flagged rows ranges from harmless to clearly harmful, and never helps — so we
+**keep all rows**. The M1 result shows *why*: its symmetric within-group rule
+also removes legitimate premium rents, which the tree model relies on.
 
 ---
 

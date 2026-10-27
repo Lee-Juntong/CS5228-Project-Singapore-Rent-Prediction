@@ -1,0 +1,2 @@
+run_id,timestamp,member,model,feature_set,n_features,split,target_mode,n_fit,n_valid,rmse,rmse_std,mae,mape,bias,rmse_window,train_seconds,predict_seconds,seed,git_commit,notes
+20261027-150809_lightgbm_tuned_G0+G1_time_raw,2026-10-27T15:08:09,C,lightgbm_tuned,G0+G1,39,time,raw,132262,17037,452.62226690403855,0.0,329.393687355004,12.39309835492998,-35.13741550842228,452.62226690403855,18.466932042036206,0.09914975002175197,5228,fcb4662,drop suspect_m1
