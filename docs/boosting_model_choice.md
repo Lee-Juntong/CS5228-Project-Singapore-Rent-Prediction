@@ -109,9 +109,9 @@ varies, so each row isolates one feature group. Raw target, time holdout.
   even though those values would not be known at prediction time — supports plan
   decision 6: drop the leaky macro features.
 
-**Why the full 4-way ablation was run only on `raw`, and `index` only on G0+G1
-and G0+G1+G2:** the ablation's job is to rank *feature groups*, and the trend
-handling (`raw` vs `index`) is an independent axis — running both on all four
+**Why the full 4-way ablation was run only on `raw`, and only G0+G1 and
+G0+G1+G2 for `index`:** the ablation's job is to rank *feature groups*, and the
+trend handling (`raw` vs `index`) is an independent axis — running both on all four
 feature sets would be 8 configs/model for no extra insight. `index` was added
 only on the two feature sets still in contention for the final model (G0+G1 and
 G0+G1+G2), since G0 and ALL were already losing on `raw`. So the trend-handling
@@ -127,7 +127,7 @@ Trend handling (raw vs index) on the contending feature sets:
 | catboost_tuned | G0+G1+G2 | 448.5 | 448.4 |
 
 `index` (train on rent ÷ monthly rent index, multiply back) helps LightGBM ~4
-RMSE but barely moves CatBoost. The index is the training median rent per month,
+RMSE but barely moves CatBoost. The index is the **training median rent per month**,
 extrapolated to future months by a line through the last 12 monthly medians
 (leakage-safe). It matters because tree models cannot extrapolate a trend on
 their own — the index supplies it.
@@ -217,7 +217,10 @@ both too-cheap and too-expensive rows. 331 rows, 276 in the fit window.
 decisive of the three ablations. M1 sweeps in *legitimate* extremes, notably the
 `central` 5-room premiums the EDA flagged as real signal (not errors), so
 dropping them throws away information the model uses. This is the cautionary
-case: blunt within-group outlier removal is actively harmful here.
+case: blunt within-group outlier removal is actively harmful here. The Kaggle
+leaderboard confirms it — the M1-removed model scores 438.6 vs 434.4 with the
+rows (+4.2, ~1%; §7), worse on the true test horizon too, and ~10× the ~0.5
+noise band seen in the M2-low submission.
 
 ### both — high-confidence rows (M1 ∩ M2 low, 12 rows)
 
@@ -237,11 +240,21 @@ error candidates.
 definitions both say the data's statistical outliers are not worth removing for
 a tree model.
 
-**Summary across the three ablations** (lightgbm_tuned, G0+G1 index target,
-baseline 445.8): M2 low 445.7 (~0), both 446.1 (+0.3), M1 447.9 (+2.1). Removing
-flagged rows ranges from harmless to clearly harmful, and never helps — so we
-**keep all rows**. The M1 result shows *why*: its symmetric within-group rule
-also removes legitimate premium rents, which the tree model relies on.
+**Summary across the three ablations** (lightgbm_tuned, G0+G1 index target):
+
+| dropped | rows | val RMSE | public LB | vs baseline |
+|---|---|---|---|---|
+| — (baseline) | 0 | 445.8 | 434.4 | — |
+| M2 low | 49 | 445.7 | 434.0 | ~0 (noise) |
+| both (M1 ∩ M2) | 12 | 446.1 | — | +0.3 val |
+| M1 | 331 | 447.9 | 438.6 | **+2.2 val / +4.2 LB** |
+
+Removing flagged rows ranges from harmless (M2 low, both) to clearly harmful
+(M1), and never helps — so we **keep all rows**. The M1 result shows *why*: its
+symmetric within-group rule also removes legitimate premium rents, which the
+tree model relies on. The harm is modest in absolute terms (~1% RMSE) but
+consistent across *both* the holdout and the Kaggle test, and ~10× the ~0.5
+leaderboard noise band — so it is a real effect, not run-to-run variation.
 
 ---
 
@@ -262,16 +275,33 @@ That is reassuring rather than suspicious: the validation window (Oct 2024–Mar
 least as well on the test data. It also confirms the model is not overfit to the
 validation split (consistent with the near-zero optimism in §3).
 
-### Tue 27 Oct 2026 — lightgbm_tuned, G0+G1, index, without suspect rows
+### Tue 27 Oct 2026 — lightgbm_tuned, G0+G1, index, without M2-low rows
 
 | field | value |
 |---|---|
-| model | lightgbm_tuned, G0+G1, index, trained without the 49 suspect rows |
+| model | lightgbm_tuned, G0+G1, index, trained without the 49 M2-low (`suspect_rent_low_for_area`) rows |
 | submission file | `submissions/lightgbm_tuned_G0G1_index_nosuspect.csv` |
 | time-holdout RMSE (val) | 445.7 |
 | public LB RMSE | **434.0** |
 
-Dropping the suspect rows gives public LB 434.0 vs 434.4 with them — 0.45 apart,
+Dropping the M2-low rows gives public LB 434.0 vs 434.4 with them — 0.45 apart,
 i.e. noise. The leaderboard confirms the §6 ablation: the ~50 "big flat, tiny
 rent" rows do not matter either way, so we keep them (simpler, matches the
 preprocessing decision).
+
+### Wed 28 Oct 2026 — lightgbm_tuned, G0+G1, index, without M1 rows
+
+| field | value |
+|---|---|
+| model | lightgbm_tuned, G0+G1, index, trained without the 331 M1 rows |
+| submission file | `submissions/lightgbm_tuned_G0G1_index_nom1.csv` |
+| time-holdout RMSE (val) | 447.9 |
+| public LB RMSE | **438.6** |
+
+Removing the within-group rent extremes scores 438.6 vs 434.4 with them — +4.2
+(~1%), worse on the test horizon just as on the holdout (+2.2), and ~10× the
+noise band the no-suspect submission established (0.45). Modest in absolute terms
+but a real, consistent degradation — the strongest evidence that blunt extreme-row
+removal hurts, because M1 discards legitimate premium rents (e.g. central 5-room).
+The prediction range also compressed (max 5637 → 5073), the model losing its grip
+on high rents.
