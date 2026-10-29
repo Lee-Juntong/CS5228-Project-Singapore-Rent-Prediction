@@ -25,3 +25,13 @@ venv/
 
 # Tests stay local
 tests/
+
+# Local Member B artifacts; reports, figures and curve CSVs remain trackable.
+data/kaggle_download/
+tmp/
+*.joblib
+results/member_b/**/validation_predictions.csv
+results/member_b/**/test_predictions.csv
+results/member_b/**/fit_ids.csv
+results/member_b/**/holdout_truth.csv
+results/member_b/**/random5_predictions.parquet

@@ -28,7 +28,15 @@ class GlobalMedian:
         return np.full(len(X), self.value_)
 
 
-def sklearn_tabular(estimator, scale: bool = True) -> Pipeline:
+def numeric_columns(X):
+    return [c for c in X.columns if not isinstance(X[c].dtype, pd.CategoricalDtype)]
+
+
+def categorical_columns(X):
+    return [c for c in X.columns if isinstance(X[c].dtype, pd.CategoricalDtype)]
+
+
+def sklearn_tabular(estimator, scale: bool = True, onehot_drop=None, dense: bool = False) -> Pipeline:
     """Wrap a scikit-learn estimator so it accepts the shared X directly.
 
     Categorical columns are one hot encoded (unseen levels become all zeros).
@@ -36,18 +44,13 @@ def sklearn_tabular(estimator, scale: bool = True) -> Pipeline:
     scaling. Columns are detected by dtype at fit time.
     """
 
-    def numeric(X):
-        return [c for c in X.columns if not isinstance(X[c].dtype, pd.CategoricalDtype)]
-
-    def categorical(X):
-        return [c for c in X.columns if isinstance(X[c].dtype, pd.CategoricalDtype)]
-
-    numeric_steps = [SimpleImputer(strategy="median")] + ([StandardScaler()] if scale else [])
+    numeric_steps = [SimpleImputer(strategy="median", keep_empty_features=True)] + ([StandardScaler()] if scale else [])
     transformer = ColumnTransformer(
         [
-            ("num", make_pipeline(*numeric_steps), numeric),
-            ("cat", OneHotEncoder(handle_unknown="ignore"), categorical),
-        ]
+            ("num", make_pipeline(*numeric_steps), numeric_columns),
+            ("cat", OneHotEncoder(handle_unknown="ignore", drop=onehot_drop), categorical_columns),
+        ],
+        sparse_threshold=0.0 if dense else 0.3,
     )
     return Pipeline([("prep", transformer), ("model", estimator)])
 
