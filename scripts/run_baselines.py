@@ -1,8 +1,7 @@
-"""Reproduce Member B models, holdout evaluation, curves and local predictions."""
+"""Evaluate registered baselines; opt in to curves, CV or one final refit."""
 
 import argparse
 from datetime import datetime
-import hashlib
 from importlib.metadata import version
 import json
 from pathlib import Path
@@ -15,18 +14,12 @@ import pandas as pd
 from threadpoolctl import threadpool_limits
 
 from src.baselines import BASELINE_MODELS, MODEL_NOTES, GroupMedian
-from src.config import PROJECT_ROOT, PROCESSED_DIR, SEED, TARGET
+from src.config import PROJECT_ROOT, SEED, TARGET
 from src.evaluation import fit_predict, run_experiment, time_holdout_masks, _git_commit
 from src.evaluation_artifacts import learning_curve, forest_curve, plot_comparison, plot_segments
 from src.features import feature_columns, load_modeling_data
+from src.models import MODELS
 
-
-def sha256(path):
-    digest = hashlib.sha256()
-    with Path(path).open("rb") as stream:
-        for block in iter(lambda: stream.read(1024 * 1024), b""):
-            digest.update(block)
-    return digest.hexdigest()
 
 
 def markdown_table(table):
@@ -40,13 +33,13 @@ def markdown_table(table):
 def export_parameters(output, names):
     parameters = {}
     for name in names:
-        model = BASELINE_MODELS[name]()
+        model = MODELS[name]()
         params = model.get_params(deep=True) if hasattr(model, "get_params") else {"strategy": "median"}
         parameters[name] = {"notes": MODEL_NOTES[name], "parameters": {k: repr(v) for k, v in params.items()}}
     (output / "hyperparameters.json").write_text(json.dumps(parameters, indent=2), encoding="utf-8")
 
 
-def write_report(output, table, comparison=None):
+def write_report(output, table, comparison=None, refit_model=None, learning_curves=False):
     ordered = table.sort_values("rmse")
     best = ordered.iloc[0]
     lookup = table.set_index("model")
@@ -67,7 +60,7 @@ def write_report(output, table, comparison=None):
             "overprediction, not merely noisy individual errors. The comparison supports evaluating nonlinear interactions "
             "and averaging trees, but linear and KNN models use the plan's restricted inputs, so their "
             "gaps do not isolate algorithm choice alone. Boosting's incremental benefit over random "
-            "forest remains to be measured using Member C's models under the same protocol.")
+            "forest should be compared under the same protocol.")
     (output / "gaps.txt").write_text(paragraph + "\n", encoding="utf-8")
     columns = ["model", "rmse", "mae", "mape", "r2", "bias", "train_seconds", "predict_seconds"]
     text = ("# Member B baseline evaluation\n\n"
@@ -82,16 +75,20 @@ def write_report(output, table, comparison=None):
             "area and month. Linear/Ridge retain flat type and remove the three area-derived columns, "
             "ordinal flat type and redundant lease year. Both tree models use all G0+G1 columns. "
             "All imputers, scalers, category encoders and target statistics are fitted on training rows only.\n\n"
-            "## Learning curves and saved models\n\n"
-            "The sample-size curves use a single deterministic, nested, month-stratified sample sequence "
-            "from the training window and a fixed future holdout. They are diagnostics, not repeated-CV "
-            "confidence intervals. Training errors are in-sample; KNN with distance weighting and group "
-            "lookups can have particularly optimistic training errors. The forest curve evaluates prefixes "
-            "of the saved forest; it is not gradient-descent convergence or early stopping.\n\n"
-            "The results table evaluates models fitted only through September 2024. Each final model "
-            "is separately refitted on all labelled rows for local test predictions. Test labels are "
-            "unavailable, so no test-set metrics are reported. The six-month validation horizon does "
-            "not establish accuracy at the end of the much longer Kaggle test horizon.\n")
+            "## Saved models and optional diagnostics\n\n"
+            "The results table evaluates models fitted only through September 2024. "
+            "Holdout bundles include preprocessing. Test labels are unavailable, so no test-set "
+            "metrics are reported. The six-month validation horizon does not establish accuracy "
+            "at the end of the longer Kaggle test horizon.\n")
+    if refit_model:
+        text += f"\nOnly `{refit_model}` was refitted on all labelled rows for local test predictions.\n"
+    else:
+        text += "\nNo full-data refit or test prediction was requested.\n"
+    if learning_curves:
+        text += ("\nSample-size curves are in `curves/` (CSV, PNG and SVG). They use nested "
+                 "month-stratified training samples and a fixed future holdout. Training errors "
+                 "are in-sample; these are diagnostics, not repeated-CV confidence intervals. "
+                 "The forest tree-count curve scores prefixes of the same ensemble.\n")
     if comparison is not None:
         text += "\n## Random CV comparison\n\n" + markdown_table(comparison) + "\n\n"
         split_row = comparison.iloc[0]
@@ -106,23 +103,38 @@ def write_report(output, table, comparison=None):
                  "gap measures this split effect, not a deployable forecast gain. Model selection and the "
                  "reported holdout score use the same validation window; the best score is exploratory.\n")
     (output / "evaluation_report.md").write_text(text, encoding="utf-8")
-    ordered[columns].to_latex(output / "results_table.tex", index=False, float_format="%.2f")
 
 
-def main():
+def parse_args(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=PROJECT_ROOT / "results" / "member_b" / datetime.now().strftime("%Y%m%d-%H%M%S"))
     parser.add_argument("--models", nargs="+", choices=BASELINE_MODELS, default=list(BASELINE_MODELS))
-    parser.add_argument("--skip-curves", action="store_true")
-    parser.add_argument("--skip-refit", action="store_true")
-    parser.add_argument("--skip-random-cv", action="store_true")
-    parser.add_argument("--resume", action="store_true", help="Resume a run using completed model results and full-fit artifacts")
-    parser.add_argument("--ablation", action="store_true", help="Optional Phase 2 feature ablation for selected best two baselines")
-    args = parser.parse_args()
+    parser.add_argument("--learning-curves", action="store_true", help="Add sample-size curves (four extra fits per model)")
+    parser.add_argument("--random-cv", action="store_true", help="Add five-fold CV for the best holdout model")
+    parser.add_argument("--refit", choices=["best", *BASELINE_MODELS], help="Refit one evaluated model on all labelled rows; best selects by holdout RMSE")
+    args = parser.parse_args(argv)
+    args.models = list(dict.fromkeys(args.models))
+    if args.refit and args.refit != "best" and args.refit not in args.models:
+        parser.error("--refit must name a model included in --models (or use best)")
+    return args
+
+
+def refit_final(name, train, test, output):
+    print(f"REFIT ALL LABELLED ROWS: {name}", flush=True)
+    pred, fit_s, predict_s, final = fit_predict(MODELS[name], train, test,
+                                               feature_columns("G0+G1"), return_fitted=True)
+    destination = output / "full_fit" / name
+    destination.mkdir(parents=True)
+    joblib.dump(final, destination / "model.joblib", compress=3)
+    np.testing.assert_allclose(joblib.load(destination / "model.joblib").predict(test), pred, rtol=1e-12, atol=1e-8)
+    pd.DataFrame({"ROW_ID": test.ROW_ID.to_numpy(), "y_pred": pred}).to_csv(destination / "test_predictions.csv", index=False)
+    pd.DataFrame([{"n_fit": len(train), "n_predict": len(test), "fit_seconds": fit_s,
+                   "predict_seconds": predict_s, "serialization_verified": True}]).to_csv(destination / "metadata.csv", index=False)
+
+
+def run(args):
     output = args.output.resolve()
-    if args.resume and not (output / "manifest.json").exists():
-        raise FileNotFoundError("--resume requires an existing run manifest")
-    output.mkdir(parents=True, exist_ok=args.resume)
+    output.mkdir(parents=True, exist_ok=False)
     print(f"OUTPUT: {output}", flush=True)
     data = load_modeling_data()
     train, test = data
@@ -130,29 +142,11 @@ def main():
     if train.ROW_ID.duplicated().any() or test.ROW_ID.duplicated().any() or np.any(fit & valid):
         raise ValueError("Invalid IDs or overlapping train/validation masks")
     packages = {name: version(name) for name in ("numpy", "pandas", "scipy", "scikit-learn", "matplotlib", "pyarrow", "joblib", "threadpoolctl")}
-    sources = list((PROJECT_ROOT / "src").glob("*.py")) + list((PROJECT_ROOT / "scripts").glob("*.py"))
     manifest = {"seed": SEED, "git_commit": _git_commit(), "python": platform.python_version(), "packages": packages,
                 "n_train": len(train), "n_fit": int(fit.sum()), "n_valid": int(valid.sum()), "n_test": len(test),
                 "feature_columns": feature_columns("G0+G1"), "arguments": vars(args) | {"output": str(output)},
-                "source_sha256": {str(p.relative_to(PROJECT_ROOT)): sha256(p) for p in sources},
-                "data_sha256": {str(p.relative_to(PROJECT_ROOT)): sha256(p) for p in
-                                list(PROCESSED_DIR.glob("*.parquet")) + list((PROJECT_ROOT / "data").glob("*.csv")) +
-                                list((PROJECT_ROOT / "data" / "auxiliary").glob("*.csv")) +
-                                list((PROJECT_ROOT / "data" / "derived").glob("*.csv"))}}
-    if args.resume:
-        previous = json.loads((output / "manifest.json").read_text(encoding="utf-8"))
-        for key in ("data_sha256", "packages", "feature_columns", "seed"):
-            if previous[key] != manifest[key]:
-                raise ValueError(f"Cannot resume with changed {key}")
-        manifest["previous_execution"] = previous
-    snapshot = output / "source_snapshot" / datetime.now().strftime("%Y%m%d-%H%M%S")
-    for source in sources:
-        target = snapshot / source.relative_to(PROJECT_ROOT)
-        target.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(source, target)
-    manifest["source_snapshot"] = str(snapshot.relative_to(output))
+                "completed": False, "refit_model": None}
     (output / "manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
-    (output / "requirements-lock.txt").write_text("\n".join(f"{k}=={v}" for k, v in packages.items()) + "\n", encoding="utf-8")
     export_parameters(output, args.models)
     train.loc[valid, ["ROW_ID", "RENT_APPROVAL_DATE", "FLAT_TYPE", TARGET]].to_csv(output / "holdout_truth.csv", index=False)
     rows, segments = [], []
@@ -160,12 +154,8 @@ def main():
         for name in args.models:
             print(f"FIT: {name}", flush=True)
             folder = output / "holdout" / name
-            if args.resume and (folder / "result.csv").exists():
-                print(f"  using completed holdout: {name}", flush=True)
-                row = pd.read_csv(folder / "result.csv").iloc[0].to_dict()
-            else:
-                row = run_experiment(name, BASELINE_MODELS[name], member="B", data=data,
-                                     notes=MODEL_NOTES[name], artifact_dir=folder)
+            row = run_experiment(name, MODELS[name], member="B", data=data,
+                                 notes=MODEL_NOTES[name], artifact_dir=folder)
             fitted = joblib.load(folder / "time" / "model.joblib")
             row["effective_n_features"] = len(fitted.model.named_steps["columns"].columns_) if hasattr(fitted.model, "named_steps") and "columns" in fitted.model.named_steps else (0 if name == "global_median" else 3 if name == "group_median" else len(fitted.columns))
             train_metrics = pd.read_csv(folder / "time" / "train_metrics.csv").iloc[0]
@@ -179,25 +169,10 @@ def main():
             if isinstance(fitted.model, GroupMedian):
                 _, levels = fitted.model.predict_with_levels(train.loc[valid, fitted.columns])
                 pd.Series(levels).value_counts().rename_axis("fallback_level").to_csv(folder / "fallback_counts.csv", header=["n"])
-            if not args.skip_curves:
-                curve_file = output / "curves" / f"{name}.csv"
-                curve_complete = (args.resume and curve_file.exists() and len(pd.read_csv(curve_file)) == 5
-                                  and curve_file.with_suffix(".png").exists() and curve_file.with_suffix(".svg").exists())
-                if not curve_complete:
-                    learning_curve(name, BASELINE_MODELS[name], train, output / "curves", fitted_full=fitted)
+            if args.learning_curves:
+                learning_curve(name, MODELS[name], train, output / "curves", fitted_full=fitted)
                 if name == "random_forest":
                     forest_curve(fitted, train, output / "curves")
-            if not args.skip_refit and not (args.resume and (output / "full_fit" / name / "metadata.csv").exists()):
-                print(f"REFIT ALL LABELLED ROWS: {name}", flush=True)
-                pred, fit_s, predict_s, final = fit_predict(BASELINE_MODELS[name], train, test,
-                                                          feature_columns("G0+G1"), return_fitted=True)
-                destination = output / "full_fit" / name
-                destination.mkdir(parents=True)
-                joblib.dump(final, destination / "model.joblib", compress=3)
-                np.testing.assert_allclose(joblib.load(destination / "model.joblib").predict(test), pred, rtol=1e-12, atol=1e-8)
-                pd.DataFrame({"ROW_ID": test.ROW_ID.to_numpy(), "y_pred": pred}).to_csv(destination / "test_predictions.csv", index=False)
-                pd.DataFrame([{"n_fit": len(train), "n_predict": len(test), "fit_seconds": fit_s,
-                               "predict_seconds": predict_s, "serialization_verified": True}]).to_csv(destination / "metadata.csv", index=False)
         table = pd.DataFrame(rows)
         plot_comparison(table, output / "figures")
         all_segments = pd.concat(segments, ignore_index=True)
@@ -205,34 +180,30 @@ def main():
         plot_segments(all_segments, output / "figures")
         comparison = None
         best = table.sort_values("rmse").iloc[0]
-        if not args.skip_random_cv:
+        if args.random_cv:
             name = best["model"]
             print(f"RANDOM FIVE-FOLD CV: {name}", flush=True)
-            cv = run_experiment(name, BASELINE_MODELS[name], split="random5", member="B", data=data,
+            cv = run_experiment(name, MODELS[name], split="random5", member="B", data=data,
                                 notes="Best Phase 1 baseline; same fixed hyperparameters; all OOF predictions saved.")
             shutil.copy2(PROJECT_ROOT / "results" / "predictions" / f"{cv['run_id']}.parquet", output / "random5_predictions.parquet")
             comparison = pd.DataFrame([{"model": name, "time_rmse": best["rmse"], "random5_rmse_all": cv["rmse"],
                                        "random5_rmse_std": cv["rmse_std"], "random5_rmse_same_window": cv["rmse_window"],
                                        "optimism": best["rmse"] - cv["rmse_window"]}])
             comparison.to_csv(output / "split_comparison.csv", index=False)
-        if args.ablation:
-            ablations = []
-            eligible = table[table.model.isin(["linear_regression", "ridge", "decision_tree", "random_forest"])]
-            for name in eligible.sort_values("rmse").head(2).model:
-                for features in ("G0", "G0+G1", "G0+G1+G2", "ALL"):
-                    if features == "G0+G1":
-                        ablations.append(table[table.model == name].iloc[0].to_dict())
-                    else:
-                        ablations.append(run_experiment(name, BASELINE_MODELS[name], feature_set=features,
-                            member="B", data=data, notes="Optional baseline ablation; ALL includes contemporaneous market data.",
-                            artifact_dir=output / "ablation" / name / features))
-                    pd.DataFrame(ablations).to_csv(output / "ablation_results.csv", index=False)
-        write_report(output, table, comparison)
+        if args.refit:
+            name = best["model"] if args.refit == "best" else args.refit
+            refit_final(name, train, test, output)
+            manifest["refit_model"] = name
+        write_report(output, table, comparison, manifest["refit_model"], args.learning_curves)
     manifest["completed"] = True
-    manifest["serialization_checks"] = "Every saved holdout and full-fit model reloaded; predictions matched."
+    manifest["serialization_checks"] = "Every saved holdout and requested full-fit model reloaded; predictions matched."
     (output / "manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
     print(table[["model", "rmse", "mae", "mape", "r2"]].to_string(index=False), flush=True)
     print(f"COMPLETE: {output}", flush=True)
+
+
+def main():
+    run(parse_args())
 
 
 if __name__ == "__main__":

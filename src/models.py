@@ -8,6 +8,7 @@ runner can find it. Pass random_state=SEED (from src.config) to every model that
 from __future__ import annotations
 
 import json
+from functools import partial
 
 import numpy as np
 import pandas as pd
@@ -154,6 +155,13 @@ def make_catboost_tuned():
     return CatBoostModel(**_load_tuned_params("catboost"))
 
 
+def make_baseline(name):
+    """Load baseline implementations lazily to avoid a circular import."""
+    from src.baselines import BASELINE_MODELS
+
+    return BASELINE_MODELS[name]()
+
+
 MODELS = {
     "global_median": make_global_median,
     "lightgbm_default": make_lightgbm,
@@ -161,4 +169,8 @@ MODELS = {
     "lightgbm_tuned": make_lightgbm_tuned,
     "catboost_tuned": make_catboost_tuned,
     "ridge_default": make_ridge,
+    **{name: partial(make_baseline, name) for name in (
+        "group_median", "linear_regression", "ridge", "knn",
+        "decision_tree", "random_forest",
+    )},
 }
