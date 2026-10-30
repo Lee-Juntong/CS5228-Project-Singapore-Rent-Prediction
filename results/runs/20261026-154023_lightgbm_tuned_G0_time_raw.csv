@@ -1,0 +1,2 @@
+run_id,timestamp,member,model,feature_set,n_features,split,target_mode,n_fit,n_valid,rmse,rmse_std,mae,mape,bias,rmse_window,train_seconds,predict_seconds,seed,git_commit,notes
+20261026-154023_lightgbm_tuned_G0_time_raw,2026-10-26T15:40:23,C,lightgbm_tuned,G0,13,time,raw,132538,17037,460.24012908112576,0.0,338.8239230903708,12.727042592852833,-37.62664466110532,460.24012908112576,16.206577125005424,0.101128084002994,5228,89c2772+dirty,

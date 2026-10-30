@@ -1,0 +1,4 @@
+date,member,model,feature_set,target_mode,val_rmse,public_lb,notes
+2026-10-27,C,lightgbm_tuned,G0+G1,index,445.78,434.43,"Final model. Best time-holdout RMSE. submissions/lightgbm_tuned_G0G1_index.csv; weights models/lightgbm_tuned_G0G1_index.joblib. Public LB 434.43 beats val 445.8 by ~11."
+2026-10-27,C,lightgbm_tuned,G0+G1,index,445.69,433.99,"Ablation variant: trained without the 49 suspect_rent_low_for_area rows. submissions/lightgbm_tuned_G0G1_index_nosuspect.csv. Public LB 433.99 vs 434.43 with-rows (0.45 apart = noise) -> dropping the suspect rows does not matter, confirms keep decision."
+2026-10-28,C,lightgbm_tuned,G0+G1,index,447.94,438.65,"Ablation variant: trained without the 331 suspect_m1 rows (within-group rent extremes). submissions/lightgbm_tuned_G0G1_index_nom1.csv. Public LB 438.65 vs 434.43 baseline (+4.2, +1%) and val +2.2 -> dropping extremes hurts on BOTH holdout and test. ~8-10x the no-suspect noise band (0.44). Confirms keep decision."

@@ -10,6 +10,11 @@ data/auxiliary/*
 results/predictions/
 submissions/
 
+# Saved model weights are large binaries; rebuild them with
+# scripts/save_final_model.py. See models/README.md.
+models/*
+!models/README.md
+
 # Local build output
 __pycache__/
 *.pyc

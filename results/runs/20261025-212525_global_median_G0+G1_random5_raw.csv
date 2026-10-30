@@ -1,0 +1,2 @@
+run_id,timestamp,member,model,feature_set,n_features,split,target_mode,n_fit,n_valid,rmse,rmse_std,mae,mape,bias,rmse_window,train_seconds,predict_seconds,seed,git_commit,notes
+20261025-212525_global_median_G0+G1_random5_raw,2026-10-25T21:25:25,C,global_median,G0+G1,39,random5,raw,119660,149575,751.9909054625493,2.39787644799337,617.2568677920775,25.041311506695493,-47.92167140230653,794.6116790181233,0.013510625925846398,0.002507748082280159,5228,8201b42+dirty,
