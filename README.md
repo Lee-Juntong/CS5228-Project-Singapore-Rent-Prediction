@@ -75,14 +75,40 @@ compare_splits("ridge", lambda: sklearn_tabular(Ridge(alpha=1.0)), member="B", d
 
 Or from the shell: `python -m scripts.run_experiment --model lightgbm_default --compare-splits`. `split_comparison()` rebuilds the table from `results/results.csv`.
 
-Current numbers on G0+G1, raw target:
+Current numbers on G0+G1, raw target, sorted by time holdout RMSE:
 
 | model | time holdout RMSE | random CV RMSE, all rows | random CV RMSE, holdout rows | optimism |
 |---|---|---|---|---|
+| catboost_tuned | 448.8 | 475.4 | 451.0 | -2.1 |
+| lightgbm_tuned | 449.9 | 478.8 | 451.9 | -2.0 |
+| catboost_default | 452.7 | 476.4 | 451.6 | 1.2 |
 | lightgbm_default | 457.3 | 478.9 | 455.3 | 2.0 |
 | ridge_default | 574.9 | 509.2 | 501.6 | 73.3 |
+| global_median | 837.1 | 752.0 | 794.6 | 42.5 |
 
-Random CV flatters Ridge by 73 RMSE because Ridge extends a straight month trend into the holdout and overpredicts by 330 on average there. LightGBM keeps the last level it saw, and rents were flat in late 2024, so random CV barely flatters it. The all rows random CV number is higher than the holdout for LightGBM only because it includes 2023, when rents varied most.
+`global_median` (predict the training median for every row) is the sanity floor; every learned model clears it by a wide margin. Compare each model's time holdout RMSE with its random CV holdout rows number: both score the same Oct 2024 to Mar 2025 rows, so the gap (optimism) is only the effect of the split. Random CV flatters Ridge by 73 RMSE because Ridge extends a straight month trend into the holdout and overpredicts by 330 on average there. The boosting models have optimism near zero: they keep the last level they saw, rents were flat in late 2024, so the random split barely helps them, and the tuned ones even score marginally better on the honest future window than on the random folds. The all rows random CV number is not comparable to the other two columns because it covers all of 2021 to 2025, including 2023 when rents varied most.
+
+Tuned boosting models (30 Optuna trials each on the time holdout). Time holdout RMSE by feature set and target mode:
+
+| model | feature set | raw target | index target |
+|---|---|---|---|
+| lightgbm_tuned | G0+G1 | 449.9 | 445.8 |
+| lightgbm_tuned | G0+G1+G2 | 449.8 | 446.2 |
+| catboost_tuned | G0+G1 | 448.8 | 449.0 |
+| catboost_tuned | G0+G1+G2 | 448.5 | 448.4 |
+
+Tuning cuts LightGBM from 457.3 to 449.9 and CatBoost from 452.7 to 448.8. The index target mode (dividing rent by a monthly rent index, decision 5) helps LightGBM by about 4 RMSE but barely moves CatBoost. The best single result is **lightgbm_tuned on G0+G1 with index mode, 445.8**, which is the final submission model: index mode extends the rent trend into the future, and that matters most on the long Kaggle horizon (to Jul 2026) where tree models cannot extrapolate on their own. Adding the block group (G2) does not help either model here. Build the configs with `python -m scripts.tune_boosting`; the best parameters are saved to `configs/<model>_tuned.json`.
+
+Feature-group ablation (tuned models, time holdout, raw target). The tuned hyperparameters are held fixed at the `G0+G1` values while the feature set varies, so each row isolates the contribution of a feature group:
+
+| feature set | features | catboost_tuned | lightgbm_tuned |
+|---|---|---|---|
+| G0 (core) | 13 | 462.7 | 460.2 |
+| G0+G1 (+location) | 39 | 448.8 | 449.9 |
+| G0+G1+G2 (+block) | 44 | 448.5 | 449.8 |
+| ALL (+market) | 54 | 450.1 | 452.4 |
+
+Location (G1) is the only group that clearly helps: it cuts about 12 to 14 RMSE for both models. Block attributes (G2) add almost nothing (0.1 to 0.3). The market group (G3: current-month COE, CPI and stock values) makes both models worse, by 1.6 to 2.6 RMSE, even though those values would not be known at prediction time. This supports decision 6: the leaky macro features are not worth keeping, and `G0+G1+G2` is the best feature recipe.
 
 ### Where results go
 
@@ -95,11 +121,21 @@ Random CV flatters Ridge by 73 RMSE because Ridge extends a straight month trend
 
 ```python
 from src.evaluation import make_submission
-from src.models import make_lightgbm
-make_submission(make_lightgbm, "G0+G1", path="submissions/lightgbm.csv")
+from src.models import make_lightgbm_tuned
+# The final model: tuned LightGBM on G0+G1 with index trend handling (val RMSE 445.8).
+make_submission(make_lightgbm_tuned, "G0+G1", target_mode="index",
+                path="submissions/lightgbm_tuned_G0G1_index.csv")
 ```
 
-The `submissions/` folder is created if it does not exist. It is not in git.
+The `submissions/` folder is created if it does not exist. It is not in git. Each submission is logged in `results/kaggle_log.csv` (date, model, feature set, target mode, validation RMSE, public leaderboard score, notes); record the validation RMSE before reading the public score so the leaderboard does not drive model selection.
+
+### Saved model weights
+
+```bash
+python -m scripts.save_final_model --model lightgbm_tuned --features G0+G1 --target-mode index
+```
+
+Fits the model on all training rows and saves the fitted model to `models/` (gitignored) with a JSON provenance sidecar, so a reported submission can be reloaded and replayed later. See `models/README.md` to reload one.
 
 ## Layout
 

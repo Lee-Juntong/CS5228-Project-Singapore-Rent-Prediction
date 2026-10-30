@@ -41,7 +41,6 @@ CORE_PREDICTOR_COLUMNS = [
 DATASET_FILES = {
     "train": "train.csv",
     "test": "test.csv",
-    "example_submission": "example-submission.csv",
     "hdb": "auxiliary/sg-hdb-block.csv",
     "mrt": "auxiliary/sg-mrt-stations.csv",
     "schools": "auxiliary/sg-schools.csv",

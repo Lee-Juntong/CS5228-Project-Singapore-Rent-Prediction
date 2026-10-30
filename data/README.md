@@ -4,7 +4,7 @@ Large and Kaggle supplied files are not in git. Put them here before running any
 
 | Path | Source | In git |
 |---|---|---|
-| `train.csv`, `test.csv`, `example-submission.csv` | [Kaggle competition page](https://www.kaggle.com/competitions/cs-5228-2610-project), Data tab | No |
+| `train.csv`, `test.csv` | [Kaggle competition page](https://www.kaggle.com/competitions/cs-5228-2610-project), Data tab | No |
 | `auxiliary/sg-hdb-block.csv`, `sg-mrt-stations.csv`, `sg-schools.csv`, `sg-shopping-malls.csv`, `sg-coe-prices.csv`, `sg-stock-prices.csv` | [Kaggle competition page](https://www.kaggle.com/competitions/cs-5228-2610-project), Data tab (auxiliary folder) | No |
 | `auxiliary/sg-rail-lines.geojson` (24 MB) | Team added. URA "Master Plan 2025 Rail Line Layer" on [data.gov.sg](https://data.gov.sg/datasets/d_1c6365f0cad13a77bd79bdbb499131bf/view), GeoJSON. Only needed to rebuild `derived/block_extra_features.csv`. | No |
 | `auxiliary/sg-cpi.csv` | Team added. SingStat table [M213751](https://tablebuilder.singstat.gov.sg/table/TS/M213751), "Consumer Price Index (CPI), 2024 As Base Year, Monthly". Series used: All Items, Accommodation, Actual Rentals For Housing. | Yes |
