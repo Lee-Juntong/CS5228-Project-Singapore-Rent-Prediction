@@ -1,0 +1,2 @@
+run_id,timestamp,member,model,feature_set,n_features,split,target_mode,n_fit,n_valid,rmse,rmse_std,mae,mape,bias,rmse_window,train_seconds,predict_seconds,seed,git_commit,notes,r2
+20261028-150306-740964_group_median_G0+G1_time_raw,2026-10-28T15:03:06,B,group_median,G0+G1,39,time,raw,132538,17037,754.9486465596863,0.0,658.0385044315314,20.978642377445876,-563.1791982156483,754.9486465596863,0.07142669998575002,0.013791100005619228,5228,db96de7+dirty,"Town/type/absolute calendar quarter; fallback town+type, type, town, global.",-0.3848128934133057

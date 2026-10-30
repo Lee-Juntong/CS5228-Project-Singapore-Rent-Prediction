@@ -1,0 +1,2 @@
+n_fit,n_predict,fit_seconds,predict_seconds,serialization_verified
+149575,50000,4.327643300057389,0.20875880005769432,True

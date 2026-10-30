@@ -1,0 +1,72 @@
+{
+  "passed": true,
+  "models": [
+    {
+      "model": "global_median",
+      "n_holdout": 17037,
+      "n_test": 50000,
+      "metrics_recomputed": true,
+      "curve_endpoint_matches": true,
+      "test_min": 2650.0,
+      "test_max": 2650.0
+    },
+    {
+      "model": "group_median",
+      "n_holdout": 17037,
+      "n_test": 50000,
+      "metrics_recomputed": true,
+      "curve_endpoint_matches": true,
+      "test_min": 1450.0,
+      "test_max": 4950.0
+    },
+    {
+      "model": "linear_regression",
+      "n_holdout": 17037,
+      "n_test": 50000,
+      "metrics_recomputed": true,
+      "curve_endpoint_matches": true,
+      "test_min": 2070.943296388509,
+      "test_max": 5719.8552400448125
+    },
+    {
+      "model": "ridge",
+      "n_holdout": 17037,
+      "n_test": 50000,
+      "metrics_recomputed": true,
+      "curve_endpoint_matches": true,
+      "test_min": 2065.522543619899,
+      "test_max": 5677.802893449403
+    },
+    {
+      "model": "knn",
+      "n_holdout": 17037,
+      "n_test": 50000,
+      "metrics_recomputed": true,
+      "curve_endpoint_matches": true,
+      "test_min": 1200.0,
+      "test_max": 4600.0
+    },
+    {
+      "model": "decision_tree",
+      "n_holdout": 17037,
+      "n_test": 50000,
+      "metrics_recomputed": true,
+      "curve_endpoint_matches": true,
+      "test_min": 1600.0,
+      "test_max": 5316.666666666667
+    },
+    {
+      "model": "random_forest",
+      "n_holdout": 17037,
+      "n_test": 50000,
+      "metrics_recomputed": true,
+      "curve_endpoint_matches": true,
+      "test_min": 1387.2106370965355,
+      "test_max": 5338.53031827492
+    }
+  ],
+  "random_cv_rows": 149575,
+  "random_cv_folds": 5,
+  "holdout_models": 7,
+  "full_fit_models": 7
+}
