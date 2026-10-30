@@ -20,6 +20,13 @@ and "without" runs score the identical rows and the RMSE delta reflects only the
 cleaner training data. No change to the shared interface: the cleaned frame is
 passed via `run_experiment(..., data=(train_clean, test))`.
 
+Each variant is logged under its own model name (`lightgbm_tuned_no_<flag>`, e.g.
+`lightgbm_tuned_no_m1`) rather than reusing `lightgbm_tuned` with only a `notes`
+tag. `split_comparison()` keys on (model, feature_set, target_mode) and ignores
+`notes`, so sharing the baseline's name would let an ablation's time run
+overwrite the baseline in that table and get paired against the wrong split. A
+distinct name keeps each experiment in its own bucket.
+
     python -m scripts.suspicious_row_ablation --flag m2     # default
     python -m scripts.suspicious_row_ablation --flag both   # ~243 high-confidence rows
     python -m scripts.suspicious_row_ablation --flag m1
@@ -104,12 +111,16 @@ def main() -> None:
           f"(dropped {len(train) - len(train_clean)})")
 
     data_clean = (train_clean, test)
+    # Log under a variant-specific model name so split_comparison() keeps this
+    # experiment separate from the lightgbm_tuned baseline (it keys on model /
+    # feature_set / target_mode and ignores notes).
+    model_name = f"{MODEL}_no_{args.flag}"
     notes = f"drop {name}"
     for target_mode in TARGET_MODES:
-        row = run_experiment(MODEL, MODELS[MODEL], feature_set=FEATURE_SET,
+        row = run_experiment(model_name, MODELS[MODEL], feature_set=FEATURE_SET,
                              target_mode=target_mode, member="C", notes=notes,
                              data=data_clean)
-        print(f"  without {name} | {target_mode:5s} | "
+        print(f"  {model_name} | {target_mode:5s} | "
               f"RMSE {row['rmse']:.2f} (n_valid {row['n_valid']})")
 
 

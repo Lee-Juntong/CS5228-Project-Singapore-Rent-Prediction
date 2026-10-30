@@ -1,2 +1,0 @@
-run_id,timestamp,member,model,feature_set,n_features,split,target_mode,n_fit,n_valid,rmse,rmse_std,mae,mape,bias,rmse_window,train_seconds,predict_seconds,seed,git_commit,notes
-20261027-113314_lightgbm_tuned_G0+G1_time_index,2026-10-27T11:33:14,C,lightgbm_tuned,G0+G1,39,time,index,132494,17037,445.6877799124528,0.0,323.728254750459,12.26044148648145,-22.86072274677631,445.6877799124528,17.397753582976293,0.09989387501263991,5228,8446b09+dirty,drop suspect_rent_low_for_area
