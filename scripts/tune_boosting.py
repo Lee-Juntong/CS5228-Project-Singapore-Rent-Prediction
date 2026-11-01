@@ -59,6 +59,19 @@ def _catboost_space(trial: optuna.Trial) -> dict:
     }
 
 
+def _xgboost_space(trial: optuna.Trial) -> dict:
+    return {
+        "n_estimators": trial.suggest_int("n_estimators", 200, 2000, step=100),
+        "learning_rate": trial.suggest_float("learning_rate", 0.01, 0.3, log=True),
+        "max_depth": trial.suggest_int("max_depth", 3, 10),
+        "min_child_weight": trial.suggest_float("min_child_weight", 1.0, 10.0),
+        "subsample": trial.suggest_float("subsample", 0.5, 1.0),
+        "colsample_bytree": trial.suggest_float("colsample_bytree", 0.5, 1.0),
+        "reg_alpha": trial.suggest_float("reg_alpha", 1e-3, 10.0, log=True),
+        "reg_lambda": trial.suggest_float("reg_lambda", 1e-3, 10.0, log=True),
+    }
+
+
 def _lightgbm_factory(params: dict) -> Callable:
     def make():
         from lightgbm import LGBMRegressor
@@ -77,8 +90,18 @@ def _catboost_factory(params: dict) -> Callable:
     return make
 
 
-SPACES = {"lightgbm": _lightgbm_space, "catboost": _catboost_space}
-FACTORIES = {"lightgbm": _lightgbm_factory, "catboost": _catboost_factory}
+def _xgboost_factory(params: dict) -> Callable:
+    def make():
+        from xgboost import XGBRegressor
+
+        return XGBRegressor(random_state=SEED, n_jobs=-1, enable_categorical=True,
+                            tree_method="hist", **params)
+
+    return make
+
+
+SPACES = {"lightgbm": _lightgbm_space, "catboost": _catboost_space, "xgboost": _xgboost_space}
+FACTORIES = {"lightgbm": _lightgbm_factory, "catboost": _catboost_factory, "xgboost": _xgboost_factory}
 
 
 def tune(model: str, trials: int, timeout: float | None, data) -> dict:
