@@ -1,0 +1,17 @@
+{
+  "model": "xgboost",
+  "feature_set": "G0+G1",
+  "target_mode": "raw",
+  "seed": 5228,
+  "holdout_rmse": 449.8693,
+  "params": {
+    "n_estimators": 1100,
+    "learning_rate": 0.010891543259097412,
+    "max_depth": 9,
+    "min_child_weight": 2.9430119822241023,
+    "subsample": 0.7813758200981089,
+    "colsample_bytree": 0.5157716279126507,
+    "reg_alpha": 0.0033072899283803276,
+    "reg_lambda": 1.573211745228019
+  }
+}
