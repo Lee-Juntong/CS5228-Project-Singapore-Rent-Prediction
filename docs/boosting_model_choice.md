@@ -335,9 +335,11 @@ on high rents.
 | model | xgboost_tuned, G0+G1, index target |
 | submission file | `submissions/xgboost_tuned_G0G1_index.csv` |
 | time-holdout RMSE (val) | 445.6 |
-| public LB RMSE | _pending_ |
+| public LB RMSE | **434.5** |
 
 Not the final model — submitted only to place the third boosting family on the
-leaderboard next to LightGBM (434.4). XGBoost's holdout (445.6) ties LightGBM
-(445.8) within noise, so we expect a similar LB score; it would corroborate that
-all three families land in the same place.
+leaderboard next to LightGBM (434.4). XGBoost scores 434.5 vs LightGBM's 434.4 —
+**0.05 apart**, so the two best models are indistinguishable on the test set, not
+just the holdout. This confirms the §5 takeaway on real data: all three boosting
+families land in the same place (~445 holdout / ~434 LB), so the choice between
+them is noise and the ~434 level is near the achievable ceiling for these features.
