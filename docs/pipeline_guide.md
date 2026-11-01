@@ -55,15 +55,15 @@ The dicts behind `feature_columns`. Read them to see what each group holds. Do n
 
 ## `src/evaluation.py`
 
-### `run_experiment(model_name, make_model, feature_set="G0+G1", split="time", target_mode="raw", member="", notes="", data=None, save_predictions=True, log=True) -> dict`
+### `run_experiment(model_name, make_model, feature_set="G0+G1", split="time", target_mode="raw", member="", notes="", data=None, save_predictions=True, log=True, artifact_dir=None) -> dict`
 
 The one function every model goes through.
 
 * `split`: `"time"` (main) or `"random5"` (shuffled 5 fold CV).
 * `target_mode`: `"raw"` trains on rent. `"index"` trains on rent divided by a monthly rent index.
-* `log=False` prints the scores but writes nothing. Use it for quick trials.
+* `log=False` prints the scores but writes nothing. Use it for quick trials. It cannot be combined with `artifact_dir`.
 
-Returns the logged row. The columns of `results/results.csv` are `run_id`, `timestamp`, `member`, `model`, `feature_set`, `n_features`, `split`, `target_mode`, `n_fit`, `n_valid`, `rmse`, `rmse_std` (spread over folds), `mae`, `mape` (in percent), `bias`, `rmse_window` (see `compare_splits`), `train_seconds`, `predict_seconds`, `seed`, `git_commit` and `notes`. When logging it writes:
+Returns the logged row. The columns of `results/results.csv` are `run_id`, `timestamp`, `member`, `model`, `feature_set`, `n_features`, `split`, `target_mode`, `n_fit`, `n_valid`, `rmse`, `rmse_std` (spread over folds), `mae`, `mape` (in percent), `bias`, `r2`, `rmse_window` (see `compare_splits`), `train_seconds`, `predict_seconds`, `seed`, `git_commit` and `notes`. When logging it writes:
 
 * `results/runs/<run_id>.csv`, one row. Commit it.
 * `results/results.csv`, rebuilt from all run files.
@@ -108,9 +108,9 @@ from src.evaluation import split_comparison
 split_comparison().round(1)
 ```
 
-### `fit_predict(make_model, fit_frame, predict_frame, columns, target_mode="raw") -> (prediction, fit_seconds, predict_seconds)`
+### `fit_predict(make_model, fit_frame, predict_frame, columns, target_mode="raw", return_fitted=False) -> tuple`
 
-One fit and one prediction with the shared seed and trend handling, without logging. Use it for custom loops such as tuning trials.
+One fit and one prediction with the shared seed and trend handling, without logging. Returns `(prediction, fit_seconds, predict_seconds)`. With `return_fitted=True`, a fourth value is a `FittedRentModel` bundle containing the selected columns, preprocessing, estimator and optional target index. Its `predict(frame)` returns rent in SGD. Use it for custom loops such as tuning trials.
 
 ```python
 from src.evaluation import fit_predict, time_holdout_masks, regression_metrics
@@ -133,7 +133,7 @@ True for rows dated Oct 2024 to Mar 2025.
 
 ### `regression_metrics(y_true, y_pred) -> dict`
 
-Returns `rmse`, `mae`, `mape` (percent) and `bias` (mean of prediction minus truth, so positive means too high).
+Returns `rmse`, `mae`, `mape` (percent), `bias` (mean prediction minus truth) and `r2`. Predictions must be finite one-dimensional arrays matching the positive rent targets. Constant targets produce `NaN` for `r2`.
 
 ### `segment_metrics(frame, prediction) -> DataFrame`
 
@@ -158,9 +158,9 @@ make_submission(make_lightgbm, "G0+G1", path="submissions/lightgbm.csv", data=da
 
 ## `src/models.py`
 
-### `sklearn_tabular(estimator, scale=True) -> Pipeline`
+### `sklearn_tabular(estimator, scale=True, onehot_drop=None, dense=False) -> Pipeline`
 
-Wraps any scikit-learn regressor so it accepts the shared X. Categorical columns are one hot encoded (unseen levels become all zeros). Numeric columns get median imputation and, if `scale` is true, standard scaling. Set `scale=False` for trees.
+Wraps any scikit-learn regressor so it accepts the shared X. Categorical columns are one hot encoded (unseen levels become all zeros). Numeric columns get median imputation and, if `scale` is true, standard scaling. Set `scale=False` for trees. `onehot_drop="first"` drops the reference category; `dense=True` forces dense output. Numeric imputation keeps empty columns, and the column selectors are serializable.
 
 To use fewer columns than the feature set, put a column selector in front:
 
@@ -198,3 +198,106 @@ python -m scripts.run_experiment --model ridge_default lightgbm_default --compar
 ```
 
 `--features`, `--split` and `--target-mode` each take several values and run every combination. `--compare-splits` runs both splits for each model and prints the comparison table. `--no-log` writes nothing.
+
+
+## Baseline ladder
+
+Use the shared **Python 3.10** environment and repository-root requirements. No baseline-specific requirements file is needed:
+
+```bash
+python -m pip install -r requirements.txt
+```
+
+Prepare the competition files and processed features as described in [data setup](../data/README.md). Run commands from the repository root. Seven baselines are registered in `src.models.MODELS`: `global_median`, `group_median`, `linear_regression`, `ridge`, `knn`, `decision_tree` and `random_forest`. `ridge_default` remains the separate alpha-1 reference on all features.
+
+Use the existing runner for selected experiments:
+
+```bash
+python -m scripts.run_experiment --model ridge random_forest --features G0+G1 --member B
+```
+
+For a baseline comparison with saved holdout models, result tables and metric plots:
+
+```bash
+python -m scripts.run_baselines --output results/member_b/new_run
+```
+
+The default performs **seven holdout fits**. It does not run learning curves, random CV or full-data refits. It writes `results_table.csv`, `segment_metrics.csv`, `evaluation_report.md`, `gaps.txt`, `hyperparameters.json`, `manifest.json`, comparison figures in `figures/`, and holdout bundles and predictions in `holdout/<model>/time/`.
+
+Choose a new output directory for every run. Use `--models ridge random_forest` to evaluate a subset. Optional diagnostics and final prediction are explicit:
+
+```bash
+python -m scripts.run_baselines --models ridge random_forest --learning-curves --random-cv --refit best --output results/member_b/diagnostics_run
+```
+
+| Option | Additional work |
+| --- | --- |
+| `--learning-curves` | Four extra fits per evaluated model; reuse its holdout fit for the 100% endpoint. Write CSV/PNG/SVG in `curves/`. Forest tree-count curves reuse the same ensemble. |
+| `--random-cv` | Five fits for the model with the lowest holdout RMSE. Write `split_comparison.csv`. |
+| `--refit best` | One fit on all labelled rows for the best holdout model. |
+| `--refit random_forest` | One fit for this explicitly selected model; it must be included in `--models`. |
+
+A requested final refit writes `full_fit/<model>/model.joblib`, `metadata.csv` and `test_predictions.csv`. Models and row-level predictions are local artifacts excluded from Git. Load a bundle generated in the same package environment with:
+
+```bash
+python -m scripts.predict_saved_model --model results/member_b/diagnostics_run/full_fit/random_forest/model.joblib --output results/member_b/reloaded_test.csv
+```
+
+Replace the model name with the actual selected winner. Bundles accept the engineered DataFrame from `load_modeling_data()`, not raw Kaggle rows. Full-fit models have seen the holdout labels and must not be used for validation. These commands do not upload to Kaggle.
+
+The previous `--skip-*`, `--resume` and `--ablation` flags are removed. Use the explicit options above and a fresh output directory. Feature ablations can use `run_experiment.py --features G0 G0+G1 G0+G1+G2 ALL`; KNN requires location columns and cannot use G0 alone.
+
+### Baseline settings
+
+The seed is 5228; hyperparameters are fixed without a tuning search. Raw monthly rent and G0+G1 are used by the ladder.
+
+| Model | Main settings |
+| --- | --- |
+| Global median | Median training rent |
+| Group median | Town + flat type + calendar quarter; fallback to town + type, type, town, global |
+| Linear regression | Intercept enabled, unregularized least squares |
+| Ridge | `alpha=10`, `solver="lsqr"`, `tol=1e-6`, `max_iter=10000` |
+| KNN | `n_neighbors=50`, distance weighting, `algorithm="kd_tree"`, `leaf_size=30`, Euclidean distance, `n_jobs=8` |
+| Decision tree | `max_depth=16`, `min_samples_leaf=20`, squared-error criterion |
+| Random forest | 300 trees, `max_depth=20`, `min_samples_leaf=5`, `max_features=0.7`, bootstrap enabled, `n_jobs=8` |
+
+Linear/Ridge retain categorical flat type and drop all three area-derived columns, `FLAT_TYPE_ORDINAL` and `LEASE_COMMENCE_DATE` (34 inputs). They median-impute and scale numeric columns and one-hot encode categories with `drop="first"`. KNN uses only latitude, longitude, area and month index, imputed and scaled. Trees use all 39 inputs with median imputation and one-hot encoding, without scaling; the forest receives dense input. Encoders ignore unseen levels, and imputers keep empty columns. All preprocessing is fitted on the training partition only.
+
+Group median uses `floor(MONTH_INDEX / 3)`, with January 2021 as month zero, so quarters distinguish years. Learning-curve fractions are 10%, 25%, 50%, 75% and 100%, nested within each training month. Forest prefixes contain 10, 25, 50, 100, 200 and 300 trees.
+
+See [baseline results and figure locations](baseline_results.md) for the archived run and its original environment. The recorded [hyperparameters.json](../results/member_b/baseline_ladder/hyperparameters.json) describes that run, including estimator defaults from its original versions.
+
+## Saved artifacts and external prediction evaluation
+
+All members can reuse `src/evaluation.py` for training and `src/evaluation_artifacts.py` for curves, plots and ID-aligned prediction scoring.
+
+Supply a fresh `artifact_dir` to save a holdout bundle, fit IDs, training metrics, validation predictions and segment tables. The shared evaluator checks that reloaded predictions match:
+
+```python
+from src.evaluation import run_experiment
+from src.models import MODELS
+
+row = run_experiment("ridge", MODELS["ridge"], member="B",
+                     artifact_dir="results/custom/ridge_run")
+```
+
+Omit `artifact_dir` if using a model-specific checkpoint API. Joblib classes must live in importable modules. Use matching package versions when loading bundles; see [scikit-learn's persistence guidance](https://scikit-learn.org/1.5/model_persistence.html).
+
+To evaluate another member's predictions, export CSV or Parquet with `ROW_ID,y_pred`. IDs must exactly match the shared holdout, with no missing, duplicate or extra IDs. Order may differ; the evaluator aligns by ID. Use processed-data `ROW_ID`, not a reset DataFrame index:
+
+```bash
+python -m scripts.evaluate_predictions --predictions results/custom/holdout.csv --output results/custom/evaluation_run
+```
+
+This writes `metrics.csv` and `segment_metrics.csv`. The caller remains responsible for preventing leakage. Test predictions cannot be scored without labels.
+
+`learning_curve(name, factory, train, output_dir, fitted_full=None)` uses raw targets and nested month-stratified samples against the fixed future holdout. If provided, `fitted_full` must be the matching holdout bundle, never an all-data refit. `plot_comparison(pd.DataFrame(rows), output_dir)` writes one PNG/SVG per metric; compare the same split, data version, feature set and target mode. Training errors are in-sample, not confidence intervals or epoch losses.
+
+### Checks
+
+```bash
+python -m unittest discover -s checks -v
+python -m checks.verify_run results/member_b/new_run
+```
+
+Unit checks use small synthetic data and stubbed runner fits. The artifact check is for a completed local run: it recomputes metrics from saved predictions and checks only the curves, CV and final refit requested in its manifest. It also supports the original archived run layout.

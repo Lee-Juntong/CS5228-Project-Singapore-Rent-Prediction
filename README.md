@@ -28,6 +28,10 @@ Then put the Kaggle files in `data/` and build the processed data as described i
 * Commit only your own files in `results/runs/` and `results/breakdowns/`.
 * Pass your member letter as `--member` (or `member=` in Python) so every run shows who made it.
 
+## Baseline ladder (Phase 1)
+
+Seven baselines are registered in the shared model registry. Run `python -m scripts.run_baselines --output results/member_b/new_run` for seven holdout fits and comparison plots. Learning curves, random CV and one selected final refit are optional. See the [pipeline guide](docs/pipeline_guide.md#baseline-ladder) for commands and hyperparameters, and the [baseline results](docs/baseline_results.md) for the recorded scores and figure locations.
+
 ## Shared experiment setup (Phase 0)
 
 Every model goes through one function, so all results are comparable. [docs/pipeline_guide.md](docs/pipeline_guide.md) lists every reusable function with its inputs, outputs and an example.
@@ -58,7 +62,7 @@ from src.features import load_modeling_data
 from src.models import sklearn_tabular
 
 data = load_modeling_data()
-run_experiment("ridge", lambda: sklearn_tabular(Ridge(alpha=1.0)),
+run_experiment("ridge_example", lambda: sklearn_tabular(Ridge(alpha=1.0)),
                feature_set="G0+G1", member="B", data=data)
 ```
 
@@ -70,7 +74,7 @@ Register it in `MODELS` in `src/models.py` if you want it on the command line.
 
 ```python
 from src.evaluation import compare_splits
-compare_splits("ridge", lambda: sklearn_tabular(Ridge(alpha=1.0)), member="B", data=data)
+compare_splits("ridge_example", lambda: sklearn_tabular(Ridge(alpha=1.0)), member="B", data=data)
 ```
 
 Or from the shell: `python -m scripts.run_experiment --model lightgbm_default --compare-splits`. `split_comparison()` rebuilds the table from `results/results.csv`.

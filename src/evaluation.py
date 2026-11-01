@@ -27,6 +27,7 @@ from typing import Callable, Iterator
 
 import numpy as np
 import pandas as pd
+import joblib
 from sklearn.model_selection import KFold
 
 from src.config import (
@@ -60,12 +61,20 @@ def regression_metrics(y_true, y_pred) -> dict[str, float]:
 
     y_true = np.asarray(y_true, dtype=float)
     y_pred = np.asarray(y_pred, dtype=float)
+    if y_true.ndim != 1 or y_pred.ndim != 1 or y_true.shape != y_pred.shape or not len(y_true):
+        raise ValueError("Metrics require matching, nonempty one-dimensional arrays")
+    if not np.isfinite(y_true).all() or not np.isfinite(y_pred).all():
+        raise ValueError("Metrics require finite targets and predictions")
+    if np.any(y_true <= 0):
+        raise ValueError("Rent targets must be positive for MAPE")
     error = y_pred - y_true
+    total = np.sum((y_true - y_true.mean()) ** 2)
     return {
         "rmse": float(np.sqrt(np.mean(error**2))),
         "mae": float(np.mean(np.abs(error))),
         "mape": float(np.mean(np.abs(error) / y_true) * 100),
         "bias": float(np.mean(error)),
+        "r2": float(1 - np.sum(error**2) / total) if total > 0 else float("nan"),
     }
 
 
@@ -166,13 +175,32 @@ class MonthlyRentIndex:
 # ---------------------------------------------------------------- one fit
 
 
+@dataclass
+class FittedRentModel:
+    """Persist preprocessing, input schema and optional target index together."""
+
+    model: object
+    columns: list[str]
+    target_mode: str
+    rent_index: MonthlyRentIndex | None = None
+
+    def predict(self, frame: pd.DataFrame) -> np.ndarray:
+        prediction = np.asarray(self.model.predict(frame[self.columns]), dtype=float)
+        if self.rent_index is not None:
+            prediction *= self.rent_index.transform(frame["MONTH_INDEX"])
+        if prediction.shape != (len(frame),) or not np.isfinite(prediction).all():
+            raise ValueError("Model must return one finite prediction per row")
+        return prediction
+
+
 def fit_predict(make_model: Callable, fit_frame: pd.DataFrame, predict_frame: pd.DataFrame,
-                columns: list[str], target_mode: str = "raw") -> tuple[np.ndarray, float, float]:
+                columns: list[str], target_mode: str = "raw", return_fitted: bool = False):
     """Fit on one frame, predict another. Returns (prediction, fit_s, predict_s)."""
 
     if target_mode not in TARGET_MODES:
         raise ValueError(f"target_mode must be one of {TARGET_MODES}")
     y = fit_frame[TARGET].to_numpy(dtype=float)
+    index = None
     if target_mode == "index":
         index = MonthlyRentIndex().fit(fit_frame["MONTH_INDEX"], fit_frame[TARGET])
         y = y / index.transform(fit_frame["MONTH_INDEX"])
@@ -183,11 +211,12 @@ def fit_predict(make_model: Callable, fit_frame: pd.DataFrame, predict_frame: pd
     model.fit(fit_frame[columns], y)
     fit_seconds = time.perf_counter() - start
     start = time.perf_counter()
-    prediction = np.asarray(model.predict(predict_frame[columns]), dtype=float)
+    fitted = FittedRentModel(model, columns, target_mode, index)
+    prediction = fitted.predict(predict_frame)
     predict_seconds = time.perf_counter() - start
 
-    if target_mode == "index":
-        prediction = prediction * index.transform(predict_frame["MONTH_INDEX"])
+    if return_fitted:
+        return prediction, fit_seconds, predict_seconds, fitted
     return prediction, fit_seconds, predict_seconds
 
 
@@ -196,7 +225,7 @@ def fit_predict(make_model: Callable, fit_frame: pd.DataFrame, predict_frame: pd
 RESULT_COLUMNS = [
     "run_id", "timestamp", "member", "model", "feature_set", "n_features", "split",
     "target_mode", "n_fit", "n_valid", "rmse", "rmse_std", "mae", "mape", "bias", "rmse_window",
-    "train_seconds", "predict_seconds", "seed", "git_commit", "notes",
+    "train_seconds", "predict_seconds", "seed", "git_commit", "notes", "r2",
 ]
 
 
@@ -232,7 +261,8 @@ def collect_results() -> pd.DataFrame:
 def run_experiment(model_name: str, make_model: Callable, feature_set: str = "G0+G1",
                    split: str = "time", target_mode: str = "raw", member: str = "",
                    notes: str = "", data: tuple[pd.DataFrame, pd.DataFrame] | None = None,
-                   save_predictions: bool = True, log: bool = True) -> dict:
+                   save_predictions: bool = True, log: bool = True,
+                   artifact_dir: str | Path | None = None) -> dict:
     """Evaluate one model on one split and log a row to the shared results.
 
     Returns the logged row as a dict. `rmse` is the mean over folds.
@@ -247,13 +277,31 @@ def run_experiment(model_name: str, make_model: Callable, feature_set: str = "G0
     """
 
     train, _ = data if data is not None else load_modeling_data()
+    if artifact_dir is not None and not log:
+        raise ValueError("artifact_dir requires log=True")
     columns = feature_columns(feature_set)
     fold_rows, predictions, breakdowns, in_window = [], [], [], []
     for fold in iter_folds(train, split):
         fit_frame = train.iloc[fold.fit_index]
         valid_frame = train.iloc[fold.valid_index]
         in_window.append(in_time_valid_window(valid_frame))
-        prediction, fit_s, predict_s = fit_predict(make_model, fit_frame, valid_frame, columns, target_mode)
+        if fit_frame.empty or valid_frame.empty:
+            raise ValueError("Both fit and validation partitions must contain rows")
+        prediction, fit_s, predict_s, fitted = fit_predict(
+            make_model, fit_frame, valid_frame, columns, target_mode, return_fitted=True)
+        if artifact_dir is not None:
+            destination = Path(artifact_dir) / fold.name
+            destination.mkdir(parents=True, exist_ok=False)
+            joblib.dump(fitted, destination / "model.joblib", compress=3)
+            restored = joblib.load(destination / "model.joblib")
+            np.testing.assert_allclose(restored.predict(valid_frame), prediction, rtol=1e-12, atol=1e-8)
+            pd.DataFrame({"ROW_ID": fit_frame["ROW_ID"].to_numpy()}).to_csv(destination / "fit_ids.csv", index=False)
+            train_prediction = fitted.predict(fit_frame)
+            pd.DataFrame([regression_metrics(fit_frame[TARGET], train_prediction)]).to_csv(
+                destination / "train_metrics.csv", index=False)
+            pd.DataFrame({"ROW_ID": valid_frame["ROW_ID"].to_numpy(),
+                          "y_true": valid_frame[TARGET].to_numpy(), "y_pred": prediction}).to_csv(
+                destination / "validation_predictions.csv", index=False)
         fold_rows.append({"n_fit": len(fit_frame), "n_valid": len(valid_frame), "train_seconds": fit_s,
                           "predict_seconds": predict_s, **regression_metrics(valid_frame[TARGET], prediction)})
         predictions.append(pd.DataFrame({"ROW_ID": valid_frame["ROW_ID"].to_numpy(), "fold": fold.name,
@@ -266,7 +314,7 @@ def run_experiment(model_name: str, make_model: Callable, feature_set: str = "G0
     window = np.concatenate(in_window)
     rmse_window = regression_metrics(pooled["y_true"][window], pooled["y_pred"][window])["rmse"] if window.any() else np.nan
     stamp = datetime.now()
-    run_id = re.sub(r"[^A-Za-z0-9_.+-]", "-", f"{stamp:%Y%m%d-%H%M%S}_{model_name}_{feature_set}_{split}_{target_mode}")
+    run_id = re.sub(r"[^A-Za-z0-9_.+-]", "-", f"{stamp:%Y%m%d-%H%M%S-%f}_{model_name}_{feature_set}_{split}_{target_mode}")
     row = {
         "run_id": run_id, "timestamp": stamp.isoformat(timespec="seconds"), "member": member,
         "model": model_name, "feature_set": feature_set, "n_features": len(columns), "split": split,
@@ -276,6 +324,7 @@ def run_experiment(model_name: str, make_model: Callable, feature_set: str = "G0
         "rmse_window": rmse_window,
         "train_seconds": folds["train_seconds"].sum(), "predict_seconds": folds["predict_seconds"].sum(),
         "seed": SEED, "git_commit": _git_commit(), "notes": notes,
+        "r2": folds["r2"].mean(),
     }
     if log:
         RUNS_DIR.mkdir(parents=True, exist_ok=True)
@@ -287,6 +336,11 @@ def run_experiment(model_name: str, make_model: Callable, feature_set: str = "G0
             PREDICTIONS_DIR.mkdir(parents=True, exist_ok=True)
             pd.concat(predictions).to_parquet(PREDICTIONS_DIR / f"{run_id}.parquet", index=False)
         collect_results()
+        if artifact_dir is not None:
+            pd.DataFrame([row]).to_csv(Path(artifact_dir) / "result.csv", index=False)
+            folds.to_csv(Path(artifact_dir) / "fold_metrics.csv", index=False)
+            if breakdowns:
+                pd.concat(breakdowns).to_csv(Path(artifact_dir) / "segment_metrics.csv", index=False)
     print(f"{model_name:<24} {feature_set:<10} {split:<8} {target_mode:<6} "
           f"RMSE {row['rmse']:8.2f}  MAE {row['mae']:8.2f}  MAPE {row['mape']:6.2f}%  "
           f"fit {row['train_seconds']:.1f}s")

@@ -94,6 +94,8 @@ def load_raw_data(data_dir: str | Path) -> dict[str, pd.DataFrame]:
     datasets: dict[str, pd.DataFrame] = {}
     for name, relative_path in DATASET_FILES.items():
         path = data_dir / relative_path
+        if name == "example_submission" and not path.exists():
+            continue
         if not path.exists():
             raise FileNotFoundError(f"Missing required dataset: {path}")
         dtype: dict[str, str] | None = None

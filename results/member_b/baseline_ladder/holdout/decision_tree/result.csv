@@ -1,0 +1,2 @@
+run_id,timestamp,member,model,feature_set,n_features,split,target_mode,n_fit,n_valid,rmse,rmse_std,mae,mape,bias,rmse_window,train_seconds,predict_seconds,seed,git_commit,notes,r2
+20261028-150422-096712_decision_tree_G0+G1_time_raw,2026-10-28T15:04:22,B,decision_tree,G0+G1,39,time,raw,132538,17037,482.9480652540594,0.0,357.83835357550197,13.324905441731753,-36.81903987414721,482.9480652540594,22.421362800057977,0.08687350002583116,5228,db96de7+dirty,"G0+G1; depth=16, minimum leaf=20.",0.43329487809798495

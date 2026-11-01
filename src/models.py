@@ -8,6 +8,7 @@ runner can find it. Pass random_state=SEED (from src.config) to every model that
 from __future__ import annotations
 
 import json
+from functools import partial
 
 import numpy as np
 import pandas as pd
@@ -30,7 +31,15 @@ class GlobalMedian:
         return np.full(len(X), self.value_)
 
 
-def sklearn_tabular(estimator, scale: bool = True) -> Pipeline:
+def numeric_columns(X):
+    return [c for c in X.columns if not isinstance(X[c].dtype, pd.CategoricalDtype)]
+
+
+def categorical_columns(X):
+    return [c for c in X.columns if isinstance(X[c].dtype, pd.CategoricalDtype)]
+
+
+def sklearn_tabular(estimator, scale: bool = True, onehot_drop=None, dense: bool = False) -> Pipeline:
     """Wrap a scikit-learn estimator so it accepts the shared X directly.
 
     Categorical columns are one hot encoded (unseen levels become all zeros).
@@ -38,18 +47,13 @@ def sklearn_tabular(estimator, scale: bool = True) -> Pipeline:
     scaling. Columns are detected by dtype at fit time.
     """
 
-    def numeric(X):
-        return [c for c in X.columns if not isinstance(X[c].dtype, pd.CategoricalDtype)]
-
-    def categorical(X):
-        return [c for c in X.columns if isinstance(X[c].dtype, pd.CategoricalDtype)]
-
-    numeric_steps = [SimpleImputer(strategy="median")] + ([StandardScaler()] if scale else [])
+    numeric_steps = [SimpleImputer(strategy="median", keep_empty_features=True)] + ([StandardScaler()] if scale else [])
     transformer = ColumnTransformer(
         [
-            ("num", make_pipeline(*numeric_steps), numeric),
-            ("cat", OneHotEncoder(handle_unknown="ignore"), categorical),
-        ]
+            ("num", make_pipeline(*numeric_steps), numeric_columns),
+            ("cat", OneHotEncoder(handle_unknown="ignore", drop=onehot_drop), categorical_columns),
+        ],
+        sparse_threshold=0.0 if dense else 0.3,
     )
     return Pipeline([("prep", transformer), ("model", estimator)])
 
@@ -151,6 +155,13 @@ def make_catboost_tuned():
     return CatBoostModel(**_load_tuned_params("catboost"))
 
 
+def make_baseline(name):
+    """Load baseline implementations lazily to avoid a circular import."""
+    from src.baselines import BASELINE_MODELS
+
+    return BASELINE_MODELS[name]()
+
+
 MODELS = {
     "global_median": make_global_median,
     "lightgbm_default": make_lightgbm,
@@ -158,4 +169,8 @@ MODELS = {
     "lightgbm_tuned": make_lightgbm_tuned,
     "catboost_tuned": make_catboost_tuned,
     "ridge_default": make_ridge,
+    **{name: partial(make_baseline, name) for name in (
+        "group_median", "linear_regression", "ridge", "knn",
+        "decision_tree", "random_forest",
+    )},
 }
