@@ -1,0 +1,2 @@
+run_id,timestamp,member,model,feature_set,n_features,split,target_mode,n_fit,n_valid,rmse,rmse_std,mae,mape,bias,rmse_window,train_seconds,predict_seconds,seed,git_commit,notes,r2
+20261103-001330-136341_random_forest_G0+G1_random5_index,2026-11-03T00:13:30,A,random_forest,G0+G1,39,random5,index,119660,149575,478.8967551336229,1.8258466107573699,359.1754726487401,14.832963933933732,0.23215925833014522,451.9021421734473,455.07882209995296,2.0371349999913946,5228,29d34fb+dirty,split comparison,0.5922143612930238

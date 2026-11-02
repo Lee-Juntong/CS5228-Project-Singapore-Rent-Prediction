@@ -1,0 +1,10 @@
+% Owner: all members. Target length: 0.5 page.
+\section{Limitations and Future Work}\label{sec:limitations}
+
+The data does not record the floor of the unit, its condition or furnishing, or whether the whole flat or only some rooms are rented. These attributes explain part of the rent that no model in this report can recover.
+
+Our holdout covers six months after the last training month. The test period extends up to 16 months after the last training month, so errors on the test set are likely larger than on the holdout, especially if the rent trend changes direction.
+
+The market features (COE, CPI and stock values) use the value of the approval month, which would not be known when a future rent is predicted. They did not improve the holdout RMSE, and the final model does not use them.
+
+\todo{Data we did not integrate: rents by market segment, work pass counts, BTO completion schedules, travel times, unit storey.}

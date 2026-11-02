@@ -1,0 +1,2 @@
+run_id,timestamp,member,model,feature_set,n_features,split,target_mode,n_fit,n_valid,rmse,rmse_std,mae,mape,bias,rmse_window,train_seconds,predict_seconds,seed,git_commit,notes,r2
+20261102-235640-021811_knn_G0+G1_time_index,2026-11-02T23:56:40,A,knn,G0+G1,39,time,index,132538,17037,481.93693424649814,0.0,350.60201463290787,13.282277304352208,0.32453848218719794,481.93693424649814,0.2666648000013083,0.23751519998768345,5228,29d34fb+dirty,decision 5 trend test,0.43566537428004926
