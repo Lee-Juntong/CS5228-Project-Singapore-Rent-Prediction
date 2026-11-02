@@ -49,7 +49,7 @@ Seven baselines are registered in the shared model registry. Run `python -m scri
 
 ## Analysis
 
-[Analysis findings and reproduction](docs/analysis.md) covers EDA, repeated-profile dispersion, error cases and model interpretation. It documents one preparation command and one analysis command for the selected LightGBM plus matched Ridge comparison. Compact reference evidence is committed under `results/analysis/reference/`; generated reports, figures and models stay ignored.
+[Analysis findings and reproduction](docs/analysis.md) covers EDA, repeated-profile dispersion, error cases and model interpretation. It documents one preparation command and one analysis command for the selected LightGBM plus matched Ridge comparison. Compact reference evidence is committed under `results/analysis/reference/`, with lossless compressed chart previews in the analysis guide. Full reports, PNG/PDF figures and models are regenerated locally and stay ignored.
 
 Run the baseline and analysis checks without Kaggle data: `python -m unittest discover -s checks -v`.
 

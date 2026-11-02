@@ -11,6 +11,19 @@ import pandas as pd
 from src.config import PROJECT_ROOT
 
 REFERENCE_RUN = "20261025-210800_lightgbm_tuned_G0+G1_time_index"
+REPORT_FIGURES = (
+    ("Rent distribution and trend", "eda/figures/eda_distribution_trend"),
+    ("Rent by flat type", "eda/figures/eda_flat_type"),
+    ("Monthly rent by flat type", "eda/figures/eda_flat_type_month"),
+    ("Rent by town", "eda/figures/eda_town"),
+    ("Monthly rent by town", "eda/figures/eda_town_month"),
+    ("Error by forecast month", "residuals/figures/error_by_horizon"),
+    ("Residual distribution and calibration", "residuals/figures/residual_distribution_calibration"),
+    ("Town errors and squared-error contribution", "residuals/figures/town_errors_contribution"),
+    ("Validation outliers", "residuals/figures/validation_outliers"),
+    ("Permutation importance", "interpretation/permutation_importance"),
+    ("Partial dependence", "interpretation/partial_dependence"),
+)
 
 
 def file_hash(path: Path) -> str:
@@ -86,12 +99,7 @@ def write_full_report(output, eda, residuals, interpretation, profile_comparison
               "area/age sensitivity updates engineered derivatives, while month curves hold seasonality and age fixed.",
               "[Correlations versus importance](correlation_vs_importance.csv) · "
               "[Partial-dependence values](interpretation/partial_dependence.csv)", "## Figures"]
-    for title, path in [("Rent distribution and trend", "eda/figures/eda_distribution_trend"),
-                        ("Rent by flat type", "eda/figures/eda_flat_type"),
-                        ("Error by forecast month", "residuals/figures/error_by_horizon"),
-                        ("Validation outliers", "residuals/figures/validation_outliers"),
-                        ("Permutation importance", "interpretation/permutation_importance"),
-                        ("Partial dependence", "interpretation/partial_dependence")]:
+    for title, path in REPORT_FIGURES:
         report.append(f"![{title}]({path}.png)")
     report.extend(["## Limits and reproduction",
                    "The holdout also guided tuning and selection, and covers only six forecast months. "

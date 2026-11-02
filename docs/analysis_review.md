@@ -8,11 +8,19 @@ The compact [reference metrics](../results/analysis/reference/metrics.csv) and [
 
 The model has RMSE SGD **445.78**, MAE **323.91**, MAPE **12.25%** and bias **−24.51** across 17,037 rows. Residual means prediction minus truth. Although 60.20% of observations are underpredicted, positive errors account for 59.91% of total squared error: the overprediction tail is less frequent but more severe. The 20 largest absolute errors are all overpredictions and together contribute 3.91% of squared error; both signs are therefore reviewed separately below.
 
+![Residual distribution and prediction-decile calibration](figures/analysis/residual_distribution_calibration.webp)
+
 The clearest concentration is in retrospectively defined low true rents. The 585 observations below SGD 2,000 represent **3.43% of rows but 25.99% of squared error**, with RMSE SGD 1,226.50 and bias +1,112.23. Within them, the 41 rents below SGD 1,000 contribute 4.59% of total squared error. This diagnoses a low-target tail; neither a price threshold nor a large residual confirms a recording error, room rental or housing programme. True-rent bands cannot be used at inference time.
+
+![Validation predictions and error concentration](figures/analysis/validation_outliers.webp)
 
 Large flats have somewhat higher per-row error but do not carry most total error. The 5-room and executive categories comprise 27.80% of rows and 31.32% of squared error; 3-room and 4-room flats contribute **66.12%**. Executive RMSE is SGD 524.32 on 851 observations. Jurong West is the largest town contributor (9.57%, n=1,174), followed by Bukit Merah (7.47%, n=972). The town labelled `central` contributes only 1.81% (n=266). Defining proximity explicitly as less than 5 km from Raffles Place gives 2,066 rows (12.13%) and 15.75% of squared error, with RMSE SGD 507.97. These results do not support a claim that central locations account for most error.
 
+![Town error levels and squared-error contributions](figures/analysis/town_errors_contribution.webp)
+
 Monthly RMSE is 431.49, 458.65, 440.85, 460.25, 443.81 and 439.05 SGD at horizons 1–6. There is no monotonic deterioration across this window. Bias remains slightly negative in every month (−33.28 to −14.30 SGD). Longer-horizon extrapolation remains a limitation rather than the demonstrated dominant failure here. Predicted-rent decile means remain close to the calibration diagonal (bin biases −39.13 to −9.49 SGD), but averaging hides substantial errors at both true-rent tails.
+
+![Validation error and bias by forecast horizon](figures/analysis/error_by_horizon.webp)
 
 With identical fit rows, input columns and index target handling, Ridge has RMSE SGD 467.13 and bias −57.54; boosting lowers RMSE by SGD 21.34 and has lower absolute error on 9,723/17,037 rows (57.07%). Boosting improves RMSE in every reported MRT-distance bin: 456.12 versus 481.43 SGD below 0.5 km (n=7,686), and 438.99 versus 456.91 SGD at 0.5–1 km (n=7,649). Town/type gains vary: Bukit Merah 3-room improves from 544.87 to 479.36 SGD (n=414), while Jurong West executive worsens from 580.39 to 600.65 SGD (n=99). The varying gains support a conditional model comparison; they do not by themselves prove which learned interaction or nonlinear distance response caused it. Consult the PDPs alongside these results.
 
@@ -84,5 +92,7 @@ The following standard PDP changes are differences between averaged full-SGD pre
 The age comparison demonstrates the danger of changing an engineered input independently. Updating lease commencement together with age changes the age response to -209.57 SGD for boosting and -581.23 SGD for Ridge; Ridge's direction reverses. Updating log-area and area-per-room alongside area gives endpoint changes of +217.15 and +263.13 SGD, respectively. Ridge's coherent area curve peaks at 104 sq m and then falls toward 131 sq m; this is model behavior under a hypothetical combination, not evidence that larger real flats rent for less.
 
 The boosting MRT curve is nonlinear: predicted rent falls SGD 45.75 from 0.1796 to 0.4022 km, then SGD 32.97 from 0.4022 to 1.1499 km, with small local reversals. Ridge's standard MRT curve is linear in distance. This demonstrates a response shape the fitted boosting model can represent; it does not by itself attribute the matched holdout RMSE improvement (467.13 to 445.78 SGD) to that one feature or to town/type interactions.
+
+![Partial dependence and derived-feature sensitivities](figures/analysis/partial_dependence.webp)
 
 Interpretation remains limited by repeated model selection on this holdout, correlated inputs, implausible synthetic combinations, and the much longer test horizon. The coherent area/age sensitivities preserve exact derivative relationships but still hold other correlated flat and location attributes fixed. Month curves hold seasonal encodings and age fixed.

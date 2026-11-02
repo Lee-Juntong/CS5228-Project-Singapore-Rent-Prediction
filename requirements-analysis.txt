@@ -10,3 +10,5 @@ seaborn==0.13.2
 # Serialization and Windows timezone support used by the analysis scripts.
 joblib==1.4.2
 tzdata==2025.2
+# Lossless WebP report previews.
+pillow==12.3.0
