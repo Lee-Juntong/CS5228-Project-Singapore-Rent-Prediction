@@ -1,6 +1,6 @@
 # Data
 
-Large and Kaggle supplied files are not in git. Put them here before running anything.
+Large and Kaggle supplied files are not in git. Place `train.csv` and `test.csv` directly in `data/`, and all six supplied auxiliary CSVs in `data/auxiliary/`. All eight files are required for preprocessing, including the analysis workflow. The check suite uses synthetic data and can run without them.
 
 | Path | Source | In git |
 |---|---|---|
@@ -32,3 +32,5 @@ python -c "from src.data_preprocessing import run_pipeline; run_pipeline()"
 ```
 
 This writes `processed/train_features.parquet` and `processed/test_features.parquet`.
+
+For the analysis workflow, use the [preparation command](../docs/analysis.md#reproduce), which stages formatting repairs before invoking the shared pipeline. It preserves the original input CSVs. Keep the committed block-feature cache; the rail GeoJSON is only needed if rebuilding that cache.

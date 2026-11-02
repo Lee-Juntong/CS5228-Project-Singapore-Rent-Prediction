@@ -4,37 +4,54 @@ Predict `MONTHLY_RENT` for HDB rentals. Training covers Jan 2021 to Mar 2025 and
 
 ## Setup
 
-Use Python 3.10. Python 3.13 fails to install the pinned numpy.
+Use Python 3.10 with the pinned packages. Run commands from the repository root.
 
 ```bash
 git clone https://github.com/Lee-Juntong/CS5228-Project-Singapore-Rent-Prediction.git
 cd CS5228-Project-Singapore-Rent-Prediction
-python3.10 -m venv .venv
 ```
 
-Activate the environment. On Windows run `.venv\Scripts\activate`. On macOS or Linux run `source .venv/bin/activate`. Then install the packages:
+Create and activate the environment on macOS or Linux:
 
 ```bash
-pip install -r requirements.txt
+python3.10 -m venv .venv
+source .venv/bin/activate
 ```
 
-This includes torch (CPU build) for neural models such as TabM.
+On Windows, use PowerShell:
 
-Then put the Kaggle files in `data/` and build the processed data as described in [data/README.md](data/README.md). Preprocessing takes about 20 seconds on Juntong's PC.
+```powershell
+py -3.10 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
+
+Install the analysis packages using the activated environment:
+
+```bash
+python -m pip install -r requirements-analysis.txt
+```
+
+For the complete project, use `python -m pip install -r requirements.txt` instead; this also installs CatBoost, tuning, notebook and PyTorch dependencies.
+
+On macOS, LightGBM also needs the OpenMP library (`brew install libomp`).
+
+Put the Kaggle files in `data/` as described in [data/README.md](data/README.md). For analysis, follow the linked reproduction guide; shared experiments can use the standard preprocessing command in the data guide.
 
 ### Working together
 
 * Run `git pull` before you push.
 * Commit only your own files in `results/runs/` and `results/breakdowns/`.
-* Pass your member letter as `--member` (or `member=` in Python) so every run shows who made it.
+* For shared model experiments, pass your member letter as `--member` (or `member=` in Python) so the run shows who made it.
 
 ## Baseline ladder (Phase 1)
 
 Seven baselines are registered in the shared model registry. Run `python -m scripts.run_baselines --output results/member_b/new_run` for seven holdout fits and comparison plots. Learning curves, random CV and one selected final refit are optional. See the [pipeline guide](docs/pipeline_guide.md#baseline-ladder) for commands and hyperparameters, and the [baseline results](docs/baseline_results.md) for the recorded scores and figure locations.
 
-## Member D diagnostics
+## Analysis
 
-See [Member D findings and reproduction](docs/member_d.md) for EDA, repeated-profile dispersion, validation cases, matched Ridge comparison and model interpretation. `python -m scripts.run_member_d --member D` generates the complete analysis, including outlier diagnostics, from two fixed holdout fits. Reports and compact source tables stay under `results/member_d/`; large intermediate artifacts remain local.
+[Analysis findings and reproduction](docs/analysis.md) covers EDA, repeated-profile dispersion, error cases and model interpretation. It documents one preparation command and one analysis command for the selected LightGBM plus matched Ridge comparison. Compact reference evidence is committed under `results/analysis/reference/`; generated reports, figures and models stay ignored.
+
+Run the baseline and analysis checks without Kaggle data: `python -m unittest discover -s checks -v`.
 
 ## Shared experiment setup (Phase 0)
 
@@ -116,7 +133,7 @@ Feature-group ablation (tuned models, time holdout, raw target). The tuned hyper
 | G0+G1+G2 (+block) | 44 | 448.5 | 449.8 |
 | ALL (+market) | 54 | 450.1 | 452.4 |
 
-Location (G1) is the only group that clearly helps: it cuts about 12 to 14 RMSE for both models. Block attributes (G2) add almost nothing (0.1 to 0.3). The market group (G3: current-month COE, CPI and stock values) makes both models worse, by 1.6 to 2.6 RMSE, even though those values would not be known at prediction time. This supports decision 6: the leaky macro features are not worth keeping, and `G0+G1+G2` is the best feature recipe.
+Location (G1) is the only group that clearly helps: it cuts about 12 to 14 RMSE for both models. Block attributes (G2) add almost nothing (0.1 to 0.3). The market group (G3: current-month COE, CPI and stock values) makes both models worse, by 1.6 to 2.6 RMSE, even though those values would not be known at prediction time. The final selected recipe is `G0+G1` with index targets; the tiny raw-target improvement from G2 does not carry over to that LightGBM setup.
 
 ### Where results go
 
