@@ -1,0 +1,22 @@
+{
+  "source_run_id": "20261025-210800_lightgbm_tuned_G0+G1_time_index",
+  "seed": 5228,
+  "sample_rows": 2000,
+  "sample_ids_match": true,
+  "retained_indices_match_training_monthly_medians_and_tail_line": true,
+  "last_training_month_index": 44,
+  "full_SGD_restoration_verified": true,
+  "both_saved_validation_prediction_files_match_retained_models": true,
+  "baseline_sample_rmse_sgd": 435.99175151498486,
+  "all_permutation_means_and_ddof0_SDs_reconcile": true,
+  "independent_permutation_features_checked": [
+    "FLAT_TYPE_ORDINAL",
+    "HDB_SUBZONE",
+    "FLOOR_AREA_SQM",
+    "MONTH_INDEX"
+  ],
+  "all_PDP_grids_match_sample_rules": true,
+  "independent_PDP_ordinates_checked": 36,
+  "curve_count": 12,
+  "visual_PNG_checks": "Both figures inspected; marks, axes and legends readable; no clipping observed."
+}

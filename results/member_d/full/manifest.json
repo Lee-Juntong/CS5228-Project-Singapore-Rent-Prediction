@@ -1,0 +1,291 @@
+{
+  "member": "D",
+  "status": "complete",
+  "created_at": "2026-11-02T00:27:33.152440+08:00",
+  "command": "\"C:\\Users\\yulon\\VS Code\\CS5228-Project-Singapore-Rent-Prediction\\.venv\\Scripts\\python.exe\" -m scripts.run_member_d --member D --output results/member_d/full",
+  "python": "3.10.20",
+  "source_run_id": "20261025-210800_lightgbm_tuned_G0+G1_time_index",
+  "packages": {
+    "numpy": "1.26.4",
+    "pandas": "2.2.1",
+    "scipy": "1.12.0",
+    "scikit-learn": "1.5.1",
+    "lightgbm": "4.6.0",
+    "pyarrow": "19.0.1",
+    "matplotlib": "3.9.2",
+    "seaborn": "0.13.2"
+  },
+  "code_sha256": {
+    "scripts/run_member_d.py": "14d2503be58089c4b0259d2e6487982f55efe8c583d99ba8a9a1c9ccf57755b2",
+    "src/member_d_eda.py": "d8e6e74d309d04a3436d5012ff74eaeb9a6e4c0cd5de2e11d996b8ce9d37426f",
+    "src/member_d_interpretation.py": "11bc25c6a5147a6b76f6566287cb47164ce1596f43c39353330587fe39e05d23",
+    "src/member_d_report.py": "13cdd19339d6a1a715c3a8a05cfb4ff8a57b0e2615a6233e13589753c96d8eb6",
+    "src/member_d_residuals.py": "9d0e0ca1857a0e6e35dd7fc28c9bdf9325eafd2ba4af04e801472a38603b6f29",
+    "src/evaluation.py": "126ff7f1f3de2065c3e987796d09f7020d3111b84aed61e0669e9758bc6b33b8",
+    "src/features.py": "6d41449ca778a4956bcea3ce78d99fec94a387486faa8356041ffc78eb40d086",
+    "src/models.py": "af75a383fa5eeb4d8539554a017ec28bca7792564bb084be088710a9be04d924",
+    "src/config.py": "d5b09350575c0513c6f93ece35ad43f38d6bc1f4715d460c2548b51ca3b1c79b",
+    "src/external_features.py": "bcbdf166a25ff1b3e1baa017ff796456a584b2c0bd43c322c47e570de32b2455",
+    "src/data_preprocessing.py": "7df50621cd5a842b69dc2e4ad88db53bd682017f3b579de0adbc08ce6b83546e"
+  },
+  "reference_agreement": {
+    "level": "aggregate metrics only",
+    "absolute_metric_tolerance": 0.05,
+    "source_predictions_available": false,
+    "metrics": {
+      "rmse": 445.7839527832046,
+      "mae": 323.9147183248443,
+      "mape": 12.254533494492712,
+      "bias": -24.514456106233084,
+      "r2": 0.5171578909036809
+    },
+    "limitation": "Matching aggregate metrics does not establish identical row-level predictions."
+  },
+  "feature_set": "G0+G1",
+  "columns": [
+    "TOWN",
+    "FLAT_TYPE",
+    "FLAT_TYPE_ORDINAL",
+    "FLAT_MODEL",
+    "FLOOR_AREA_SQM",
+    "LOG_FLOOR_AREA_SQM",
+    "FLOOR_AREA_PER_ROOM_PROXY",
+    "LEASE_COMMENCE_DATE",
+    "FLAT_AGE_YEARS",
+    "INVALID_LEASE_DATE_FLAG",
+    "MONTH_INDEX",
+    "MONTH_SIN",
+    "MONTH_COS",
+    "HDB_LATITUDE",
+    "HDB_LONGITUDE",
+    "HDB_SUBZONE",
+    "DISTANCE_TO_RAFFLES_PLACE_KM",
+    "NEAREST_OPEN_MRT_KM",
+    "OPEN_MRT_COUNT_500M",
+    "OPEN_MRT_COUNT_1KM",
+    "OPEN_MRT_COUNT_2KM",
+    "NEAREST_OPEN_INTERCHANGE_KM",
+    "NEAREST_PLANNED_MRT_KM",
+    "PLANNED_MRT_COUNT_1KM",
+    "PLANNED_MRT_COUNT_2KM",
+    "NEAREST_SCHOOL_KM",
+    "SCHOOL_COUNT_1KM",
+    "SCHOOL_COUNT_2KM",
+    "NEAREST_PRIMARY_SCHOOL_KM",
+    "PRIMARY_SCHOOL_COUNT_1KM",
+    "PRIMARY_SCHOOL_COUNT_2KM",
+    "NEAREST_MALL_KM",
+    "MALL_COUNT_1KM",
+    "MALL_COUNT_2KM",
+    "NEAREST_RAIL_LINE_KM",
+    "NEAREST_ABOVEGROUND_RAIL_KM",
+    "NEAREST_TERTIARY_KM",
+    "NEAREST_UNIVERSITY_KM",
+    "TERTIARY_COUNT_2KM"
+  ],
+  "target_mode": "index",
+  "split": "time",
+  "seed": 5228,
+  "source_run": {
+    "run_id": "20261025-210800_lightgbm_tuned_G0+G1_time_index",
+    "timestamp": "2026-10-25T21:08:00",
+    "member": "C",
+    "model": "lightgbm_tuned",
+    "feature_set": "G0+G1",
+    "n_features": 39,
+    "split": "time",
+    "target_mode": "index",
+    "n_fit": 132538,
+    "n_valid": 17037,
+    "rmse": 445.7839527832047,
+    "rmse_std": 0.0,
+    "mae": 323.91471832484444,
+    "mape": 12.25453349449272,
+    "bias": -24.51445610623399,
+    "rmse_window": 445.7839527832047,
+    "train_seconds": 17.33555024996167,
+    "predict_seconds": 0.0871064999955706,
+    "seed": 5228,
+    "git_commit": "94e568e+dirty",
+    "notes": ""
+  },
+  "n_fit": 132538,
+  "n_valid": 17037,
+  "timings": {
+    "boosting": {
+      "fit_seconds": 3.1969864000002417,
+      "predict_seconds": 0.0870372999997926
+    },
+    "ridge": {
+      "fit_seconds": 1.5453532000010455,
+      "predict_seconds": 0.02206330000080925
+    }
+  },
+  "comparison_factory": "src.models.make_ridge (Ridge alpha=1, all 39 inputs)",
+  "configuration_sha256": "e169b32a48226eebbf44121aca532bb1e058301439b45743b83f9c871ae243f5",
+  "source_record_sha256": "951ab25785b802d8a1a60be72eee9e00da1d435fb7ed7cdffd962ba75f4bd5b6",
+  "model_choice_sha256": "86ac474b590654976a09ce56d24bc50639c40baf0e134dd13bc5971e90166e0e",
+  "cleaning_audit_sha256": "d647012fff6ad996d4db3ee709b1748b47383943800ddd2db048ffd317f345a3",
+  "primary_parameters": {
+    "boosting_type": "gbdt",
+    "class_weight": null,
+    "colsample_bytree": 1.0,
+    "importance_type": "split",
+    "learning_rate": 0.034444722990075456,
+    "max_depth": -1,
+    "min_child_samples": 51,
+    "min_child_weight": 0.001,
+    "min_split_gain": 0.0,
+    "n_estimators": 500,
+    "n_jobs": -1,
+    "num_leaves": 205,
+    "objective": null,
+    "random_state": 5228,
+    "reg_alpha": 0.06967366091057987,
+    "reg_lambda": 0.0014734013092790143,
+    "subsample": 1.0,
+    "subsample_for_bin": 200000,
+    "subsample_freq": 0,
+    "verbose": -1,
+    "feature_fraction": 0.896120311553904,
+    "bagging_fraction": 0.9140610646856642,
+    "bagging_freq": 1
+  },
+  "data_sha256": {
+    "data/processed/train_features.parquet": "007ef035e9f7a487d0c6e7fbb84c2f37d4be15bf485160cb1f0a82c59f986dd8",
+    "data/processed/test_features.parquet": "8e207e1f7ffa98c7c502ef96efac7a6fe32a6e9f2ceb754fd191482e236391a4",
+    "data/derived/block_extra_features.csv": "c1f2c6f1f8176aa6fe704342a0d3105b063d0b4650659070d6d89e2a4e4604b6",
+    "data/auxiliary/sg-cpi.csv": "b6ef8811591ff0aaf8c132dc555149729a590ed23b5d5c4379341ab4d4a2028e"
+  },
+  "input_preparation_sha256": "66ac6598fcff66d5e97a1c1b0db7bf5f730f6093df078f20f7ee9ed0897296dc",
+  "preparation_script_sha256": "88e49c545eede0b47418be0fb5b80bfe148cc38619ef807e77b9d9b98f5c3a2a",
+  "local_preprocessing_audit_sha256": "8bd04b02a6aea3e48f7d3bc4c4766cc59b8c89178b650bc3980d0f3e8a2110a9",
+  "sampling": {
+    "sample_n": 2000,
+    "validation_n": 17037,
+    "seed": 5228,
+    "sample_rule": "Sort ROW_ID; numpy default_rng(seed) sample without replacement; retain sorted positions",
+    "n_repeats": 5,
+    "baseline_rmse_sgd": 435.99175151498486,
+    "target_mode": "index",
+    "importance_definition": "Permuted full-SGD RMSE minus unpermuted full-SGD RMSE; positive means worse",
+    "uncertainty": "Population SD across fixed-sample permutations (ddof=0); not sampling uncertainty or a confidence interval",
+    "pdp_grid": "All distinct values if <=20; otherwise 20 sample quantiles between 5% and 95%",
+    "pdp_definition": "Average full-SGD prediction after setting one feature on every sampled row",
+    "pdp_sensitivity": "Area updates log-area and area-per-room; age updates lease commencement, invalid flag and remaining-lease proxy when present",
+    "limitations": [
+      "Held-out targets affect scoring only; no model, encoder or rent index is fitted here.",
+      "The shared holdout also guided model tuning; it is not an independent post-selection test.",
+      "Correlated inputs can share or mask permutation importance; rankings are not causal.",
+      "Individual permutations and standard PDPs can create implausible combinations with engineered or correlated inputs.",
+      "Area/age sensitivity maintains exact derivatives but can still create unrealistic flat-type, location and age combinations.",
+      "Month PDP changes MONTH_INDEX (and the retained rent-index restoration), holding seasonality and age columns fixed.",
+      "PDPs describe model behavior on a selected held-out population, not real-world interventions."
+    ],
+    "top_features": [
+      {
+        "feature": "FLAT_TYPE_ORDINAL",
+        "importance_mean_sgd": 166.18770741451786,
+        "importance_std_sgd": 3.7696883963653907,
+        "n_repeats": 5,
+        "sample_n": 2000,
+        "baseline_rmse_sgd": 435.99175151498486
+      },
+      {
+        "feature": "HDB_SUBZONE",
+        "importance_mean_sgd": 111.64817317541979,
+        "importance_std_sgd": 4.378611507331749,
+        "n_repeats": 5,
+        "sample_n": 2000,
+        "baseline_rmse_sgd": 435.99175151498486
+      },
+      {
+        "feature": "FLOOR_AREA_SQM",
+        "importance_mean_sgd": 25.60908375342634,
+        "importance_std_sgd": 1.7471502894532842,
+        "n_repeats": 5,
+        "sample_n": 2000,
+        "baseline_rmse_sgd": 435.99175151498486
+      },
+      {
+        "feature": "LEASE_COMMENCE_DATE",
+        "importance_mean_sgd": 7.3686849644778025,
+        "importance_std_sgd": 0.6139793212482528,
+        "n_repeats": 5,
+        "sample_n": 2000,
+        "baseline_rmse_sgd": 435.99175151498486
+      },
+      {
+        "feature": "FLAT_AGE_YEARS",
+        "importance_mean_sgd": 5.873366673525425,
+        "importance_std_sgd": 0.5816248162716551,
+        "n_repeats": 5,
+        "sample_n": 2000,
+        "baseline_rmse_sgd": 435.99175151498486
+      },
+      {
+        "feature": "FLAT_MODEL",
+        "importance_mean_sgd": 5.543785791221171,
+        "importance_std_sgd": 1.7037137387621109,
+        "n_repeats": 5,
+        "sample_n": 2000,
+        "baseline_rmse_sgd": 435.99175151498486
+      },
+      {
+        "feature": "NEAREST_OPEN_MRT_KM",
+        "importance_mean_sgd": 4.793772608713016,
+        "importance_std_sgd": 0.8619100242236873,
+        "n_repeats": 5,
+        "sample_n": 2000,
+        "baseline_rmse_sgd": 435.99175151498486
+      },
+      {
+        "feature": "MONTH_SIN",
+        "importance_mean_sgd": 3.85188306159298,
+        "importance_std_sgd": 0.9257224329931281,
+        "n_repeats": 5,
+        "sample_n": 2000,
+        "baseline_rmse_sgd": 435.99175151498486
+      },
+      {
+        "feature": "NEAREST_RAIL_LINE_KM",
+        "importance_mean_sgd": 2.957648223551132,
+        "importance_std_sgd": 0.2174845610778243,
+        "n_repeats": 5,
+        "sample_n": 2000,
+        "baseline_rmse_sgd": 435.99175151498486
+      },
+      {
+        "feature": "NEAREST_MALL_KM",
+        "importance_mean_sgd": 2.8630736917560737,
+        "importance_std_sgd": 0.4831072204613218,
+        "n_repeats": 5,
+        "sample_n": 2000,
+        "baseline_rmse_sgd": 435.99175151498486
+      }
+    ]
+  },
+  "initial_generation_code_sha256": {
+    "scripts/run_member_d.py": "ad760e5b92e88e371631b0a7ceb02bab35a91dfa3f3eee2faf188628ea7bfbb4",
+    "src/member_d_eda.py": "62373791d779d691e6e99e25b3dcc907c38230cf72d7e821b502e453fded5b76",
+    "src/member_d_interpretation.py": "11bc25c6a5147a6b76f6566287cb47164ce1596f43c39353330587fe39e05d23",
+    "src/member_d_report.py": "4b4cde2f1d7058816355606343f478f5b162b34c67bf7363268385e807a2765b",
+    "src/member_d_residuals.py": "8894b5c4ab0e766450b4eb24348a8aecab7efd359bcd6f719e4fd6414e767d91",
+    "src/evaluation.py": "126ff7f1f3de2065c3e987796d09f7020d3111b84aed61e0669e9758bc6b33b8",
+    "src/features.py": "6d41449ca778a4956bcea3ce78d99fec94a387486faa8356041ffc78eb40d086",
+    "src/models.py": "af75a383fa5eeb4d8539554a017ec28bca7792564bb084be088710a9be04d924",
+    "src/config.py": "d5b09350575c0513c6f93ece35ad43f38d6bc1f4715d460c2548b51ca3b1c79b",
+    "src/external_features.py": "bcbdf166a25ff1b3e1baa017ff796456a584b2c0bd43c322c47e570de32b2455",
+    "src/data_preprocessing.py": "7df50621cd5a842b69dc2e4ad88db53bd682017f3b579de0adbc08ce6b83546e"
+  },
+  "postprocessing_commands": [
+    ".venv/Scripts/python.exe -c \"from pathlib import Path; from src.features import load_modeling_data; from src.member_d_eda import generate_eda; from src.member_d_report import write_json; output=Path('results/member_d/full'); write_json(output/'eda_summary.json', generate_eda(load_modeling_data(), output/'eda'))\"",
+    "write_full_report(output, eda_summary.json, residuals/summary.json, interpretation/summary.json, profile_model_comparison.csv, manifest.json); report-only refresh after factual review, no refits",
+    "Cleanup: generate_residuals from the two retained validation Parquets; write_full_report from saved summaries. Integrated outlier diagnostics; no refit or input changes."
+  ],
+  "reviewed_supporting_files": {
+    "residuals/case_review.md": "e7e8b4788a2b4b9d7bfc1087576d4a5e1d5a4ba4ba4f05ca2fbaa195495f1960",
+    "interpretation/interpretation_notes.md": "eb43ef1e22a7c6ba09ff44710ddcd8139044c476314dd9fbfeba08d030d2d180",
+    "interpretation/audit.json": "38c6f72b88a35f98e0380087c1eeba81b099b2fa456a5dcad6fc3eeba880145e"
+  }
+}

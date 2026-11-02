@@ -32,6 +32,10 @@ Then put the Kaggle files in `data/` and build the processed data as described i
 
 Seven baselines are registered in the shared model registry. Run `python -m scripts.run_baselines --output results/member_b/new_run` for seven holdout fits and comparison plots. Learning curves, random CV and one selected final refit are optional. See the [pipeline guide](docs/pipeline_guide.md#baseline-ladder) for commands and hyperparameters, and the [baseline results](docs/baseline_results.md) for the recorded scores and figure locations.
 
+## Member D diagnostics
+
+See [Member D findings and reproduction](docs/member_d.md) for EDA, repeated-profile dispersion, validation cases, matched Ridge comparison and model interpretation. `python -m scripts.run_member_d --member D` generates the complete analysis, including outlier diagnostics, from two fixed holdout fits. Reports and compact source tables stay under `results/member_d/`; large intermediate artifacts remain local.
+
 ## Shared experiment setup (Phase 0)
 
 Every model goes through one function, so all results are comparable. [docs/pipeline_guide.md](docs/pipeline_guide.md) lists every reusable function with its inputs, outputs and an example.

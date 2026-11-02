@@ -1,0 +1,80 @@
+{
+  "metrics": {
+    "n": 17037,
+    "rmse": 445.7839527832046,
+    "mae": 323.9147183248443,
+    "mape": 12.254533494492712,
+    "bias": -24.514456106233084,
+    "r2": 0.5171578909036809
+  },
+  "residual_definition": "prediction minus truth; positive = overprediction",
+  "bin_definitions": {
+    "rent_band": "True rent SGD: (0,1000), [1000,2000), [2000,3000), [3000,4000), [4000,5000), [5000,infinity). Retrospective only.",
+    "flat_age": "Years: (-infinity,0) invalid; [0,10), [10,20), [20,30), [30,40), [40,50), [50,infinity); missing/nonfinite age is <missing>.",
+    "horizon": "Calendar months since shared TIME_FIT_END: October 2024 = 1, March 2025 = 6.",
+    "mrt_distance": "Nearest open MRT km: [0,0.5), [0.5,1), [1,2), [2,infinity); negative distance is invalid, missing/nonfinite is <missing>.",
+    "categories": "Missing or blank town/flat type is <missing>; no rows are excluded.",
+    "rare_segment": "Town x flat type has fewer than 30 rows in this holdout; descriptive flag, not a cause.",
+    "calibration": "Up to 10 empirical quantile bins of held-out predictions; duplicate edges are dropped; constant predictions use one bin. Bins are descriptive, with no fitted recalibration."
+  },
+  "row_join_verified": true,
+  "top20_overpredictions": 20,
+  "top20_underpredictions": 0,
+  "case_review_limit": "Categories are observed flags, not verified causes. Unrecorded unit floor, condition, facing, renovation and tenancy context are plausible omitted information; their effects cannot be assigned to these records.",
+  "outliers": {
+    "large_error_definition": "Absolute residual strictly greater than SGD 1000",
+    "populations": [
+      {
+        "population": "All validation rows",
+        "n": 17037,
+        "row_share_pct": 100.0,
+        "squared_error_share_pct": 100.0,
+        "rmse_sgd": 445.7839527832046,
+        "bias_sgd": -24.514456106233084
+      },
+      {
+        "population": "Absolute error > SGD 1000",
+        "n": 659,
+        "row_share_pct": 3.8680518870693197,
+        "squared_error_share_pct": 38.134271450638636,
+        "rmse_sgd": 1399.7033822850324,
+        "bias_sgd": 993.4917982674788
+      },
+      {
+        "population": "True rent < SGD 2000",
+        "n": 585,
+        "row_share_pct": 3.433703116745906,
+        "squared_error_share_pct": 25.99261599543931,
+        "rmse_sgd": 1226.5014185396956,
+        "bias_sgd": 1112.2305145780922
+      },
+      {
+        "population": "True rent >= SGD 2000 (retrospective)",
+        "n": 16452,
+        "row_share_pct": 96.5662968832541,
+        "squared_error_share_pct": 74.00738400456069,
+        "rmse_sgd": 390.25562241090154,
+        "bias_sgd": -64.93481884938468
+      },
+      {
+        "population": "Top 20 absolute errors removed (retrospective)",
+        "n": 17017,
+        "row_share_pct": 99.88260844045313,
+        "squared_error_share_pct": 96.08541124511756,
+        "rmse_sgd": 437.22825511179144,
+        "bias_sgd": -27.544829635423408
+      }
+    ],
+    "caveat": "True-rent subsets and trimming are retrospective sensitivities. All holdout rows remain in the reported score; large residuals do not confirm recording errors."
+  },
+  "comparison": {
+    "n": 17037,
+    "rmse": 467.12838202679575,
+    "mae": 347.4462886425195,
+    "mape": 12.943872817933439,
+    "bias": -57.54227904358345,
+    "r2": 0.4698133512743168,
+    "rmse_ridge_minus_boosting": 21.34442924359115,
+    "paired_rows_lower_absolute_error_boosting": 9723
+  }
+}

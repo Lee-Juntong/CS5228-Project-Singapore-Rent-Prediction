@@ -1,0 +1,102 @@
+{
+  "status": "ready_with_documented_limits",
+  "member": "D",
+  "source_run_id": "20261025-210800_lightgbm_tuned_G0+G1_time_index",
+  "unit_checks": {
+    "member_d_passed": 22,
+    "existing_baseline_passed": 12,
+    "default_discovery_passed": 34
+  },
+  "executed_commands": [
+    ".venv/Scripts/python.exe -m scripts.prepare_member_d_data",
+    ".venv/Scripts/python.exe -m scripts.run_member_d --member D --output results/member_d/full",
+    ".venv/Scripts/python.exe -m unittest discover -s checks -v"
+  ],
+  "real_data_checks": {
+    "cleaning_and_row_identity": "150000 raw, 425 exact duplicates removed, 149575 retained; original ROW_ID and target alignment independently verified",
+    "test_order": "All 50000 rows retained; staged formatting copies field-by-field equal to originals after whitespace trim",
+    "reference_metrics": "Selected refit reproduces archived RMSE/MAE/MAPE/bias to floating-point precision; original predictions unavailable",
+    "local_model_predictions": "Both serialized holdout bundles reproduce saved local SGD predictions by ROW_ID",
+    "repeated_profiles": "All four source-group tables and SD/LOO formulas independently verified from raw data; no missing key exclusions",
+    "segment_metrics": "All 56 groups independently verified; n, RMSE, MAE, MAPE, bias and SSE shares reconcile",
+    "error_cases": "Actual top 20 plus 10 largest underpredictions reviewed; raw targets and paired-profile examples verified",
+    "interpretation": "2000 fixed sample IDs, both training-only indices, all importance means/SDs and grids, 36 sampled PDP ordinates and five permutations each for four key features independently checked",
+    "visual_checks": "All 11 report PNG figure exports inspected; prior sparse-month and layout defects repaired.",
+    "scope": "Two fixed holdout fits; no retuning, external data collection or Kaggle submission"
+  },
+  "remaining_limits": [
+    "Archived source row-level predictions unavailable; aggregate agreement is explicitly qualified",
+    "No installed TeX compiler; final team PDF layout/page count remains an integration check",
+    "Unit/tenancy causes of individual residuals unobserved; no universal irreducible-error claim"
+  ],
+  "git_operations": "No commit, push or pull performed",
+  "completion_audit": {
+    "eda": {
+      "files_verified": [
+        "eda_summary.json",
+        "eda/tables/rent_correlations.csv",
+        "eda/tables/rent_by_month.csv",
+        "eda/tables/rent_by_flat_type.csv",
+        "eda/tables/rent_by_town.csv"
+      ],
+      "status": "present and verified"
+    },
+    "repeated_profiles": {
+      "files_verified": [
+        "repeated_profile_summary.csv",
+        "profile_model_comparison.csv",
+        "eda/tables/repeated_profile_groups_all_train_plan.csv",
+        "eda/tables/repeated_profile_groups_all_train_strict.csv",
+        "eda/tables/repeated_profile_groups_holdout_plan.csv",
+        "eda/tables/repeated_profile_groups_holdout_strict.csv"
+      ],
+      "status": "present and verified"
+    },
+    "residuals": {
+      "files_verified": [
+        "residuals/segment_metrics.csv",
+        "residuals/calibration.csv",
+        "residuals/residual_histogram.csv",
+        "residuals/top20_errors.csv",
+        "residuals/largest_underpredictions.csv",
+        "residuals/largest_overpredictions.csv",
+        "residuals/case_review.md",
+        "residuals/outlier_summary.csv"
+      ],
+      "status": "present and verified"
+    },
+    "interpretation": {
+      "files_verified": [
+        "interpretation/sample_rows.csv",
+        "interpretation/permutation_importance.csv",
+        "interpretation/permutation_repeats.csv",
+        "interpretation/partial_dependence.csv",
+        "interpretation/interpretation_notes.md",
+        "correlation_vs_importance.csv"
+      ],
+      "status": "present and verified"
+    },
+    "handoff": {
+      "files_verified": [
+        "report.md",
+        "sections.tex",
+        "manifest.json",
+        "verification.json"
+      ],
+      "status": "present and verified"
+    }
+  },
+  "current_code_input_config_review_hashes_match": true,
+  "all_eleven_report_images_and_review_links_resolve": true,
+  "cleanup": {
+    "result": "One Member D guide and integrated diagnostics pipeline; obsolete recorded-only mode and standalone outlier script removed",
+    "default_test_command": ".venv/Scripts/python.exe -m unittest discover -s checks -v",
+    "local_archive": "C:/Users/yulon/AppData/Local/Temp/CS5228-Member-D-cleanup-20261102",
+    "archived_files": 90,
+    "archived_mib": 24.47,
+    "preserved": "Teammates source/results; raw/processed data; both saved models, prediction files and fit IDs unchanged",
+    "refits": 0,
+    "source_and_report_links_checked": 47,
+    "integrated_outlier_metrics_match_previous_followup": true
+  }
+}

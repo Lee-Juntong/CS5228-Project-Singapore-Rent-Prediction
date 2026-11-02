@@ -1,0 +1,105 @@
+{
+  "sample_n": 2000,
+  "validation_n": 17037,
+  "seed": 5228,
+  "sample_rule": "Sort ROW_ID; numpy default_rng(seed) sample without replacement; retain sorted positions",
+  "n_repeats": 5,
+  "baseline_rmse_sgd": 435.99175151498486,
+  "target_mode": "index",
+  "importance_definition": "Permuted full-SGD RMSE minus unpermuted full-SGD RMSE; positive means worse",
+  "uncertainty": "Population SD across fixed-sample permutations (ddof=0); not sampling uncertainty or a confidence interval",
+  "pdp_grid": "All distinct values if <=20; otherwise 20 sample quantiles between 5% and 95%",
+  "pdp_definition": "Average full-SGD prediction after setting one feature on every sampled row",
+  "pdp_sensitivity": "Area updates log-area and area-per-room; age updates lease commencement, invalid flag and remaining-lease proxy when present",
+  "limitations": [
+    "Held-out targets affect scoring only; no model, encoder or rent index is fitted here.",
+    "The shared holdout also guided model tuning; it is not an independent post-selection test.",
+    "Correlated inputs can share or mask permutation importance; rankings are not causal.",
+    "Individual permutations and standard PDPs can create implausible combinations with engineered or correlated inputs.",
+    "Area/age sensitivity maintains exact derivatives but can still create unrealistic flat-type, location and age combinations.",
+    "Month PDP changes MONTH_INDEX (and the retained rent-index restoration), holding seasonality and age columns fixed.",
+    "PDPs describe model behavior on a selected held-out population, not real-world interventions."
+  ],
+  "top_features": [
+    {
+      "feature": "FLAT_TYPE_ORDINAL",
+      "importance_mean_sgd": 166.18770741451786,
+      "importance_std_sgd": 3.7696883963653907,
+      "n_repeats": 5,
+      "sample_n": 2000,
+      "baseline_rmse_sgd": 435.99175151498486
+    },
+    {
+      "feature": "HDB_SUBZONE",
+      "importance_mean_sgd": 111.64817317541979,
+      "importance_std_sgd": 4.378611507331749,
+      "n_repeats": 5,
+      "sample_n": 2000,
+      "baseline_rmse_sgd": 435.99175151498486
+    },
+    {
+      "feature": "FLOOR_AREA_SQM",
+      "importance_mean_sgd": 25.60908375342634,
+      "importance_std_sgd": 1.7471502894532842,
+      "n_repeats": 5,
+      "sample_n": 2000,
+      "baseline_rmse_sgd": 435.99175151498486
+    },
+    {
+      "feature": "LEASE_COMMENCE_DATE",
+      "importance_mean_sgd": 7.3686849644778025,
+      "importance_std_sgd": 0.6139793212482528,
+      "n_repeats": 5,
+      "sample_n": 2000,
+      "baseline_rmse_sgd": 435.99175151498486
+    },
+    {
+      "feature": "FLAT_AGE_YEARS",
+      "importance_mean_sgd": 5.873366673525425,
+      "importance_std_sgd": 0.5816248162716551,
+      "n_repeats": 5,
+      "sample_n": 2000,
+      "baseline_rmse_sgd": 435.99175151498486
+    },
+    {
+      "feature": "FLAT_MODEL",
+      "importance_mean_sgd": 5.543785791221171,
+      "importance_std_sgd": 1.7037137387621109,
+      "n_repeats": 5,
+      "sample_n": 2000,
+      "baseline_rmse_sgd": 435.99175151498486
+    },
+    {
+      "feature": "NEAREST_OPEN_MRT_KM",
+      "importance_mean_sgd": 4.793772608713016,
+      "importance_std_sgd": 0.8619100242236873,
+      "n_repeats": 5,
+      "sample_n": 2000,
+      "baseline_rmse_sgd": 435.99175151498486
+    },
+    {
+      "feature": "MONTH_SIN",
+      "importance_mean_sgd": 3.85188306159298,
+      "importance_std_sgd": 0.9257224329931281,
+      "n_repeats": 5,
+      "sample_n": 2000,
+      "baseline_rmse_sgd": 435.99175151498486
+    },
+    {
+      "feature": "NEAREST_RAIL_LINE_KM",
+      "importance_mean_sgd": 2.957648223551132,
+      "importance_std_sgd": 0.2174845610778243,
+      "n_repeats": 5,
+      "sample_n": 2000,
+      "baseline_rmse_sgd": 435.99175151498486
+    },
+    {
+      "feature": "NEAREST_MALL_KM",
+      "importance_mean_sgd": 2.8630736917560737,
+      "importance_std_sgd": 0.4831072204613218,
+      "n_repeats": 5,
+      "sample_n": 2000,
+      "baseline_rmse_sgd": 435.99175151498486
+    }
+  ]
+}

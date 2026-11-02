@@ -40,3 +40,8 @@ results/member_b/**/test_predictions.csv
 results/member_b/**/fit_ids.csv
 results/member_b/**/holdout_truth.csv
 results/member_b/**/random5_predictions.parquet
+
+# Member D keeps models, predictions and large group intermediates local.
+results/member_d/**/*.parquet
+results/member_d/**/fit_ids.csv
+results/member_d/**/eda/tables/repeated_profile_groups_*.csv
