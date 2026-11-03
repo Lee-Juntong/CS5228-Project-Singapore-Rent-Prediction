@@ -5,11 +5,9 @@ from __future__ import annotations
 import argparse
 from datetime import datetime
 from importlib.metadata import version
-import json
 import platform
 from pathlib import Path
 import shlex
-import shutil
 import subprocess
 import sys
 from zoneinfo import ZoneInfo
@@ -76,13 +74,6 @@ def main(argv=None):
     missing = [str(p.relative_to(PROJECT_ROOT)) for p in required_paths if not p.is_file()]
     if missing:
         parser.error("Missing " + ", ".join(missing) + ". Prepare the competition inputs first; see docs/analysis.md.")
-    preparation = PROCESSED_DIR / "analysis_preparation/input_preparation.json"
-    if preparation.is_file():
-        prepared = json.loads(preparation.read_text(encoding="utf-8"))
-        for path in data_paths:
-            expected = prepared["processed_sha256"][path.relative_to(PROJECT_ROOT).as_posix()]
-            if file_hash(path) != expected:
-                parser.error("Processed data differs from its preparation record; rerun scripts.prepare_analysis_data")
     stamp = datetime.now(ZoneInfo("Asia/Singapore")).strftime("%Y%m%d-%H%M%S")
     output = args.output or PROJECT_ROOT / "results/analysis" / stamp
     output = output.resolve()
@@ -100,7 +91,7 @@ def main(argv=None):
         "command": subprocess.list2cmdline(command) if sys.platform == "win32" else shlex.join(command),
         "command_args": command,
         "python": platform.python_version(), "source_run_id": REFERENCE_RUN,
-        "packages": {p: version(p) for p in ("numpy", "pandas", "scipy", "scikit-learn", "lightgbm", "pyarrow", "matplotlib", "seaborn", "joblib", "tzdata")},
+        "packages": {p: version(p) for p in ("numpy", "pandas", "scipy", "scikit-learn", "lightgbm", "pyarrow", "matplotlib", "seaborn", "joblib")},
         "requirements_sha256": file_hash(PROJECT_ROOT / "requirements-analysis.txt"),
         "code_sha256": {str(p.relative_to(PROJECT_ROOT).as_posix()): file_hash(p) for p in
             [Path(__file__).resolve(), *(PROJECT_ROOT / "src").glob("analysis_*.py"),
@@ -150,15 +141,6 @@ def main(argv=None):
                         data_sha256={p.relative_to(PROJECT_ROOT).as_posix(): file_hash(p) for p in
                             [*data_paths, PROJECT_ROOT / "data/derived/block_extra_features.csv",
                              PROJECT_ROOT / "data/auxiliary/sg-cpi.csv"]})
-        if preparation.is_file():
-            # Keep each run's small provenance files when later preparation reruns.
-            saved_preparation = output / "preparation"
-            saved_preparation.mkdir()
-            for source_file in (preparation, preparation.with_name("audit_summary.json")):
-                shutil.copyfile(source_file, saved_preparation / source_file.name)
-            manifest["input_preparation_sha256"] = file_hash(saved_preparation / preparation.name)
-            manifest["preparation_script_sha256"] = file_hash(PROJECT_ROOT / "scripts/prepare_analysis_data.py")
-            manifest["local_preprocessing_audit_sha256"] = file_hash(saved_preparation / "audit_summary.json")
         write_json(output / "manifest.json", manifest)
         print("Generating EDA, repeated-profile and row-aligned residual diagnostics", flush=True)
         eda = generate_eda((train, test), output / "eda")

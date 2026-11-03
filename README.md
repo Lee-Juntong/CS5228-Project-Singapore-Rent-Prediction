@@ -4,44 +4,31 @@ Predict `MONTHLY_RENT` for HDB rentals. Training covers Jan 2021 to Mar 2025 and
 
 ## Setup
 
-Use Python 3.10 with the pinned packages. Run commands from the repository root.
+Use Python 3.10. Python 3.13 fails to install the pinned numpy.
 
 ```bash
 git clone https://github.com/Lee-Juntong/CS5228-Project-Singapore-Rent-Prediction.git
 cd CS5228-Project-Singapore-Rent-Prediction
-```
-
-Create and activate the environment on macOS or Linux:
-
-```bash
 python3.10 -m venv .venv
-source .venv/bin/activate
 ```
 
-On Windows, use PowerShell:
-
-```powershell
-py -3.10 -m venv .venv
-.\.venv\Scripts\Activate.ps1
-```
-
-Install the analysis packages using the activated environment:
+Activate the environment. On Windows run `.venv\Scripts\activate`. On macOS or Linux run `source .venv/bin/activate`. Then install the packages:
 
 ```bash
-python -m pip install -r requirements-analysis.txt
+pip install -r requirements.txt
 ```
 
-For the complete project, use `python -m pip install -r requirements.txt` instead; this also installs CatBoost, tuning, notebook and PyTorch dependencies.
+This includes torch for neural models such as TabM. For analysis only, use `python -m pip install -r requirements-analysis.txt` instead.
 
-On macOS, LightGBM also needs the OpenMP library (`brew install libomp`).
+On macOS, LightGBM also needs OpenMP (`brew install libomp`).
 
-Put the Kaggle files in `data/` as described in [data/README.md](data/README.md). For analysis, follow the linked reproduction guide; shared experiments can use the standard preprocessing command in the data guide.
+Then put the Kaggle files in `data/` and build the processed data as described in [data/README.md](data/README.md). Preprocessing takes about 20 seconds on Juntong's PC.
 
 ### Working together
 
 * Run `git pull` before you push.
 * Commit only your own files in `results/runs/` and `results/breakdowns/`.
-* For shared model experiments, pass your member letter as `--member` (or `member=` in Python) so the run shows who made it.
+* Pass your member letter as `--member` (or `member=` in Python) so every run shows who made it.
 
 ## Baseline ladder (Phase 1)
 
@@ -49,9 +36,9 @@ Seven baselines are registered in the shared model registry. Run `python -m scri
 
 ## Analysis
 
-[Analysis findings and reproduction](docs/analysis.md) covers EDA, repeated-profile dispersion, error cases and model interpretation. It documents one preparation command and one analysis command for the selected LightGBM plus matched Ridge comparison. Compact reference evidence is committed under `results/analysis/reference/`, with lossless compressed chart previews in the analysis guide. Full reports, PNG/PDF figures and models are regenerated locally and stay ignored.
+[Analysis findings and reproduction](docs/analysis.md) covers EDA, residuals and model interpretation for selected LightGBM plus matched Ridge. Reference evidence is in `results/analysis/reference/`; WebP previews and PDF report figures are in `docs/figures/analysis/`. Full runs and models are regenerated locally and stay ignored.
 
-Run the baseline and analysis checks without Kaggle data: `python -m unittest discover -s checks -v`.
+Run the checks without Kaggle data: `python -m unittest discover -s checks -v`.
 
 ## Shared experiment setup (Phase 0)
 

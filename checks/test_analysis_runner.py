@@ -21,6 +21,7 @@ from sklearn.dummy import DummyRegressor
 
 from scripts import run_analysis as runner
 from src import analysis_report as report
+from src import features
 from src.config import PROJECT_ROOT, SEED
 from src.evaluation import regression_metrics
 from src.features import CATEGORICAL_COLUMNS, feature_columns
@@ -60,9 +61,8 @@ def small_data():
 
 def prepare_test_repository(root, train, test):
     """Copy the small inputs needed for source hashing into an isolated repo."""
-    paths = ["scripts/run_analysis.py", "scripts/prepare_analysis_data.py", "requirements-analysis.txt",
+    paths = ["scripts/run_analysis.py", "requirements-analysis.txt",
              "configs/lightgbm_tuned.json",
-             "artifacts/data_audit/audit_summary.json",
              "data/derived/block_extra_features.csv", "data/auxiliary/sg-cpi.csv",
              "results/runs/" + runner.REFERENCE_RUN + ".csv"]
     paths += [p.relative_to(PROJECT_ROOT).as_posix()
@@ -142,14 +142,13 @@ class RunnerChecks(unittest.TestCase):
             fit.assert_not_called()
             load.assert_called_once_with()
 
-    def test_missing_configuration_and_stale_preparation_fail_before_output(self):
+    def test_missing_configuration_fails_before_output(self):
         train, test = small_data()
         with tempfile.TemporaryDirectory(dir=PROJECT_ROOT / "tmp") as folder:
             root = Path(folder)
             processed = prepare_test_repository(root, train, test)
             destination = root / "results/analysis/rejected"
             configuration = root / "configs/lightgbm_tuned.json"
-            content = configuration.read_bytes()
             configuration.unlink()
             with ExitStack() as stack:
                 stack.enter_context(patch.object(runner, "PROJECT_ROOT", root))
@@ -157,18 +156,6 @@ class RunnerChecks(unittest.TestCase):
                 stack.enter_context(patch.object(runner, "RUNS_DIR", root / "results/runs"))
                 stack.enter_context(redirect_stderr(io.StringIO()))
                 load = stack.enter_context(patch.object(runner, "load_modeling_data"))
-                with self.assertRaises(SystemExit):
-                    runner.main(["--output", str(destination)])
-                self.assertFalse(destination.exists())
-                configuration.write_bytes(content)
-                preparation = processed / "analysis_preparation/input_preparation.json"
-                preparation.parent.mkdir()
-                preparation.write_text(json.dumps({"processed_sha256": {
-                    path.relative_to(root).as_posix(): report.file_hash(path)
-                    for path in processed.glob("*.parquet")}}), encoding="utf-8")
-                changed = train.copy()
-                changed.loc[0, "MONTHLY_RENT"] += 100
-                changed.to_parquet(processed / "train_features.parquet", index=False)
                 with self.assertRaises(SystemExit):
                     runner.main(["--output", str(destination)])
                 self.assertFalse(destination.exists())
@@ -180,20 +167,16 @@ class RunnerChecks(unittest.TestCase):
             root = Path(folder)
             processed = prepare_test_repository(root, train, test)
             destination = root / "results/analysis/synthetic"
-            preparation_dir = processed / "analysis_preparation"
-            preparation_dir.mkdir()
-            shutil.copyfile(root / "artifacts/data_audit/audit_summary.json",
-                            preparation_dir / "audit_summary.json")
-            report.write_json(preparation_dir / "input_preparation.json", {"processed_sha256": {
-                path.relative_to(root).as_posix(): report.file_hash(path)
-                for path in processed.glob("*.parquet")}})
             with ExitStack() as stack:
                 stack.enter_context(patch.object(runner, "PROJECT_ROOT", root))
                 stack.enter_context(patch.object(report, "PROJECT_ROOT", root))
                 stack.enter_context(patch.object(runner, "PROCESSED_DIR", processed))
                 stack.enter_context(patch.object(runner, "RUNS_DIR", root / "results/runs"))
                 stack.enter_context(patch.object(runner, "__file__", str(root / "scripts/run_analysis.py")))
-                stack.enter_context(patch.object(runner, "load_modeling_data", return_value=(train, test)))
+                load = stack.enter_context(patch.object(runner, "load_modeling_data", wraps=features.load_modeling_data))
+                stack.enter_context(patch.object(features, "PROCESSED_DIR", processed))
+                stack.enter_context(patch.object(features, "load_block_extras", return_value=None))
+                stack.enter_context(patch.object(features, "add_external_features", side_effect=lambda frame, _: frame))
                 stack.enter_context(patch.object(runner, "make_lightgbm_tuned",
                                                  return_value=DummyRegressor(strategy="median")))
                 # This checks plumbing using artificial data, never agreement
@@ -203,6 +186,7 @@ class RunnerChecks(unittest.TestCase):
                 stack.enter_context(redirect_stdout(io.StringIO()))
                 actual = runner.main(["--output", str(destination), "--sample-size", "12",
                                       "--permutation-repeats", "2"])
+            load.assert_called_once_with()
             self.assertEqual(actual, destination)
             manifest = json.loads((destination / "manifest.json").read_text(encoding="utf-8"))
             self.assertEqual(manifest["status"], "complete")
@@ -210,12 +194,8 @@ class RunnerChecks(unittest.TestCase):
             self.assertEqual(manifest["n_valid"], 24)
             self.assertEqual(manifest["sampling"]["sample_n"], 12)
             self.assertIn("data/derived/block_extra_features.csv", manifest["data_sha256"])
+            self.assertIn("data/processed/train_features.parquet", manifest["data_sha256"])
             self.assertIn("src/data_preprocessing.py", manifest["code_sha256"])
-            self.assertIn("local_preprocessing_audit_sha256", manifest)
-            self.assertEqual(report.file_hash(destination / "preparation/input_preparation.json"),
-                             manifest["input_preparation_sha256"])
-            self.assertEqual(report.file_hash(destination / "preparation/audit_summary.json"),
-                             manifest["local_preprocessing_audit_sha256"])
             self.assertEqual(manifest["command_args"][-1], "2")
             for path in destination.rglob("*.json"):
                 # Strict parsing forbids NaN and Infinity in serialized results.

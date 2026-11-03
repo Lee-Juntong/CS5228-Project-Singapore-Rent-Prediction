@@ -1,6 +1,6 @@
 # Error analysis, interpretation and EDA
 
-The analysis covers rent EDA, repeated-profile dispersion, residual breakdowns and case review, plus permutation importance and partial dependence for the selected model. This contribution uses the shared data and model configuration; reproduction requires two fixed holdout fits. The lossless WebP previews retain the original chart pixels and dimensions.
+The analysis covers rent EDA, repeated-profile dispersion, residual breakdowns and case review, plus permutation importance and partial dependence for the selected model. This contribution uses the shared preprocessing and model configuration; reproduction requires two fixed holdout fits. The lossless WebP previews retain the original chart pixels and dimensions. Matching [PDF figures](figures/analysis/) embed those pixels losslessly for use with pdflatex.
 
 ## Recorded findings
 
@@ -11,7 +11,7 @@ Both models fit January 2021–September 2024 (132,538 rows) and validate Octobe
 | Selected LightGBM | 445.78 | 323.91 | 12.25 | −24.51 |
 | Matched Ridge | 467.13 | 347.45 | 12.94 | −57.54 |
 
-**EDA:** cleaning removes 425 exact duplicates, leaving 149,575 labelled rows and preserving all 50,000 test rows. Training spans January 2021–March 2025; test spans March 2025–July 2026. Median rent rises from SGD 2,100 in 2021 to 3,100 in 2024. Time has Spearman rho 0.564 and Pearson r 0.535, correcting the earlier weak-correlation claim.
+**EDA:** cleaning removes 425 exact duplicates, leaving 149,575 labelled rows and preserving all 50,000 test rows. Training spans January 2021–March 2025; test spans March 2025–July 2026. Median rent rises from SGD 2,100 in 2021 to 3,100 in 2024. Time has Spearman rho 0.564 and Pearson r 0.535.
 
 ![Rent distribution and monthly medians](figures/analysis/eda_distribution_trend.webp)
 
@@ -37,6 +37,8 @@ Other unverified explanations include discounted or long-standing tenancy agreem
 
 **Interpretation:** on 2,000 fixed holdout rows with five permutations and seed 5228, ordinal flat type, subzone and floor area have the largest RMSE effects (+166.19, +111.65 and +25.61 SGD). Boosting's MRT response is nonlinear; Ridge's is linear. Area/age sensitivities update derived inputs alongside the primary feature.
 
+The month permutation effect is only +0.057 SGD RMSE over the six holdout months. Permuting `MONTH_INDEX` changes both the model input and the training-fitted rent-index multiplier. The small effect reflects the shallow fitted index slope over this window and does not imply that historical rent trends are weak; see the [archived interpretation](analysis_review.md#interpretation).
+
 ![Held-out permutation importance](figures/analysis/permutation_importance.webp)
 
 ![Partial dependence and derived-feature sensitivities](figures/analysis/partial_dependence.webp)
@@ -47,21 +49,27 @@ Low observed rents do not confirm recording errors. Missing unit/tenancy attribu
 
 ## Reproduce
 
-Use Python 3.10 and the [analysis dependencies](../requirements-analysis.txt), following the [project setup](../README.md#setup). Place all eight competition CSVs as described in [data/README.md](../data/README.md). From the repository root with the environment activated:
+Use Python 3.10 and the [analysis dependencies](../requirements-analysis.txt), following the [project setup](../README.md#setup). Place all eight competition CSVs as described in [data/README.md](../data/README.md). From the repository root with the environment activated, build the shared features if needed, then run the analysis:
 
 ```bash
-python -m scripts.prepare_analysis_data --staging tmp/analysis_inputs_reproduction
+python -c "from src.data_preprocessing import run_pipeline; run_pipeline(audit_dir='data/processed/analysis_audit')"
 python -m scripts.run_analysis --output results/analysis/reproduction
 python -m unittest discover -s checks -v
 ```
 
-Use fresh staging and output names for reruns. These commands work in PowerShell, macOS and Linux after activation. Checks use synthetic fixtures and can run without Kaggle data.
+Use fresh analysis output names for reruns. These commands work in PowerShell, macOS and Linux after activation. Checks use synthetic fixtures and can run without Kaggle data.
 
-Preparation preserves original CSVs and writes its audit under ignored `data/processed/analysis_preparation/`. The analysis uses the committed `configs/lightgbm_tuned.json` selected by [Member C](boosting_model_choice.md#5-final-model-choice), with source run `20261025-210800_lightgbm_tuned_G0+G1_time_index`; it does not retune the model.
+The preprocessing command rebuilds the shared `data/processed/train_features.parquet` and `test_features.parquet`; skip it when current processed features are already available. The shared raw-data loader handles padded CSV headers while preserving the original files. The command writes its audit under ignored `data/processed/analysis_audit/` to preserve the committed audit. The analysis uses the committed `configs/lightgbm_tuned.json` selected by [Member C](boosting_model_choice.md#5-final-model-choice), with source run `20261025-210800_lightgbm_tuned_G0+G1_time_index`; it does not retune the model.
 
-Each run produces `report.md`, `sections.tex`, EDA/residual/interpretation figures and source tables beneath its output directory. `manifest.json` records configuration, inputs, environment and reference agreement. Generated runs, predictions and model bundles stay ignored. The repository keeps the compact reference snapshot, archived prose and compressed WebP figure previews; full PNG/PDF figures remain local.
+Each run produces `report.md`, `sections.tex`, EDA/residual/interpretation figures and source tables beneath its output directory. `manifest.json` records configuration, inputs, environment and reference agreement. Generated runs, predictions and model bundles stay ignored. The repository keeps the compact reference snapshot, archived prose, lossless WebP previews and PDF copies converted from those previews.
 
-To refresh the committed previews from a reproduced run:
+Convert the committed WebP previews to PDFs without rerunning the analysis:
+
+```bash
+python -m scripts.export_report_figures
+```
+
+To refresh the WebP previews and PDF copies from a reproduced run:
 
 ```bash
 python -m scripts.export_report_figures --input results/analysis/reproduction

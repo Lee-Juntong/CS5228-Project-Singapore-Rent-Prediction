@@ -103,7 +103,9 @@ def write_full_report(output, eda, residuals, interpretation, profile_comparison
               markdown_table(importance.head(10), ["feature", "importance_mean_sgd", "importance_std_sgd"]),
               f"Permutation importance is the increase in SGD RMSE on {interpretation['sample_n']:,} fixed holdout "
               f"rows over {interpretation['n_repeats']} repeats. SD describes permutation variation, not a confidence "
-              "interval. Correlated inputs can share importance. PDPs describe fitted predictions, not causal effects; "
+              "interval. Correlated inputs can share importance. Month permutation also changes the retained "
+              "rent-index multiplier; its effect over this six-month holdout does not measure the full historical trend. "
+              "PDPs describe fitted predictions, not causal effects; "
               "area/age sensitivity updates engineered derivatives, while month curves hold seasonality and age fixed.",
               "[Correlations versus importance](correlation_vs_importance.csv) · "
               "[Partial-dependence values](interpretation/partial_dependence.csv)", "## Figures"]
