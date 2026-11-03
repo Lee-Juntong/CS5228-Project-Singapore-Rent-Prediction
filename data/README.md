@@ -32,3 +32,5 @@ python -c "from src.data_preprocessing import run_pipeline; run_pipeline()"
 ```
 
 This writes `processed/train_features.parquet` and `processed/test_features.parquet`.
+
+The [analysis workflow](../docs/analysis.md#reproduce) uses the same preprocessing with a separate audit directory. Keep the committed block-feature cache; the rail GeoJSON is only needed if rebuilding that cache.

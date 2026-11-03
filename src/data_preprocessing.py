@@ -7,7 +7,9 @@ audit artifacts used by the companion notebook.
 
 from __future__ import annotations
 
+import csv
 from dataclasses import dataclass
+from io import StringIO
 from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
 import json
@@ -117,7 +119,22 @@ def load_raw_data(data_dir: str | Path) -> dict[str, pd.DataFrame]:
             }
         elif name == "schools":
             dtype = {"POSTAL_CODE": "string"}
-        datasets[name] = pd.read_csv(path, dtype=dtype)
+        source = path
+        with path.open(encoding="utf-8-sig", newline="") as handle:
+            rows = csv.reader(handle)
+            header = next(rows, [])
+            columns = [column.strip() for column in header]
+            if len(set(columns)) != len(columns):
+                raise ValueError(f"Trimming produces duplicate column names: {path}")
+            if columns != header:
+                # Normalize before inference so padded identifier headers still
+                # match dtype keys; retain source bytes and normal CSV parsing.
+                source = StringIO()
+                writer = csv.writer(source)
+                writer.writerow(columns)
+                writer.writerows([field.strip() for field in row] for row in rows)
+                source.seek(0)
+        datasets[name] = pd.read_csv(source, dtype=dtype)
     return datasets
 
 

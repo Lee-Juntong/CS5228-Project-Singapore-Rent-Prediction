@@ -1,5 +1,7 @@
 # Kaggle data and large files stay out of git. See data/README.md.
 data/*.csv
+# Kaggle archives can unpack into a second data/ directory.
+data/data/
 data/processed/
 data/auxiliary/*
 !data/auxiliary/sg-cpi.csv
@@ -40,3 +42,7 @@ results/member_b/**/test_predictions.csv
 results/member_b/**/fit_ids.csv
 results/member_b/**/holdout_truth.csv
 results/member_b/**/random5_predictions.parquet
+
+# Regenerate analysis runs locally; commit only the compact reference results.
+results/analysis/*
+!results/analysis/reference/

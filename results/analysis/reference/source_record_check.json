@@ -1,0 +1,33 @@
+{
+  "checked_at": "2026-11-03T11:35:23.355208+08:00",
+  "purpose": "Check a published rent; no new modeling inputs",
+  "source_dataset": "https://data.gov.sg/datasets/d_c9f57187485a850908655db0e8cfe651/view",
+  "source_definition": "https://api-production.data.gov.sg/v2/public/api/collections/166/metadata",
+  "definition": "Market rental rates by approval date; rent agreed between owners and tenants, declared by the flat owner; accuracy not verified by HDB.",
+  "project_row_id": 147330,
+  "public_record": {
+    "_id": 154079,
+    "rent_approval_date": "2025-03",
+    "town": "BUKIT MERAH",
+    "block": "112A",
+    "street_name": "DEPOT RD",
+    "flat_type": "5-ROOM",
+    "monthly_rent": "650"
+  },
+  "matching": "Approval month, town, block, flat type and monthly rent match; DEPOT RD corresponds to Depot Road.",
+  "public_columns": [
+    "rent_approval_date",
+    "town",
+    "block",
+    "street_name",
+    "flat_type",
+    "monthly_rent"
+  ],
+  "limits": [
+    "The API _id is a public table row identifier, not a listing or unit identifier.",
+    "No unit number, listing URL, lease details or room/whole-flat indicator is published here.",
+    "Floor area, flat model and lease commencement year in the competition row are absent from this public table.",
+    "A matching published record does not establish the original advertisement, rental coverage or a confirmed recording error.",
+    "The full competition dataset provenance has not been established by this single-record check."
+  ]
+}
