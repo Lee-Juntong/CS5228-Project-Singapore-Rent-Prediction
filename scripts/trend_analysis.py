@@ -47,6 +47,8 @@ MODELS = {
     "xgboost_tuned": "XGBoost (tuned)",
 }
 MONTHLY_PLOT = ["ridge", "random_forest", "lightgbm_tuned"]
+# Left out of the report split table to save space. They stay in split_comparison.csv.
+SPLIT_TABLE_SKIP = {"lightgbm_default", "catboost_default", "xgboost_default"}
 
 
 def latest_time_runs(results: pd.DataFrame) -> pd.DataFrame:
@@ -96,15 +98,15 @@ def write_latex(trend: pd.DataFrame, split: pd.DataFrame) -> None:
     lines = [r"\begin{tabular}{lrrr}", r"\hline",
              r"\textbf{Model} & \textbf{Raw} & \textbf{Index} & \textbf{Change} \\", r"\hline"]
     for row in trend.itertuples():
-        lines.append(f"{MODELS[row.model]} & {row.rmse_raw:.1f} & {row.rmse_index:.1f} & {row.change:+.1f} \\\\")
+        lines.append(f"{MODELS[row.model]} & {row.rmse_raw:.1f} & {row.rmse_index:.1f} & ${row.change:+.1f}$ \\\\")
     lines += [r"\hline", r"\end{tabular}"]
     (TABLES / "trend.tex").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
     lines = [r"\begin{tabular}{lrrr}", r"\hline",
              r"\textbf{Model} & \textbf{Time} & \textbf{Random} & \textbf{Gap} \\", r"\hline"]
-    for row in split.itertuples():
+    for row in split[~split["model"].isin(SPLIT_TABLE_SKIP)].itertuples():
         name = MODELS[row.model] + (" + index" if row.target_mode == "index" else "")
-        lines.append(f"{name} & {row.rmse_time:.1f} & {row.rmse_random5_window:.1f} & {row.optimism:+.1f} \\\\")
+        lines.append(f"{name} & {row.rmse_time:.1f} & {row.rmse_random5_window:.1f} & ${row.optimism:+.1f}$ \\\\")
     lines += [r"\hline", r"\end{tabular}"]
     (TABLES / "split.tex").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
@@ -128,7 +130,7 @@ def plot(index_frame: pd.DataFrame, monthly: pd.DataFrame) -> None:
     fig.savefig(FIGURES / "rent_index.pdf")
     plt.close(fig)
 
-    fig, axes = plt.subplots(1, 2, figsize=(7.0, 2.2), sharex=True)
+    fig, axes = plt.subplots(2, 1, figsize=(3.4, 3.4), sharex=True)
     colors = dict(zip(MONTHLY_PLOT, ["tab:red", "tab:green", "tab:blue"]))
     for model in MONTHLY_PLOT:
         for mode, style in (("raw", "--"), ("index", "-")):
@@ -139,11 +141,11 @@ def plot(index_frame: pd.DataFrame, monthly: pd.DataFrame) -> None:
             axes[0].plot(part["month"], part["rmse"], style, color=colors[model], marker="o", ms=2.5, lw=1, label=label)
             axes[1].plot(part["month"], part["bias"], style, color=colors[model], marker="o", ms=2.5, lw=1)
     axes[0].set_ylabel("RMSE (SGD)")
-    axes[1].set_ylabel("Mean prediction minus rent (SGD)")
+    axes[1].set_ylabel("Bias (SGD)")
     axes[1].axhline(0, color="0.6", lw=0.8)
-    for ax in axes:
-        ax.tick_params(axis="x", rotation=45)
-    axes[0].legend(frameon=False, fontsize=6, ncol=2)
+    axes[1].tick_params(axis="x", rotation=45)
+    # The bias panel has empty space between the Ridge raw line and zero.
+    axes[1].legend(*axes[0].get_legend_handles_labels(), frameon=False, fontsize=6, ncol=2, loc="center")
     fig.tight_layout()
     fig.savefig(FIGURES / "monthly_rmse.pdf")
     plt.close(fig)

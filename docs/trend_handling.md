@@ -10,7 +10,7 @@ Plan decision 5 and the random CV check from decision 1. All runs use G0+G1 feat
 
 ## Verdicts
 
-1. **The index target helps 11 of the 13 models.** Tuned CatBoost changes by only 0.2 SGD. Default XGBoost is the one clear exception: it gets 2.4 SGD worse, although its bias falls from −36 to −22 SGD. Tuned XGBoost gains 4.3 SGD, so the loss does not carry over to the tuned model.
+1. **The index target lowers the RMSE of 11 of the 13 models.** For KNN and default CatBoost the gain is under 1 SGD, so the gain is clear for 9 models. Tuned CatBoost gets 0.2 SGD worse. Default XGBoost is the one clear exception: it gets 2.4 SGD worse, although its bias falls from −36 to −22 SGD. Tuned XGBoost gains 4.3 SGD, so the loss does not carry over to the tuned model.
 
    | Model | Raw | Index | Change |
    |---|---:|---:|---:|
@@ -30,9 +30,9 @@ Plan decision 5 and the random CV check from decision 1. All runs use G0+G1 feat
 
 2. **The untuned random forest with the index target (444.3) is the best single result.** It beats tuned XGBoost (445.6) and the chosen final model, tuned LightGBM (445.8), both with the index target. The three are within 1.5 SGD, and the difference comes from one six month holdout, so it does not by itself justify a change of the final model. Member C already treats XGBoost and LightGBM as a tie (public leaderboard 434.5 and 434.4) and keeps LightGBM. The same reasoning covers the forest, but Member C should confirm it. LightGBM fits in about 18 seconds and the forest in about 97 seconds on Juntong's PC.
 
-3. **Most of the gap between simple and complex models is the trend, not the model.** On raw rent Ridge is 126 SGD behind tuned LightGBM. With the index target it is 22 SGD behind. Ridge on raw rent over-predicts by 330 SGD on average, because its month coefficient extends the steep rise of 2022 and 2023 into a flat period. The medians on raw rent under-predict by more than 500 SGD.
+3. **Most of the gap between simple and complex models is the trend, not the model.** On raw rent Ridge is 126 SGD behind tuned LightGBM. With the index target it is 22 SGD behind. Ridge on raw rent over-predicts by 330 SGD on average, because its month coefficient extends the average rise from 2021 to 2024 into a flat period. The medians on raw rent under-predict by more than 500 SGD.
 
-4. **The holdout cannot show trend drift for tree models.** Rents were nearly flat from February 2024 (median about SGD 3,100), so the extrapolated index rises only about 2.4 SGD per month and stays within 73 SGD of the observed median in the holdout months. Tree model errors do not grow from October 2024 to March 2025. Only Ridge on raw rent shows growing bias (239 to 381 SGD). The index still helps trees, because it removes a constant under-prediction of 28 to 50 SGD that comes from leaves mixing old and recent rows.
+4. **The holdout cannot show trend drift for tree models.** Rents rose quickly through 2022 and were nearly flat from mid 2023 (median about SGD 3,100), so the extrapolated index rises only about 2.4 SGD per month and stays within 73 SGD of the observed median in the holdout months. Tree model errors do not grow from October 2024 to March 2025. Only Ridge on raw rent shows growing bias (239 to 381 SGD). On raw rent the tree models under-predict by 28 to 50 SGD, because leaves mix old and recent rows. The index target shrinks this bias for every tree model except the two CatBoost models, where it grows (default −28 to −36, tuned −30 to −50).
 
 5. **Random CV flatters the simple models, not the trees.** Gap is time holdout RMSE minus random CV RMSE on the same October 2024 to March 2025 rows.
 
