@@ -1,0 +1,79 @@
+{
+  "status": "verified_reference",
+  "source_run_id": "20261025-210800_lightgbm_tuned_G0+G1_time_index",
+  "protocol": {
+    "model": "lightgbm_tuned",
+    "configuration": "configs/lightgbm_tuned.json",
+    "comparison": "src.models.make_ridge (alpha=1, all 39 inputs)",
+    "feature_set": "G0+G1",
+    "target_mode": "index",
+    "split": "time",
+    "fit_window": [
+      "2021-01",
+      "2024-09"
+    ],
+    "validation_window": [
+      "2024-10",
+      "2025-03"
+    ],
+    "seed": 5228,
+    "n_features": 39,
+    "n_fit": 132538,
+    "n_valid": 17037
+  },
+  "archived_metrics": {
+    "lightgbm_tuned": {
+      "rmse": 445.7839527832047,
+      "mae": 323.91471832484444,
+      "mape": 12.25453349449272,
+      "bias": -24.51445610623399
+    },
+    "matched_ridge": {
+      "rmse": 467.12838202679575,
+      "mae": 347.4462886425195,
+      "mape": 12.943872817933439,
+      "bias": -57.54227904358345
+    }
+  },
+  "metric_units": {
+    "rmse": "SGD",
+    "mae": "SGD",
+    "mape": "percent",
+    "bias": "prediction minus truth, SGD"
+  },
+  "verification_method": {
+    "source": "results/runs/20261025-210800_lightgbm_tuned_G0+G1_time_index.csv",
+    "comparison": "ROW_ID-aligned holdout refit RMSE, MAE, MAPE and bias against archived aggregate metrics",
+    "absolute_tolerance_per_metric": 0.05,
+    "limitation": "Original source row-level predictions are unavailable; aggregate agreement does not establish identical row predictions."
+  },
+  "permutation": {
+    "sample_n": 2000,
+    "n_repeats": 5,
+    "seed": 5228,
+    "importance_definition": "Permuted RMSE minus baseline RMSE, SGD; repeat SD is population SD, not a confidence interval"
+  },
+  "reproduction": {
+    "status": "passed",
+    "verified_at": "2026-11-02T16:13:19.420862+08:00",
+    "python": "3.10.20",
+    "output": "results/analysis/reproduction (local, ignored)",
+    "commands": [
+      "python -m scripts.prepare_analysis_data --staging tmp/analysis_inputs_reproduction",
+      "python -m scripts.run_analysis --output results/analysis/reproduction",
+      "python -m unittest discover -s checks -v"
+    ],
+    "checks_passed": 38,
+    "maximum_absolute_metric_difference": {
+      "lightgbm_tuned": 5.684341886080802e-14,
+      "matched_ridge": 0.001484856553474856
+    },
+    "saved_model_reload_predictions_match": true,
+    "preparation_audit_preserved_in_run": true,
+    "repeated_profile_summaries_match": true,
+    "permutation_importance_matches": true,
+    "archived_reviewed_cases_match": 30,
+    "key_figures_visually_checked": true,
+    "final_code_and_input_hashes_match": true
+  }
+}

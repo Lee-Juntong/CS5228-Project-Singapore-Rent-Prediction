@@ -1,0 +1,14 @@
+# Analysis dependencies only. Python 3.10; scientific versions match the saved run.
+numpy==1.26.4
+pandas==2.2.1
+pyarrow==19.0.1
+scipy==1.12.0
+scikit-learn==1.5.1
+lightgbm==4.6.0
+matplotlib==3.9.2
+seaborn==0.13.2
+# Serialization and Windows timezone support used by the analysis scripts.
+joblib==1.4.2
+tzdata==2025.2
+# Lossless WebP report previews.
+pillow==12.3.0

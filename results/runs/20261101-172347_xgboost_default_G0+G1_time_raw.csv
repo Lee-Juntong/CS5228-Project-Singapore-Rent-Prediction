@@ -1,0 +1,2 @@
+run_id,timestamp,member,model,feature_set,n_features,split,target_mode,n_fit,n_valid,rmse,rmse_std,mae,mape,bias,rmse_window,train_seconds,predict_seconds,seed,git_commit,notes
+20261101-172347_xgboost_default_G0+G1_time_raw,2026-11-01T17:23:47,C,xgboost_default,G0+G1,39,time,raw,132538,17037,457.18463121313687,0.0,335.41330170467677,12.60566879140228,-35.70215438446011,457.18463121313687,0.6677335829590447,0.008863916038535535,5228,122c6a0,

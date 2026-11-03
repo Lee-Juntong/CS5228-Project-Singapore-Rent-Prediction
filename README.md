@@ -18,7 +18,9 @@ Activate the environment. On Windows run `.venv\Scripts\activate`. On macOS or L
 pip install -r requirements.txt
 ```
 
-This includes torch (CPU build) for neural models such as TabM.
+This includes torch for neural models such as TabM. For analysis only, use `python -m pip install -r requirements-analysis.txt` instead.
+
+On macOS, LightGBM also needs OpenMP (`brew install libomp`).
 
 Then put the Kaggle files in `data/` and build the processed data as described in [data/README.md](data/README.md). Preprocessing takes about 20 seconds on Juntong's PC.
 
@@ -31,6 +33,12 @@ Then put the Kaggle files in `data/` and build the processed data as described i
 ## Baseline ladder (Phase 1)
 
 Seven baselines are registered in the shared model registry. Run `python -m scripts.run_baselines --output results/member_b/new_run` for seven holdout fits and comparison plots. Learning curves, random CV and one selected final refit are optional. See the [pipeline guide](docs/pipeline_guide.md#baseline-ladder) for commands and hyperparameters, and the [baseline results](docs/baseline_results.md) for the recorded scores and figure locations.
+
+## Analysis
+
+[Analysis findings and reproduction](docs/analysis.md) covers EDA, residuals and model interpretation for selected LightGBM plus matched Ridge. Reference evidence is in `results/analysis/reference/`; WebP previews and PDF report figures are in `docs/figures/analysis/`. Full runs and models are regenerated locally and stay ignored.
+
+Run the checks without Kaggle data: `python -m unittest discover -s checks -v`.
 
 ## Shared experiment setup (Phase 0)
 
@@ -112,7 +120,7 @@ Feature-group ablation (tuned models, time holdout, raw target). The tuned hyper
 | G0+G1+G2 (+block) | 44 | 448.5 | 449.8 |
 | ALL (+market) | 54 | 450.1 | 452.4 |
 
-Location (G1) is the only group that clearly helps: it cuts about 12 to 14 RMSE for both models. Block attributes (G2) add almost nothing (0.1 to 0.3). The market group (G3: current-month COE, CPI and stock values) makes both models worse, by 1.6 to 2.6 RMSE, even though those values would not be known at prediction time. This supports decision 6: the leaky macro features are not worth keeping, and `G0+G1+G2` is the best feature recipe.
+Location (G1) is the only group that clearly helps: it cuts about 12 to 14 RMSE for both models. Block attributes (G2) add almost nothing (0.1 to 0.3). The market group (G3: current-month COE, CPI and stock values) makes both models worse, by 1.6 to 2.6 RMSE, even though those values would not be known at prediction time. The final selected recipe is `G0+G1` with index targets; the tiny raw-target improvement from G2 does not carry over to that LightGBM setup.
 
 ### Where results go
 

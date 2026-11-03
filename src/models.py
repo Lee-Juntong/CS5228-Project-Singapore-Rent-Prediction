@@ -114,6 +114,20 @@ def make_catboost():
     return CatBoostModel()
 
 
+def make_xgboost():
+    """XGBoost with default settings. Reads pandas categories natively.
+
+    XGBoost >= 2.0 handles `category` dtype with `enable_categorical=True` and the
+    histogram tree method, and takes numeric NaN natively, so no wrapper or manual
+    encoding is needed (unlike CatBoost).
+    """
+
+    from xgboost import XGBRegressor
+
+    return XGBRegressor(random_state=SEED, n_jobs=-1, enable_categorical=True,
+                        tree_method="hist")
+
+
 def make_ridge():
     """Ridge (alpha 1) on every column, one hot categories, scaled numerics.
 
@@ -155,6 +169,15 @@ def make_catboost_tuned():
     return CatBoostModel(**_load_tuned_params("catboost"))
 
 
+def make_xgboost_tuned():
+    """XGBoost with the parameters from configs/xgboost_tuned.json."""
+
+    from xgboost import XGBRegressor
+
+    return XGBRegressor(random_state=SEED, n_jobs=-1, enable_categorical=True,
+                        tree_method="hist", **_load_tuned_params("xgboost"))
+
+
 def make_baseline(name):
     """Load baseline implementations lazily to avoid a circular import."""
     from src.baselines import BASELINE_MODELS
@@ -166,8 +189,10 @@ MODELS = {
     "global_median": make_global_median,
     "lightgbm_default": make_lightgbm,
     "catboost_default": make_catboost,
+    "xgboost_default": make_xgboost,
     "lightgbm_tuned": make_lightgbm_tuned,
     "catboost_tuned": make_catboost_tuned,
+    "xgboost_tuned": make_xgboost_tuned,
     "ridge_default": make_ridge,
     **{name: partial(make_baseline, name) for name in (
         "group_median", "linear_regression", "ridge", "knn",

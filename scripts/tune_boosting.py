@@ -7,11 +7,12 @@ Jan 2021 to Sep 2024 fit / Oct 2024 to Mar 2025 validation split that
 
 The search runs through the shared `fit_predict`, which calls the model factory
 fresh and fixes the seed for every trial. Best parameters are written to
-`configs/<model>_tuned.json`; `make_lightgbm_tuned` / `make_catboost_tuned` in
-`src/models.py` read them back.
+`configs/<model>_tuned.json`; `make_lightgbm_tuned` / `make_catboost_tuned` /
+`make_xgboost_tuned` in `src/models.py` read them back.
 
-    python -m scripts.tune_boosting                 # both models, 30 trials each
+    python -m scripts.tune_boosting                 # all three models, 30 trials each
     python -m scripts.tune_boosting --model catboost --trials 50
+    python -m scripts.tune_boosting --model xgboost
 """
 
 from __future__ import annotations
@@ -59,6 +60,19 @@ def _catboost_space(trial: optuna.Trial) -> dict:
     }
 
 
+def _xgboost_space(trial: optuna.Trial) -> dict:
+    return {
+        "n_estimators": trial.suggest_int("n_estimators", 200, 2000, step=100),
+        "learning_rate": trial.suggest_float("learning_rate", 0.01, 0.3, log=True),
+        "max_depth": trial.suggest_int("max_depth", 3, 10),
+        "min_child_weight": trial.suggest_float("min_child_weight", 1.0, 10.0),
+        "subsample": trial.suggest_float("subsample", 0.5, 1.0),
+        "colsample_bytree": trial.suggest_float("colsample_bytree", 0.5, 1.0),
+        "reg_alpha": trial.suggest_float("reg_alpha", 1e-3, 10.0, log=True),
+        "reg_lambda": trial.suggest_float("reg_lambda", 1e-3, 10.0, log=True),
+    }
+
+
 def _lightgbm_factory(params: dict) -> Callable:
     def make():
         from lightgbm import LGBMRegressor
@@ -77,8 +91,18 @@ def _catboost_factory(params: dict) -> Callable:
     return make
 
 
-SPACES = {"lightgbm": _lightgbm_space, "catboost": _catboost_space}
-FACTORIES = {"lightgbm": _lightgbm_factory, "catboost": _catboost_factory}
+def _xgboost_factory(params: dict) -> Callable:
+    def make():
+        from xgboost import XGBRegressor
+
+        return XGBRegressor(random_state=SEED, n_jobs=-1, enable_categorical=True,
+                            tree_method="hist", **params)
+
+    return make
+
+
+SPACES = {"lightgbm": _lightgbm_space, "catboost": _catboost_space, "xgboost": _xgboost_space}
+FACTORIES = {"lightgbm": _lightgbm_factory, "catboost": _catboost_factory, "xgboost": _xgboost_factory}
 
 
 def tune(model: str, trials: int, timeout: float | None, data) -> dict:
@@ -124,7 +148,7 @@ def save_params(model: str, params: dict, rmse: float) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "--model", nargs="+", default=["lightgbm", "catboost"], choices=list(SPACES)
+        "--model", nargs="+", default=["lightgbm", "catboost", "xgboost"], choices=list(SPACES)
     )
     parser.add_argument("--trials", type=int, default=30, help="Optuna trials per model")
     parser.add_argument(
