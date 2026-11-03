@@ -114,9 +114,11 @@ varies, so each row isolates one feature group. Raw target, time holdout.
   even though those values would not be known at prediction time — supports plan
   decision 6: drop the leaky macro features.
 
-XGBoost was not run through the feature-group ablation (it was added later, only
-on G0+G1); since the feature-group ranking above is model-agnostic — G1 helps,
-G2/G3 do not — there is no reason to expect XGBoost to differ.
+The feature-group ablation was run for **LightGBM and CatBoost only**. XGBoost
+was added later and run only on the best LightGBM/CatBoost combination (G0+G1),
+to compare model families — not swept across feature groups — so we make no
+claim about which feature groups matter for XGBoost. The G1-helps / G2-G3-don't
+pattern is consistent across the two families we did ablate.
 
 **Why the full 4-way ablation was run only on `raw`, and only G0+G1 and
 G0+G1+G2 for `index`:** the ablation's job is to rank *feature groups*, and the
@@ -171,8 +173,11 @@ Reasoning:
   an artifact of the split, so we expect it to generalize.
 
 The bigger takeaway: **all three boosting families converge to ~445–450 on the
-index target**, which is stronger evidence that this is near the achievable
-ceiling for these features than any single model would be.
+index target**. This shows the result is not specific to one library — the
+choice of boosting implementation no longer moves the score — so further gains
+would have to come from features or data, not from swapping boosting models. (It
+does not by itself establish an absolute error floor; the noise-floor analysis
+speaks to that separately.)
 
 Submission: `submissions/lightgbm_tuned_G0G1_index.csv` (50k rows, Id/Predicted),
 logged in `results/kaggle_log.csv`. Weights saved for replay at
@@ -341,5 +346,6 @@ Not the final model — submitted only to place the third boosting family on the
 leaderboard next to LightGBM (434.4). XGBoost scores 434.5 vs LightGBM's 434.4 —
 **0.05 apart**, so the two best models are indistinguishable on the test set, not
 just the holdout. This confirms the §5 takeaway on real data: all three boosting
-families land in the same place (~445 holdout / ~434 LB), so the choice between
-them is noise and the ~434 level is near the achievable ceiling for these features.
+families land in the same place (~445 holdout / ~434 LB), so the choice of
+boosting library is noise — further gains would need better features or data,
+not a different boosting model.
