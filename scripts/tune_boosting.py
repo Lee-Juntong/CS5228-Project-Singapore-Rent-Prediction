@@ -7,11 +7,12 @@ Jan 2021 to Sep 2024 fit / Oct 2024 to Mar 2025 validation split that
 
 The search runs through the shared `fit_predict`, which calls the model factory
 fresh and fixes the seed for every trial. Best parameters are written to
-`configs/<model>_tuned.json`; `make_lightgbm_tuned` / `make_catboost_tuned` in
-`src/models.py` read them back.
+`configs/<model>_tuned.json`; `make_lightgbm_tuned` / `make_catboost_tuned` /
+`make_xgboost_tuned` in `src/models.py` read them back.
 
-    python -m scripts.tune_boosting                 # both models, 30 trials each
+    python -m scripts.tune_boosting                 # all three models, 30 trials each
     python -m scripts.tune_boosting --model catboost --trials 50
+    python -m scripts.tune_boosting --model xgboost
 """
 
 from __future__ import annotations
@@ -147,7 +148,7 @@ def save_params(model: str, params: dict, rmse: float) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "--model", nargs="+", default=["lightgbm", "catboost"], choices=list(SPACES)
+        "--model", nargs="+", default=["lightgbm", "catboost", "xgboost"], choices=list(SPACES)
     )
     parser.add_argument("--trials", type=int, default=30, help="Optuna trials per model")
     parser.add_argument(
