@@ -15,17 +15,19 @@ mean rent and well under the "always predict the mean" error of ~750.
 
 ## 1. Baseline models
 
-Default LightGBM and CatBoost (library defaults, native categorical handling),
-G0+G1, raw target.
+Default LightGBM, CatBoost and XGBoost (library defaults, native categorical
+handling), G0+G1, raw target.
 
 | model | time RMSE | MAE | MAPE |
 |---|---|---|---|
 | catboost_default | 452.7 | 330.2 | 12.5% |
 | lightgbm_default | 457.3 | 334.7 | 12.6% |
+| xgboost_default | 457.2 | 335.4 | 12.6% |
 
-For reference on the same split: ridge 574.9, global-median floor 837.1. Both
-boosting models clear the linear and naive baselines by a wide margin, and
-CatBoost starts ~5 RMSE ahead of LightGBM out of the box.
+For reference on the same split: ridge 574.9, global-median floor 837.1. All
+three boosting families clear the linear and naive baselines by a wide margin.
+LightGBM and XGBoost start about level (~457); CatBoost is ~5 RMSE ahead out of
+the box.
 
 ---
 
@@ -70,7 +72,8 @@ directly (no early stopping), so a trial can pick many trees at a low learning r
 
 The tuned models were run across **feature sets and both target modes** (not
 confined to G0+G1/raw — that restriction applied only to the tuning search in
-§2). Tuning cut LightGBM 457.3 → 449.9 and CatBoost 452.7 → 448.8 on G0+G1/raw.
+§2). Tuning cut LightGBM 457.3 → 449.9, CatBoost 452.7 → 448.8, and XGBoost
+457.2 → 449.9 on G0+G1/raw.
 
 Split comparison (G0+G1, raw) — see `optimism` for generalization behaviour:
 
@@ -78,16 +81,18 @@ Split comparison (G0+G1, raw) — see `optimism` for generalization behaviour:
 |---|---|---|---|---|
 | catboost_tuned | 448.8 | 475.4 | 451.0 | -2.1 |
 | lightgbm_tuned | 449.9 | 478.8 | 451.9 | -2.0 |
+| xgboost_tuned | 449.9 | 477.4 | 450.8 | -0.9 |
 | catboost_default | 452.7 | 476.4 | 451.6 | 1.2 |
 | lightgbm_default | 457.3 | 478.9 | 455.3 | 2.0 |
+| xgboost_default | 457.2 | 479.9 | 456.5 | 0.7 |
 | ridge_default | 574.9 | 509.2 | 501.6 | 73.3 |
 | global_median | 837.1 | 752.0 | 794.6 | 42.5 |
 
 `optimism` = time − random-CV-on-the-same-holdout-rows. It measures how much a
 random (leaky) split flatters the model; since the real test is strictly future,
-low optimism means the honest score will hold up. The tuned boosting models sit
-at ≈ 0 (even slightly negative) — they do not rely on seeing future rows, unlike
-Ridge (+73), which extrapolates a straight trend and overshoots.
+low optimism means the honest score will hold up. All three tuned boosting
+families sit at ≈ 0 (even slightly negative) — they do not rely on seeing future
+rows, unlike Ridge (+73), which extrapolates a straight trend and overshoots.
 
 ---
 
@@ -109,6 +114,12 @@ varies, so each row isolates one feature group. Raw target, time holdout.
   even though those values would not be known at prediction time — supports plan
   decision 6: drop the leaky macro features.
 
+The feature-group ablation was run for **LightGBM and CatBoost only**. XGBoost
+was added later and run only on the best LightGBM/CatBoost combination (G0+G1),
+to compare model families — not swept across feature groups — so we make no
+claim about which feature groups matter for XGBoost. The G1-helps / G2-G3-don't
+pattern is consistent across the two families we did ablate.
+
 **Why the full 4-way ablation was run only on `raw`, and only G0+G1 and
 G0+G1+G2 for `index`:** the ablation's job is to rank *feature groups*, and the
 trend handling (`raw` vs `index`) is an independent axis — running both on all four
@@ -121,28 +132,37 @@ Trend handling (raw vs index) on the contending feature sets:
 
 | model | feature set | raw | index |
 |---|---|---|---|
-| lightgbm_tuned | G0+G1 | 449.9 | **445.8** |
+| xgboost_tuned | G0+G1 | 449.9 | **445.6** |
+| lightgbm_tuned | G0+G1 | 449.9 | 445.8 |
 | lightgbm_tuned | G0+G1+G2 | 449.8 | 446.2 |
 | catboost_tuned | G0+G1 | 448.8 | 449.0 |
 | catboost_tuned | G0+G1+G2 | 448.5 | 448.4 |
 
-`index` (train on rent ÷ monthly rent index, multiply back) helps LightGBM ~4
-RMSE but barely moves CatBoost. The index is the **training median rent per month**,
-extrapolated to future months by a line through the last 12 monthly medians
-(leakage-safe). It matters because tree models cannot extrapolate a trend on
-their own — the index supplies it.
+`index` (train on rent ÷ monthly rent index, multiply back) helps LightGBM and
+XGBoost ~4 RMSE but barely moves CatBoost. The index is the **training median
+rent per month**, extrapolated to future months by a line through the last 12
+monthly medians (leakage-safe). It matters because tree models cannot
+extrapolate a trend on their own — the index supplies it. XGBoost on index
+(445.6) edges LightGBM (445.8) by 0.2 — a tie within noise (see §5).
 
 ---
 
 ## 5. Final model choice
 
-**lightgbm_tuned, G0+G1, index target — time-holdout RMSE 445.8** (the best
-single result across all configs above).
+**lightgbm_tuned, G0+G1, index target — time-holdout RMSE 445.8.**
 
 Reasoning:
 
-- **Lowest honest RMSE.** 445.8 beats every other config, including tuned
-  CatBoost (448.4 best) and tuned LightGBM on raw (449.9).
+- **Effectively the best honest RMSE.** The top three index configs are
+  xgboost_tuned 445.6, lightgbm_tuned 445.8, catboost_tuned (G0+G1+G2) 448.4.
+  XGBoost edges LightGBM by 0.2 — a tie well inside the ~0.4 leaderboard noise
+  band — so there is no meaningful accuracy difference between the two best.
+- **Why LightGBM over the fractionally-better XGBoost.** 0.2 RMSE is not a real
+  improvement, and LightGBM was already chosen, submitted (public LB 434.4),
+  weight-saved and documented. Switching for a within-noise difference adds risk
+  without benefit. XGBoost's value is as a *third family that confirms the ~445
+  result*, not as a reason to re-pick. (We did submit XGBoost as a comparison
+  data point — see §7.)
 - **Trend handling fits the task.** The Kaggle test spans Mar 2025–Jul 2026,
   further into the future than our holdout. Index mode is the only mechanism that
   lets a tree model follow a continuing rent trend, so its edge should be at
@@ -151,6 +171,13 @@ Reasoning:
   hurt index-mode LightGBM: 445.8 → 446.2), so the simpler feature set wins.
 - **Low optimism.** Tuned LightGBM's optimism ≈ −2 says the honest score is not
   an artifact of the split, so we expect it to generalize.
+
+The bigger takeaway: **all three boosting families converge to ~445–450 on the
+index target**. This shows the result is not specific to one library — the
+choice of boosting implementation no longer moves the score — so further gains
+would have to come from features or data, not from swapping boosting models. (It
+does not by itself establish an absolute error floor; the noise-floor analysis
+speaks to that separately.)
 
 Submission: `submissions/lightgbm_tuned_G0G1_index.csv` (50k rows, Id/Predicted),
 logged in `results/kaggle_log.csv`. Weights saved for replay at
@@ -305,3 +332,20 @@ but a real, consistent degradation — the strongest evidence that blunt extreme
 removal hurts, because M1 discards legitimate premium rents (e.g. central 5-room).
 The prediction range also compressed (max 5637 → 5073), the model losing its grip
 on high rents.
+
+### Sat 1 Nov 2026 — xgboost_tuned, G0+G1, index (third-family comparison)
+
+| field | value |
+|---|---|
+| model | xgboost_tuned, G0+G1, index target |
+| submission file | `submissions/xgboost_tuned_G0G1_index.csv` |
+| time-holdout RMSE (val) | 445.6 |
+| public LB RMSE | **434.5** |
+
+Not the final model — submitted only to place the third boosting family on the
+leaderboard next to LightGBM (434.4). XGBoost scores 434.5 vs LightGBM's 434.4 —
+**0.05 apart**, so the two best models are indistinguishable on the test set, not
+just the holdout. This confirms the §5 takeaway on real data: all three boosting
+families land in the same place (~445 holdout / ~434 LB), so the choice of
+boosting library is noise — further gains would need better features or data,
+not a different boosting model.
