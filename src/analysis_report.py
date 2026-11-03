@@ -73,7 +73,15 @@ def write_full_report(output, eda, residuals, interpretation, profile_comparison
                 f"Time has Spearman rho {association['spearman_rho']:.3f} on {association['n']:,} rows.")
     error_text = (f"LightGBM holdout RMSE is SGD {residuals['metrics']['rmse']:.2f}, compared with "
                   f"SGD {residuals['comparison']['rmse']:.2f} for matched Ridge. Both use identical fit rows, "
-                  "G0+G1 inputs and index targets. Residuals are prediction minus truth; positive means overprediction.")
+                  "G0+G1 inputs and index targets. Residuals are prediction minus truth; positive means overprediction.\n\n"
+                  "One hypothesis is that some low amounts cover a room or one tenant's share of rent in a shared household, "
+                  "while area and flat type describe the whole flat. If these amounts are mixed with whole-flat rents, "
+                  "the missing distinction could contribute to overprediction and within-profile price differences. "
+                  "The supplied fields do not identify what each rent covers, so this remains unverified. "
+                  "Confirmation would require original listings, tenancy agreements or a room/whole-flat indicator; "
+                  "low price alone does not establish the arrangement. Other unverified explanations include "
+                  "discounted or long-standing tenancy agreements, omitted condition or floor differences, "
+                  "and errors or differences in the owner-declared amount.")
     report = ["# Rent analysis", "## Data and EDA", eda_text,
               "[EDA source tables](eda/tables/rent_by_month.csv)", "## Validation errors", error_text,
               markdown_table(metrics, ["model", "n", "rmse", "mae", "mape", "bias"]),

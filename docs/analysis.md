@@ -25,6 +25,12 @@ Both models fit January 2021–September 2024 (132,538 rows) and validate Octobe
 
 **Errors:** absolute errors above SGD 1,000 occur in 3.87% of validation rows but contribute 38.13% of squared error. The 20 largest errors are all overpredictions; nine have observed rent below SGD 1,000. Monthly RMSE does not worsen monotonically over the six holdout months.
 
+**Hypothesis:** Some low amounts may represent room rent or one tenant's share of rent in a shared household, while area and flat type describe the whole flat. If these amounts are mixed with whole-flat rents, the missing distinction could contribute to overprediction and within-profile price differences. The supplied fields do not identify what each rent covers, so this explanation remains unverified. Confirmation would require original listings, tenancy agreements or an explicit room/whole-flat field; price alone cannot establish the arrangement.
+
+Other unverified explanations include discounted or long-standing tenancy agreements, differences in unit condition or floor that the inputs omit, and errors or differences in the amount declared by the owner.
+
+**Public-source check:** The March 2025, 112A Depot Road, 5-room record at SGD 650 has a matching entry in [HDB's rental table](https://data.gov.sg/datasets/d_c9f57187485a850908655db0e8cfe651/view). [HDB describes these amounts](https://api-production.data.gov.sg/v2/public/api/collections/166/metadata) as rents agreed with tenants and declared by owners; HDB does not verify their accuracy. The public table has no unit number or listing URL, so the match verifies a published amount without recovering the original advert or confirming the shared-household hypothesis. See the [record check](../results/analysis/reference/source_record_check.json). The original source of every competition row has not been established.
+
 ![Validation predictions and error concentration](figures/analysis/validation_outliers.webp)
 
 **Repeated profiles:** normalized block identity, flat type, exact area and approval month produce 18,014 repeated training groups covering 39,563 rows. Mean group sample SD is SGD 364.19. On the same 4,207 repeated holdout rows, leave-one-out group-mean RMSE is SGD 612.17 versus model RMSE 445.79. This descriptive calculation uses other holdout labels and does not establish an irreducible error floor.
