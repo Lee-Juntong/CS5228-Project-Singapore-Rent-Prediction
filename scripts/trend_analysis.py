@@ -41,8 +41,10 @@ MODELS = {
     "random_forest": "Random forest",
     "lightgbm_default": "LightGBM (default)",
     "catboost_default": "CatBoost (default)",
+    "xgboost_default": "XGBoost (default)",
     "lightgbm_tuned": "LightGBM (tuned)",
     "catboost_tuned": "CatBoost (tuned)",
+    "xgboost_tuned": "XGBoost (tuned)",
 }
 MONTHLY_PLOT = ["ridge", "random_forest", "lightgbm_tuned"]
 

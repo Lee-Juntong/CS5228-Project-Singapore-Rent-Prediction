@@ -1,12 +1,12 @@
 % Owner: member D. Target length: 1.25 pages.
 \section{Error Analysis and Interpretation}\label{sec:errors}
 
-\todo{Noise floor: group rows with identical features (same block, flat type, area and month) and report the spread of rent within each group. Compare it with the best RMSE.}
+\todo{Repeated profiles (docs/analysis.md): 18{,}014 groups with the same block, flat type, area and month cover 39{,}563 training rows. The mean standard deviation of rent within a group is SGD 364. On the 4{,}207 repeated holdout rows a leave-one-out group mean scores 612 against 445.8 for the model. This does not establish an error floor.}
 
-\todo{Residuals by town, flat type, rent band, flat age and validation month. Figure~\ref{fig:monthly} already gives the error by month.}
+\todo{Residuals by town and rent band. Figures: town\_errors\_contribution.pdf, residual\_distribution\_calibration.pdf. Errors above SGD 1{,}000 occur in 3.9\% of holdout rows and give 38\% of the squared error. Figure~\ref{fig:monthly} already gives the error by month, so leave out error\_by\_horizon.pdf or merge the two.}
 
-\todo{The 20 largest errors, grouped by cause: data error, missing attribute or rare segment.}
+\todo{The 20 largest errors are all over-predictions, and nine have an observed rent below SGD 1{,}000. Figure: validation\_outliers.pdf. Possible causes (room or shared rent, missing unit attributes, declared amounts) are not verified, so state them as hypotheses.}
 
-\todo{Permutation importance or SHAP for the final model, and partial dependence for area, age, MRT distance and month. Compare with the Spearman ranking from Section~\ref{sec:data}.}
+\todo{Permutation importance for the final model: ordinal flat type +166, subzone +112, floor area +26~SGD. Month only +0.06~SGD, because the index carries the trend and is nearly flat in the holdout. Figures: permutation\_importance.pdf, partial\_dependence.pdf.}
 
-\todo{What the boosting model learns that Ridge misses.}
+\todo{What the boosting model learns that Ridge misses, for example the nonlinear MRT distance response. Ridge with index target: 467.1 against 445.8.}

@@ -4,13 +4,13 @@ Plan decision 5 and the random CV check from decision 1. All runs use G0+G1 feat
 
 ## What was run
 
-* Index target on the time holdout for group median, linear regression, Ridge, KNN, decision tree, random forest and default CatBoost. Member C already had the boosting runs, and the global median and default LightGBM were run in Phase 0.
+* Index target on the time holdout for group median, linear regression, Ridge, KNN, decision tree, random forest, default CatBoost and default XGBoost. Member C already had the tuned boosting runs, including tuned XGBoost, and the global median and default LightGBM were run in Phase 0.
 * Raw target on the time holdout for the six Member B baselines again, in the shared Python 3.10 setup, so each raw and index pair comes from one environment. The scores match Member B's Python 3.14 run exactly.
 * Random 5 fold CV for group median, linear regression, Ridge, KNN, decision tree, random forest with index target and tuned LightGBM with index target.
 
 ## Verdicts
 
-1. **The index target helps every model, or makes no difference.** It never hurts by more than 0.2 SGD.
+1. **The index target helps 11 of the 13 models.** Tuned CatBoost changes by only 0.2 SGD. Default XGBoost is the one clear exception: it gets 2.4 SGD worse, although its bias falls from −36 to −22 SGD. Tuned XGBoost gains 4.3 SGD, so the loss does not carry over to the tuned model.
 
    | Model | Raw | Index | Change |
    |---|---:|---:|---:|
@@ -23,10 +23,12 @@ Plan decision 5 and the random CV check from decision 1. All runs use G0+G1 feat
    | Random forest | 458.7 | **444.3** | −14.4 |
    | LightGBM (default) | 457.3 | 454.3 | −3.0 |
    | CatBoost (default) | 452.7 | 452.2 | −0.5 |
+   | XGBoost (default) | 457.2 | 459.6 | +2.4 |
    | LightGBM (tuned) | 449.9 | 445.8 | −4.1 |
    | CatBoost (tuned) | 448.8 | 449.0 | +0.2 |
+   | XGBoost (tuned) | 449.9 | 445.6 | −4.3 |
 
-2. **The untuned random forest with the index target (444.3) is now the best single result.** It beats the chosen final model, tuned LightGBM with the index target (445.8), by 1.5 SGD. This difference is small and comes from one six month holdout, so it does not by itself justify a change of the final model. Member C should decide whether to keep LightGBM. LightGBM fits in about 18 seconds and the forest in about 97 seconds on Juntong's PC.
+2. **The untuned random forest with the index target (444.3) is the best single result.** It beats tuned XGBoost (445.6) and the chosen final model, tuned LightGBM (445.8), both with the index target. The three are within 1.5 SGD, and the difference comes from one six month holdout, so it does not by itself justify a change of the final model. Member C already treats XGBoost and LightGBM as a tie (public leaderboard 434.5 and 434.4) and keeps LightGBM. The same reasoning covers the forest, but Member C should confirm it. LightGBM fits in about 18 seconds and the forest in about 97 seconds on Juntong's PC.
 
 3. **Most of the gap between simple and complex models is the trend, not the model.** On raw rent Ridge is 126 SGD behind tuned LightGBM. With the index target it is 22 SGD behind. Ridge on raw rent over-predicts by 330 SGD on average, because its month coefficient extends the steep rise of 2022 and 2023 into a flat period. The medians on raw rent under-predict by more than 500 SGD.
 
@@ -46,9 +48,11 @@ Plan decision 5 and the random CV check from decision 1. All runs use G0+G1 feat
    | Random forest + index | 444.3 | 451.9 | −7.6 |
    | LightGBM (default) | 457.3 | 455.3 | +2.0 |
    | CatBoost (default) | 452.7 | 451.6 | +1.2 |
+   | XGBoost (default) | 457.2 | 456.5 | +0.7 |
    | LightGBM (tuned) | 449.9 | 451.9 | −2.0 |
    | LightGBM (tuned) + index | 445.8 | 450.7 | −4.9 |
    | CatBoost (tuned) | 448.8 | 451.0 | −2.1 |
+   | XGBoost (tuned) | 449.9 | 450.8 | −0.9 |
 
    A model choice made with random CV would have ranked the group median (490.5) above KNN (508.6), although on the time holdout it is 270 SGD worse. The time holdout is the right split for this task.
 
