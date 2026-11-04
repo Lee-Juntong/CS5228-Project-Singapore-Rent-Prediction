@@ -1,0 +1,44 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+% Member D's analysis figures stay in docs/figures/analysis/.
+\graphicspath{{figures/}{../docs/figures/analysis/}}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{url}
+
+% Marks text that still needs work. Remove every \todo before submission.
+\newcommand{\todo}[1]{\textcolor{red}{[TODO: #1]}}
+
+\begin{document}
+
+\title{Forecasting HDB Rents in Singapore:\\ Validation, Trend Handling and Model Choice}
+
+% TODO (all): names, student IDs and team name. Do not leave this as is.
+\author{\IEEEauthorblockN{Team 55}
+\IEEEauthorblockA{CS5228, National University of Singapore\\
+\todo{names and student IDs of all four members}}}
+
+\maketitle
+
+\begin{abstract}
+\todo{Write last. Two or three sentences on the task, the validation design, the best model and its holdout RMSE, and the main finding on the time trend.}
+\end{abstract}
+
+\input{sections/01_introduction}
+\input{sections/02_data}
+\input{sections/03_preprocessing}
+\input{sections/04_methods}
+\input{sections/05_evaluation}
+\input{sections/06_error_analysis}
+\input{sections/07_limitations}
+
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+\appendices
+\input{sections/appendix}
+
+\end{document}

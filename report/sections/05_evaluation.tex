@@ -1,0 +1,13 @@
+% Owner: member B, with member C for the boosting rows. Target length: 1.5 pages.
+% Sources: docs/baseline_results.md, docs/boosting_model_choice.md, results/results.csv.
+\section{Evaluation}\label{sec:evaluation}
+
+\todo{Main results table: every model on the time holdout with G0+G1 features. Columns RMSE, MAE, MAPE, bias, fit time. Current numbers: global median 837.1, group median 754.9, linear regression 575.4, Ridge 576.1, KNN 482.3, decision tree 482.9, random forest 458.7, LightGBM default 457.3, XGBoost default 457.2, CatBoost default 452.7, CatBoost tuned 448.8, LightGBM tuned 449.9, XGBoost tuned 449.9. With the index target: random forest 444.3, XGBoost tuned 445.6, LightGBM tuned 445.8 (final model). Raw and index results for every model: Table~\ref{tab:trend}.}
+
+\todo{Paragraph on the gaps: how close the lookup and linear models get, and how much boosting adds over the random forest (about 9 to 13 SGD).}
+
+\todo{Feature group ablation table (member C): G0 460--463, G0+G1 449--450, G0+G1+G2 449--450, ALL 450--452. Only the location group helps clearly. The market group hurts slightly. The ablation covers LightGBM and CatBoost only. XGBoost was run on G0+G1 only.}
+
+\todo{Suspicious row ablation in one or two sentences: removing the 49 low rent for area rows or the 12 rows flagged by both methods makes no difference. Removing the 331 rows that are extreme within their group makes the holdout RMSE 2.1~SGD worse and the public leaderboard 4.2~SGD worse.}
+
+\todo{Kaggle public leaderboard as a secondary result: tuned LightGBM with index target 434.4 (final submission), tuned XGBoost with index target 434.5. The two best models are a tie on the test data too.}

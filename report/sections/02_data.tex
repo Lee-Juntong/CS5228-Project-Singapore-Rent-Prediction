@@ -1,0 +1,12 @@
+% Owner: member D (EDA rewrite). Target length: 1.5 pages.
+\section{Data and Exploratory Analysis}\label{sec:data}
+
+Each row of the Kaggle data is one approved HDB rental. The training file has 150{,}000 rows with the monthly rent, and the test file has 50{,}000 rows without it. Each row records the approval month, town, block, street, flat type, flat model, floor area, lease commencement year, a furnishing flag and a fee. The furnishing flag and the fee are constant in both files. Auxiliary files give HDB block attributes and the locations of MRT stations, schools and shopping malls.
+
+\todo{Describe the rent distribution (mean about SGD 2{,}719, standard deviation about SGD 750) with one figure: rent over time. Figure: eda\_distribution\_trend.pdf. Do not repeat Fig.~\ref{fig:index}, which already shows the monthly median.}
+
+\todo{Rent by flat type and by town, one figure or table. Candidates: eda\_flat\_type.pdf and eda\_town.pdf. The monthly versions (eda\_flat\_type\_month.pdf, eda\_town\_month.pdf) probably do not fit the page budget.}
+
+\todo{Correct the correlation statement from the progress report: time has a strong monotonic relation with rent (Spearman $\rho = 0.564$, Pearson $r = 0.535$, docs/analysis.md). For the nonlinear view, point to the permutation importance in Section~\ref{sec:errors}.}
+
+\todo{State the train and test time ranges in one sentence and point to Section~\ref{sec:methods} for the validation design.}

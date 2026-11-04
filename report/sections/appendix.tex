@@ -1,0 +1,24 @@
+% Appendix: not counted in the 8 page limit.
+\section{Workload}\label{app:workload}
+
+\todo{Required workload table: one row per member with the tasks they did.}
+
+\section{Forecast Backtest}\label{app:backtest}
+
+\begin{table}[htbp]
+\caption{RMSE (SGD) when the fit window ends earlier, by months ahead, G0+G1 features. The 2024-03 fit has only 12 months of data, so its last row covers months 7 to 12. Hyperparameters are the final ones, so these runs borrow some information from later data.}
+\label{tab:horizon}
+\centering
+\footnotesize
+\input{tables/horizon}
+\end{table}
+
+\section{Hyperparameters}\label{app:hyperparameters}
+
+\begin{table}[htbp]
+\caption{Final hyperparameters. Models not listed use the library defaults with seed 5228.}
+\label{tab:hyperparameters}
+\centering
+\footnotesize
+\input{tables/hyperparameters}
+\end{table}
