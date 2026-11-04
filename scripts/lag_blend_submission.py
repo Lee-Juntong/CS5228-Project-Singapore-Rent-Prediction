@@ -1,3 +1,5 @@
+"""Build the five model repeat-rent blend for Kaggle. See docs/repeat_rent_blend.md."""
+
 import sys, json, warnings; sys.path.insert(0,'.'); warnings.filterwarnings('ignore')
 import numpy as np, pandas as pd, lightgbm as lgb
 from src.features import load_modeling_data, feature_columns
