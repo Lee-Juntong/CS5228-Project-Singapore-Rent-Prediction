@@ -67,7 +67,7 @@ Plan decision 5 and the random CV check from decision 1. All runs use G0+G1 feat
 
    While rents kept rising, the index target won by up to 147 SGD. Once rents flattened, it lost by up to 386 SGD, because the line through the last 12 medians was still steep. Fitted to March 2023 it reaches SGD 4,171 after 16 months, when the observed median stayed near SGD 3,100, so bias is +743 SGD on months 7 to 16. XGBoost and the forest show the same pattern.
 
-   This does not by itself overturn the final model. At the end of the training data the slope is only 5.3 SGD per month, so the index reaches SGD 3,246 at the end of the test period against a last median of SGD 3,200. That is far from the March 2023 case. There is no Kaggle score for raw LightGBM, so the public leaderboard cannot compare the two targets.
+   This does not by itself overturn the final model. At the end of the training data the slope is only 5.3 SGD per month, so the index reaches SGD 3,246 at the end of the test period against a last median of SGD 3,200. That is far from the March 2023 case. The public leaderboard agrees for now: tuned LightGBM scores 434.4 with the index target and 437.1 raw. That score covers only the public part of the test set.
 
    With the index target, the forest and XGBoost each beat LightGBM in all 8 rows, by 1 to 25 SGD for the forest and 3 to 10 SGD for XGBoost. The rows overlap in time, so this is weak evidence, but it does not support preferring LightGBM over the other two. Member C should weigh it in the open choice.
 
