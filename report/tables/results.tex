@@ -1,0 +1,20 @@
+\begin{tabular}{lrrrrr}
+\hline
+\textbf{Model} & \textbf{RMSE} & \textbf{MAE} & \textbf{MAPE} & \textbf{Bias} & \textbf{Fit} \\
+\hline
+\textbf{Five model blend} & \textbf{431.0} & 314.5 & 11.75 & $-47.0$ &  \\
+Random forest & 444.3 & 324.2 & 12.21 & $-30.3$ & 96.8 \\
+XGBoost (tuned) & 445.6 & 323.6 & 12.26 & $-23.4$ & 10.7 \\
+LightGBM (tuned) & 445.8 & 323.9 & 12.25 & $-24.5$ & 17.3 \\
+CatBoost (tuned) & 449.0 & 331.0 & 12.40 & $-49.9$ & 46.7 \\
+CatBoost (default) & 452.2 & 331.3 & 12.50 & $-36.5$ & 122.9 \\
+LightGBM (default) & 454.3 & 331.1 & 12.54 & $-25.2$ & 0.5 \\
+XGBoost (default) & 459.6 & 334.5 & 12.64 & $-22.4$ & 1.4 \\
+Linear regression & 467.6 & 347.9 & 12.95 & $-57.2$ & 5.4 \\
+Ridge & 467.9 & 347.8 & 12.95 & $-57.0$ & 3.2 \\
+Decision tree & 473.3 & 346.3 & 12.98 & $-23.0$ & 18.2 \\
+KNN & 481.9 & 350.6 & 13.28 & $+0.3$ & 0.3 \\
+Group median & 483.1 & 345.7 & 13.23 & $+28.4$ & 0.1 \\
+Global median & 641.5 & 489.2 & 17.96 & $-7.2$ & 0.0 \\
+\hline
+\end{tabular}

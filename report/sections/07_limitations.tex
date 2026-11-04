@@ -7,4 +7,6 @@ Our holdout covers six months of flat rents, while the test period extends up to
 
 The market features (COE, CPI and stock values) use the value of the approval month, which would not be known when a future rent is predicted. They did not improve the holdout RMSE, and the final model does not use them.
 
-\todo{Data we did not integrate: rents by market segment, work pass counts, BTO completion schedules, travel times, unit storey.}
+The repeat-rent features rest on an unverified reading of the data, that gaps of 12, 24 and 36 months are renewals. They also thin out with the horizon, so the blend may lose part of its gain in the last test months. Its public score covers only part of the test period.
+
+We froze the data sources early, so several ideas stayed out: rents by market segment, work pass counts, BTO completion schedules, travel times and the storey of the unit. The storey and a field for whole flat or room rental would probably help most, because they address the spread within a cell. We would also score the blend on a second forward window, tune its lag models and repeat the error analysis on the blend itself.

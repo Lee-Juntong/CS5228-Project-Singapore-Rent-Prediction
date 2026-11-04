@@ -24,7 +24,7 @@
 \maketitle
 
 \begin{abstract}
-\todo{Write last. Two or three sentences on the task, the validation design, the best model and its holdout RMSE, and the main finding on the time trend.}
+We forecast monthly HDB rents up to 16 months past the training data, and we select models on a time holdout because random cross-validation overrates the lookup and linear models by up to 264~SGD. Dividing rent by a monthly rent index closes most of the gap between simple and complex models, and all three boosting libraries and a random forest then stop near 445~SGD. Features built from the earlier rents of the same block and flat type lower the RMSE of a five model blend to 431.0~SGD on the holdout and 415.0~SGD on the public leaderboard.
 \end{abstract}
 
 \input{sections/01_introduction}

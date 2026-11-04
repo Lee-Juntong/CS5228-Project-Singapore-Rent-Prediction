@@ -22,8 +22,8 @@ Build output (`*.aux`, `*.log`, `main.pdf` and so on) is not committed.
 | `sections/01_introduction.tex` | Task, motivation, research questions | all |
 | `sections/02_data.tex` | Data description and EDA | D |
 | `sections/03_preprocessing.tex` | Feature handling table, cleaning, joins | A and D |
-| `sections/04_methods.tex` | Validation, metrics, feature groups, trend handling, models, tuning | A |
-| `sections/05_evaluation.tex` | Results table, ablations | B and C |
+| `sections/04_methods.tex` | Validation, metrics, feature groups, trend handling, models, tuning, repeat-rent blend | A |
+| `sections/05_evaluation.tex` | Results table, ablations, final model | B, C and A |
 | `sections/06_error_analysis.tex` | Noise floor, residuals, importance | D |
 | `sections/07_limitations.tex` | Limitations and future work | all |
 | `sections/appendix.tex` | Workload table, hyperparameters | all |
@@ -34,6 +34,6 @@ Build output (`*.aux`, `*.log`, `main.pdf` and so on) is not committed.
 
 ## Generated tables and figures
 
-`python -m scripts.trend_analysis` (from the project root) rebuilds `tables/trend.tex`, `tables/split.tex`, `tables/hyperparameters.tex`, `figures/rent_index.pdf` and `figures/monthly_rmse.pdf` from `results/results.csv` and `configs/`. Rerun it after new experiments are logged. `python -m scripts.horizon_backtest --table-only` rebuilds `tables/horizon.tex` from the saved CSV.
+`python -m scripts.trend_analysis` (from the project root) rebuilds `tables/trend.tex`, `tables/split.tex`, `tables/hyperparameters.tex`, `figures/rent_index.pdf` and `figures/monthly_rmse.pdf` from `results/results.csv` and `configs/`. Rerun it after new experiments are logged. `python -m scripts.horizon_backtest --table-only` rebuilds `tables/horizon.tex` from the saved CSV. `python -m scripts.lag_blend_submission --validate` rebuilds `figures/lag_correlation.pdf` and the blend results, and `python -m scripts.report_tables` then rebuilds `tables/results.tex`, `tables/ablation.tex` and `tables/blend.tex`.
 
 The EDA, residual and interpretation figures are in `docs/figures/analysis/` as PDF files. `python -m scripts.export_report_figures` rebuilds them. `main.tex` adds that folder to the graphics path, so `\includegraphics{eda_town}` works without copying files. For Overleaf, copy the PDF files you use into `report/figures/`, because the upload contains only the `report/` folder.

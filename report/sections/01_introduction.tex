@@ -12,4 +12,4 @@ We ask three questions:
 \item Which attributes drive rent, and what limits the accuracy of a prediction?
 \end{enumerate}
 
-\todo{Summarise the answers in two or three sentences once Sections~\ref{sec:evaluation} and~\ref{sec:errors} are final.}
+Our best model is an equal blend of five tree models with repeat-rent features, which use the earlier rents of the same block and flat type. It scores 431.0~SGD on a six month holdout and 415.0~SGD on the public leaderboard, against 445.8 and 434.4 for tuned LightGBM alone. Once the trend is handled, Ridge is only 22~SGD behind tuned LightGBM, and the largest later gain came from a new feature. Flat type, subzone and floor area drive the predictions. The main limit is that rows with identical inputs have rents about 450~SGD apart.

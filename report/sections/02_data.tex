@@ -3,10 +3,20 @@
 
 Each row of the Kaggle data is one approved HDB rental. The training file has 150{,}000 rows with the monthly rent, and the test file has 50{,}000 rows without it. Each row records the approval month, town, block, street, flat type, flat model, floor area, lease commencement year, a furnishing flag and a fee. The furnishing flag and the fee are constant in both files. Auxiliary files give HDB block attributes and the locations of MRT stations, schools and shopping malls.
 
-\todo{Describe the rent distribution (mean about SGD 2{,}719, standard deviation about SGD 750) with one figure: rent over time. Figure: eda\_distribution\_trend.pdf. Do not repeat Fig.~\ref{fig:index}, which already shows the monthly median.}
+Rent has a mean of SGD 2{,}718, a median of SGD 2{,}650 and a standard deviation of SGD 750, and it ranges from SGD 300 to SGD 7{,}600 after cleaning (Fig.~\ref{fig:distribution}, left). The monthly median rose from SGD 2{,}000 in January 2021 to about SGD 3{,}100 in mid 2023 and then stayed nearly flat (right). Training rows cover January 2021 to March 2025 and test rows cover March 2025 to July 2026, at about 3{,}000 rows per month. Section~\ref{sec:validation} builds the validation split on this gap.
 
-\todo{Rent by flat type and by town, one figure or table. Candidates: eda\_flat\_type.pdf and eda\_town.pdf. The monthly versions (eda\_flat\_type\_month.pdf, eda\_town\_month.pdf) probably do not fit the page budget.}
+\begin{figure}[htbp]
+\centerline{\includegraphics[width=\columnwidth]{eda_distribution_trend}}
+\caption{Rent distribution (left) and monthly rent over the training period (right).}
+\label{fig:distribution}
+\end{figure}
 
-\todo{Correct the correlation statement from the progress report: time has a strong monotonic relation with rent (Spearman $\rho = 0.564$, Pearson $r = 0.535$, docs/analysis.md). For the nonlinear view, point to the permutation importance in Section~\ref{sec:errors}.}
+Flat type separates rents more clearly than town (Fig.~\ref{fig:flat-type}). Median rent is SGD 2{,}300 for 3-room, SGD 2{,}800 for 4-room and SGD 3{,}000 for 5-room and executive flats, and these four types hold 98\% of the rows. Town medians only run from SGD 2{,}500 (Ang Mo Kio, Woodlands, Geylang) to SGD 3{,}000 (Bukit Timah, central), and the middle half of rents within most towns spans about SGD 1{,}000 (Fig.~\ref{fig:town} in Appendix~\ref{app:eda}). A town therefore tells us little about the rent of a single flat without its type and exact location.
 
-\todo{State the train and test time ranges in one sentence and point to Section~\ref{sec:methods} for the validation design.}
+\begin{figure}[htbp]
+\centerline{\includegraphics[width=0.9\columnwidth]{eda_flat_type}}
+\caption{Median and interquartile range of rent by flat type.}
+\label{fig:flat-type}
+\end{figure}
+
+Approval month has a strong monotonic relation with rent (Spearman $\rho = 0.564$, Pearson $r = 0.535$), the strongest of any numeric column. These two measures only capture linear or monotonic relations, so Section~\ref{sec:interpretation} adds permutation importance and partial dependence for a nonlinear view.
