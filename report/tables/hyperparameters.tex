@@ -1,0 +1,13 @@
+\begin{tabular}{p{0.24\columnwidth}p{0.66\columnwidth}}
+\hline
+\textbf{Model} & \textbf{Settings} \\
+\hline
+Ridge & alpha = 10 \\
+KNN & k = 50, distance weights \\
+Decision tree & depth 16, 20 rows per leaf \\
+Random forest & 300 trees, depth 20, 5 rows per leaf, max features 0.7 \\
+LightGBM (tuned) & n\_estimators = 500, learning\_rate = 0.0344, num\_leaves = 205, min\_child\_samples = 51, feature\_fraction = 0.896, bagging\_fraction = 0.914, bagging\_freq = 1, reg\_alpha = 0.0697, reg\_lambda = 0.00147 \\
+CatBoost (tuned) & iterations = 2000, learning\_rate = 0.0487, depth = 9, l2\_leaf\_reg = 11.3, random\_strength = 0.039, subsample = 0.539 \\
+XGBoost (tuned) & n\_estimators = 1100, learning\_rate = 0.0109, max\_depth = 9, min\_child\_weight = 2.94, subsample = 0.781, colsample\_bytree = 0.516, reg\_alpha = 0.00331, reg\_lambda = 1.57 \\
+\hline
+\end{tabular}

@@ -92,8 +92,10 @@ Current numbers on G0+G1, raw target, sorted by time holdout RMSE:
 | model | time holdout RMSE | random CV RMSE, all rows | random CV RMSE, holdout rows | optimism |
 |---|---|---|---|---|
 | catboost_tuned | 448.8 | 475.4 | 451.0 | -2.1 |
+| xgboost_tuned | 449.9 | 477.3 | 450.8 | -0.9 |
 | lightgbm_tuned | 449.9 | 478.8 | 451.9 | -2.0 |
 | catboost_default | 452.7 | 476.4 | 451.6 | 1.2 |
+| xgboost_default | 457.2 | 479.9 | 456.5 | 0.7 |
 | lightgbm_default | 457.3 | 478.9 | 455.3 | 2.0 |
 | ridge_default | 574.9 | 509.2 | 501.6 | 73.3 |
 | global_median | 837.1 | 752.0 | 794.6 | 42.5 |
@@ -105,11 +107,12 @@ Tuned boosting models (30 Optuna trials each on the time holdout). Time holdout 
 | model | feature set | raw target | index target |
 |---|---|---|---|
 | lightgbm_tuned | G0+G1 | 449.9 | 445.8 |
+| xgboost_tuned | G0+G1 | 449.9 | 445.6 |
 | lightgbm_tuned | G0+G1+G2 | 449.8 | 446.2 |
 | catboost_tuned | G0+G1 | 448.8 | 449.0 |
 | catboost_tuned | G0+G1+G2 | 448.5 | 448.4 |
 
-Tuning cuts LightGBM from 457.3 to 449.9 and CatBoost from 452.7 to 448.8. The index target mode (dividing rent by a monthly rent index, decision 5) helps LightGBM by about 4 RMSE but barely moves CatBoost. The best single result is **lightgbm_tuned on G0+G1 with index mode, 445.8**, which is the final submission model: index mode extends the rent trend into the future, and that matters most on the long Kaggle horizon (to Jul 2026) where tree models cannot extrapolate on their own. Adding the block group (G2) does not help either model here. Build the configs with `python -m scripts.tune_boosting`; the best parameters are saved to `configs/<model>_tuned.json`.
+Tuning cuts LightGBM from 457.3 to 449.9 and CatBoost from 452.7 to 448.8. The index target mode (dividing rent by a monthly rent index, decision 5) helps LightGBM by about 4 RMSE but barely moves CatBoost. **lightgbm_tuned on G0+G1 with index mode (445.8)** is the final submission model. Tuned XGBoost (445.6) and the untuned random forest (444.3) are within 1.5 RMSE of it, which is a tie on one holdout. Index mode lets a tree model predict above the training range, but [docs/trend_handling.md](docs/trend_handling.md) shows on earlier periods that it hurts when rents stop rising. Adding the block group (G2) does not help either model here. Build the configs with `python -m scripts.tune_boosting`; the best parameters are saved to `configs/<model>_tuned.json`.
 
 Feature-group ablation (tuned models, time holdout, raw target). The tuned hyperparameters are held fixed at the `G0+G1` values while the feature set varies, so each row isolates the contribution of a feature group:
 
@@ -155,5 +158,6 @@ Fits the model on all training rows and saves the fitted model to `models/` (git
 * `src/external_features.py`: CPI, rail line and tertiary features
 * `src/features.py`, `src/evaluation.py`, `src/models.py`: shared experiment interface
 * `scripts/run_experiment.py`: command line runner
+* `scripts/trend_analysis.py`, `scripts/horizon_backtest.py`: trend tables, report figures and the 16 month backtest ([docs/trend_handling.md](docs/trend_handling.md))
 * `notebooks/`: EDA
 * `templates/latex/`: course report template

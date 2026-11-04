@@ -1,0 +1,59 @@
+% Owner: member A. Target length: 1.25 pages.
+% Numbers: results/results.csv. Tables and figures: python -m scripts.trend_analysis.
+\section{Methods}\label{sec:methods}
+
+All models go through one shared evaluation function. It selects the feature columns, fits the model, scores the holdout and logs one row of metrics, so every member compares models on the same rows, features and metrics. The random seed is 5228 for every fit.
+
+\subsection{Validation Design}\label{sec:validation}
+
+The test set lies after the training set in time, so we use a time holdout that copies this situation~\cite{hyndman2021forecasting,bergmeir2012use}. Models are fitted on rentals approved from January 2021 to September 2024 (132{,}538 rows) and scored on October 2024 to March 2025 (17{,}037 rows). Encodings, imputation values, scalers and the rent index of Section~\ref{sec:trend} use fit rows only.
+
+To show what a random split would have told us, we also run shuffled 5-fold cross-validation (CV). We score its predictions only on the October 2024 to March 2025 rows, so both splits cover the same rows and the gap in Table~\ref{tab:split} measures only the effect of the split.
+
+\begin{table}[htbp]
+\caption{RMSE (SGD) on the October 2024 to March 2025 rows under the time holdout and under random 5-fold CV. Gap is time minus random.}
+\label{tab:split}
+\centering
+\footnotesize
+\input{tables/split}
+\end{table}
+
+Random CV does not flatter the tree models, whose gap lies between $-8$ and $+2$~SGD. It does flatter the models that handle time poorly. The group median gains 264~SGD, because random folds contain fit rows from the validation quarters, so the lookup no longer falls back to medians over all past months. Linear regression and Ridge gain 73~SGD, because a random split hides the error of extending a straight time trend into new months. Random CV would therefore have overrated the lookup and linear models, and all other results in this report use the time holdout. The final model was tuned and selected on this holdout, so its holdout RMSE is slightly optimistic. We did not hold out a second period, because it would have removed the most recent months from training.
+
+\subsection{Metrics and Feature Groups}\label{sec:groups}
+
+Kaggle ranks submissions by the root mean squared error (RMSE), so RMSE is our primary metric. We also report the mean absolute error (MAE), the mean absolute percentage error (MAPE) and the bias, the mean prediction minus the mean rent, which shows whether a model follows the rent level.
+
+We split the features into four fixed groups. \textbf{G0 core} (13 features) holds town, flat type and its ordinal, flat model, floor area and two transforms of it, lease year, flat age, an invalid lease flag, the month index and a cyclic month. \textbf{G1 location} (26) holds block coordinates, subzone, distance to the central business district, and distances and counts within 0.5 to 2~km for MRT stations, schools, malls, rail lines and tertiary campuses. \textbf{G2 block} (5) holds maximum floor, completion year and block age, with two missing value flags. \textbf{G3 market} (10) holds COE, CPI and stock market values for the approval month. These would not be known at forecast time, so we use them only in the ablation. All models use G0+G1 (39 features) unless stated otherwise.
+
+\subsection{Trend Handling}\label{sec:trend}
+
+Tree models predict the average target of a leaf, so they cannot predict a rent above the highest level they saw in training. We compare two targets. With the \textbf{raw} target the model predicts the rent, with the month index as one of its features. With the \textbf{index} target a model $f$ is trained on $y_i / I_{t_i}$ and predicts
+\begin{equation}
+\hat{y}_i = f(x_i)\, I_{t_i},
+\end{equation}
+where $I_t$ is a monthly rent index. Inside the fit period $I_t$ is the median rent of the fit rows approved in month $t$. For later months it comes from a least squares line through the last 12 monthly medians. The index uses fit rows only, and the model keeps the month index as a feature, so it can still learn changes in the rent ratio over time. Fig.~\ref{fig:index} shows the index. Rents rose quickly through 2022, more slowly in early 2023, and were nearly flat from mid 2023 at a median of about SGD~3{,}100. The extrapolated index therefore rises by only 2.4~SGD per month and stays within 73~SGD of the observed median in the holdout months (mean difference $-15$~SGD).
+
+\begin{figure}[htbp]
+\centerline{\includegraphics[width=\columnwidth]{figures/rent_index}}
+\caption{Monthly median rent and the rent index fitted on January 2021 to September 2024. After the dotted line the index is extrapolated.}
+\label{fig:index}
+\end{figure}
+
+\begin{table}[htbp]
+\caption{Time holdout RMSE (SGD) with the raw target and the index target, G0+G1 features. Change is index minus raw.}
+\label{tab:trend}
+\centering
+\footnotesize
+\input{tables/trend}
+\end{table}
+
+Table~\ref{tab:trend} shows that the index target lowers the RMSE of 11 of the 13 models, although for KNN and default CatBoost the gain is under 1~SGD. Tuned CatBoost gets 0.2~SGD worse and default XGBoost 2.4~SGD worse, while tuned XGBoost gains 4.3~SGD. The medians gain most (196 and 272~SGD), because on raw rent they predict medians over all fit months and lie more than 500~SGD below the holdout rents. Linear regression and Ridge gain 108~SGD. On raw rent they over-predict by 330~SGD, because the month coefficient extends the average rise from 2021 to 2024 into a flat period. The tree models change by between $-14$ and $+2$~SGD. On raw rent they predict 28 to 50~SGD too low, probably because leaves mix recent rows with older and cheaper ones. The index target reduces this bias for every tree model except the two CatBoost models. With the index target, the untuned random forest (444.3~SGD), tuned XGBoost (445.6~SGD) and tuned LightGBM (445.8~SGD) are the three best models, within 1.5~SGD of each other. The index also closes most of the gap between the simple and the complex models: Ridge falls from 126 to 22~SGD behind LightGBM.
+
+Fig.~\ref{fig:monthly} in Section~\ref{sec:errors} shows that the tree model errors do not grow over the six holdout months, while the bias of Ridge on raw rent grows from 239 to 381~SGD. Because rents were flat in this period, the holdout cannot show how well a tree model follows a rising trend. The index target also scored better for LightGBM on the public leaderboard (434.4 against 437.1), and its slope at the end of the training data is small, so we use it for the final model. Section~\ref{sec:limitations} tests this choice on earlier periods with a 16 month horizon.
+
+\subsection{Models and Tuning}\label{sec:models}
+
+We compare models in order of complexity. The \textbf{global median} of the fit rows is a lower bound. The \textbf{group median} is the median rent per town, flat type and calendar quarter, and falls back to town and flat type, then flat type, then town. \textbf{Linear regression} and \textbf{Ridge} ($\alpha = 10$) use one-hot categorical features, and drop the area columns, which are strongly related to flat type, along with the flat type ordinal and lease year. \textbf{$k$-nearest neighbours} ($k = 50$, distance weights) uses scaled latitude, longitude, floor area and month. The \textbf{decision tree} has depth 16 and at least 20 rows per leaf. The \textbf{random forest}~\cite{breiman2001random} has 300 trees of depth 20, at least 5 rows per leaf and 70\% of the features per split. These baselines use scikit-learn~\cite{pedregosa2011scikit} with fixed settings that were not tuned. \textbf{LightGBM}~\cite{ke2017lightgbm}, \textbf{CatBoost}~\cite{prokhorenkova2018catboost} and \textbf{XGBoost}~\cite{chen2016xgboost} are gradient boosted trees with native handling of categorical features, run first with default settings and then tuned. We dropped TabM, an optional candidate, to keep time for the report.
+
+Each boosting model got a fixed budget of 30 Optuna~\cite{akiba2019optuna} trials with the tree-structured Parzen estimator~\cite{bergstra2011algorithms}, minimising the time holdout RMSE with G0+G1 features and the raw target. The search covers the number of trees, learning rate, tree size, row and feature subsampling and regularisation (Appendix~\ref{app:hyperparameters}). The tuned settings are then held fixed for the ablations and the index target. We stopped when the budget ran out, because the course feedback warned against chasing small RMSE gains.

@@ -43,6 +43,17 @@ results/member_b/**/fit_ids.csv
 results/member_b/**/holdout_truth.csv
 results/member_b/**/random5_predictions.parquet
 
+# LaTeX build output
+report/*.aux
+report/*.bbl
+report/*.blg
+report/*.fdb_latexmk
+report/*.fls
+report/*.log
+report/*.out
+report/*.synctex.gz
+report/main.pdf
+
 # Regenerate analysis runs locally; commit only the compact reference results.
 results/analysis/*
 !results/analysis/reference/

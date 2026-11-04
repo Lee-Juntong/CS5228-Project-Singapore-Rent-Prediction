@@ -1,0 +1,2 @@
+run_id,timestamp,member,model,feature_set,n_features,split,target_mode,n_fit,n_valid,rmse,rmse_std,mae,mape,bias,rmse_window,train_seconds,predict_seconds,seed,git_commit,notes,r2
+20261103-000347-290862_ridge_G0+G1_time_raw,2026-11-03T00:03:47,A,ridge,G0+G1,39,time,raw,132538,17037,576.0683023590913,0.0,419.8530833182307,16.929020823971253,330.5389312526495,576.0683023590913,3.002088399953209,0.05464450002182275,5228,29d34fb+dirty,"raw rerun in shared py3.10 env, pairs with index runs",0.19368593572467363

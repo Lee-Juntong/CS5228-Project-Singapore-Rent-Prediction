@@ -1,0 +1,35 @@
+% Owner: member A (table) and member D. Target length: 1.25 pages.
+% Source: docs/feature_handling.md.
+\section{Preprocessing and Feature Engineering}\label{sec:preprocessing}
+
+We removed 425 exact duplicate training rows, which leaves 149{,}575 training rows. No test rows were removed. Town, block and street names were normalised before the join with the HDB block table, which raised the share of matched rows from about 79\% to 100\%.
+
+Table~\ref{tab:feature-handling} lists the decision for every column of the original data.
+
+\begin{table}[htbp]
+\caption{Handling of each column in the original data}
+\label{tab:feature-handling}
+\centering
+\footnotesize
+\begin{tabular}{p{0.24\columnwidth}p{0.66\columnwidth}}
+\hline
+\textbf{Column} & \textbf{Decision and reason} \\
+\hline
+Approval date & Transformed into a month index (months since January 2021) and a cyclic month. Defines the time split. \\
+Town & Kept as a categorical feature (26 levels). \\
+Block, street & Used only to build the address key for the block join. Not model inputs, because of high cardinality (2{,}720 and 1{,}146 levels), and because coordinates and subzone carry the location after the join. \\
+Flat type & Spellings unified. Kept as a categorical and as an ordinal (1-room to executive). \\
+Flat model & Kept as a categorical feature (20 levels). \\
+Floor area & Kept, plus its logarithm and the area per room. \\
+Lease year & Kept, plus the flat age at approval and a flag for one invalid row. \\
+Furnished, fee & Dropped. Constant in train and test. \\
+Monthly rent & Target. Not transformed in the stored data. \\
+\hline
+\end{tabular}
+\end{table}
+
+After the join, each block has coordinates and a subzone. From these we compute the distance to the central business district, and distances and counts within 0.5 to 2~km for MRT stations, schools, malls, rail lines and tertiary campuses. MRT stations are split into open and planned ones.
+
+The competition provides the block, MRT, school, mall, COE and stock market files. We added three sources: the URA Master Plan 2025 rail line layer, the SingStat CPI series and the coordinates of 13 tertiary campuses, which we checked against the OneMap search service. We froze the data sources after this step and added no others.
+
+We flagged 49 rows with a very low rent for their area, such as a 176~m$^2$ executive flat at SGD~750. We could not tell whether they are errors, so we kept them and tested their effect. Removing them from the fit rows changes the holdout RMSE of the final model by 0.1~SGD, so they stay in the data.

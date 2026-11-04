@@ -1,0 +1,15 @@
+% Owner: all members. Target length: 0.75 page.
+\section{Introduction}\label{sec:intro}
+
+Renters, landlords and housing agencies all need a fair estimate of the monthly rent of a Housing and Development Board (HDB) flat. We predict the monthly rent of an HDB flat from its type, size, age and location, and from the month in which the rental was approved.
+
+The training data covers rentals approved from January 2021 to March 2025, and the test data covers March 2025 to July 2026. The task is therefore a forecast of future rents and not an interpolation between known months. The median rent rose from about SGD 2{,}100 in 2021 to SGD 3{,}100 in 2024. Tree models cannot predict values beyond the range of the targets they saw, so the handling of this trend is a central design choice in this report.
+
+We ask three questions:
+\begin{enumerate}
+\item How well can we predict rent for future months from flat, location and market attributes?
+\item Do complex models (gradient boosting) clearly beat simple ones (lookup tables, linear models, nearest neighbours) on this task?
+\item Which attributes drive rent, and what limits the accuracy of a prediction?
+\end{enumerate}
+
+\todo{Summarise the answers in two or three sentences once Sections~\ref{sec:evaluation} and~\ref{sec:errors} are final.}
