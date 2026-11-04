@@ -34,6 +34,6 @@ Build output (`*.aux`, `*.log`, `main.pdf` and so on) is not committed.
 
 ## Generated tables and figures
 
-`python -m scripts.trend_analysis` (from the project root) rebuilds `tables/trend.tex`, `tables/split.tex`, `figures/rent_index.pdf` and `figures/monthly_rmse.pdf` from `results/results.csv`. Rerun it after new experiments are logged.
+`python -m scripts.trend_analysis` (from the project root) rebuilds `tables/trend.tex`, `tables/split.tex`, `tables/hyperparameters.tex`, `figures/rent_index.pdf` and `figures/monthly_rmse.pdf` from `results/results.csv` and `configs/`. Rerun it after new experiments are logged. `python -m scripts.horizon_backtest --table-only` rebuilds `tables/horizon.tex` from the saved CSV.
 
 The EDA, residual and interpretation figures are in `docs/figures/analysis/` as PDF files. `python -m scripts.export_report_figures` rebuilds them. `main.tex` adds that folder to the graphics path, so `\includegraphics{eda_town}` works without copying files. For Overleaf, copy the PDF files you use into `report/figures/`, because the upload contains only the `report/` folder.

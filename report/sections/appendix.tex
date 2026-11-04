@@ -3,6 +3,22 @@
 
 \todo{Required workload table: one row per member with the tasks they did.}
 
+\section{Forecast Backtest}\label{app:backtest}
+
+egin{table}[htbp]
+\caption{RMSE (SGD) when the fit window ends earlier, by months ahead, G0+G1 features. Hyperparameters are the final ones, so these runs borrow some information from later data.}
+\label{tab:horizon}
+\centering
+ootnotesize
+\input{tables/horizon}
+\end{table}
+
 \section{Hyperparameters}\label{app:hyperparameters}
 
-\todo{Final hyperparameters of every model. Sources: results/member\_b/baseline\_ladder/hyperparameters.json and configs/*\_tuned.json.}
+egin{table}[htbp]
+\caption{Final hyperparameters. Models not listed use the library defaults with seed 5228.}
+\label{tab:hyperparameters}
+\centering
+ootnotesize
+\input{tables/hyperparameters}
+\end{table}

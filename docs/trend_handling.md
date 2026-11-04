@@ -56,10 +56,26 @@ Plan decision 5 and the random CV check from decision 1. All runs use G0+G1 feat
 
    A model choice made with random CV would have ranked the group median (490.5) above KNN (508.6), although on the time holdout it is 270 SGD worse. The time holdout is the right split for this task.
 
+6. **The index target is a bet that the recent slope continues.** The holdout has flat rents, so we moved the end of the fit window back and forecast 16 months ahead from four earlier dates. `python -m scripts.horizon_backtest` takes about 15 minutes and writes [horizon_backtest.csv](../results/member_a/trend/horizon_backtest.csv). RMSE for tuned LightGBM:
+
+   | Fit to | Slope (SGD per month) | Months 1 to 6, raw | Months 1 to 6, index | Months 7 to 16, raw | Months 7 to 16, index |
+   |---|---:|---:|---:|---:|---:|
+   | 2022-03 | 21.5 | 535 | 517 | 909 | 762 |
+   | 2022-09 | 42.7 | 698 | 652 | 727 | 622 |
+   | 2023-03 | 69.8 | 640 | 668 | 569 | 955 |
+   | 2023-09 | 25.7 | 557 | 577 | 491 | 598 |
+
+   While rents kept rising, the index target won by up to 147 SGD. Once rents flattened, it lost by up to 386 SGD, because the line through the last 12 medians was still steep. Fitted to March 2023 it reaches SGD 4,171 after 16 months, when the observed median stayed near SGD 3,100, so bias is +743 SGD on months 7 to 16. XGBoost and the forest show the same pattern.
+
+   This does not by itself overturn the final model. At the end of the training data the slope is only 5.3 SGD per month, so the index reaches SGD 3,246 at the end of the test period against a last median of SGD 3,200. That is far from the March 2023 case. There is no Kaggle score for raw LightGBM, so the public leaderboard cannot compare the two targets.
+
+   With the index target, the forest and XGBoost each beat LightGBM in all 8 rows, by 1 to 25 SGD for the forest and 3 to 10 SGD for XGBoost. The rows overlap in time, so this is weak evidence, but it does not support preferring LightGBM over the other two. Member C should weigh it in the open choice.
+
 ## Caveats
 
 * The final model was tuned and selected on the same holdout, so its holdout RMSE is slightly optimistic.
-* The test period runs up to 16 months past the training data, against 6 months for the holdout. The index target is still the only option that lets a tree model predict a rent level above the training range.
+* The test period runs up to 16 months past the training data, against 6 months for the holdout. Verdict 6 tests this directly.
+* The backtest in verdict 6 uses hyperparameters tuned on the later holdout, so it borrows some information from later data.
 
 ## Report
 

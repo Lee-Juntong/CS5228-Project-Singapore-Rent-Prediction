@@ -3,7 +3,7 @@
 
 The data does not record the floor of the unit, its condition or furnishing, or whether the whole flat or only some rooms are rented. These attributes explain part of the rent that no model in this report can recover.
 
-Our holdout covers six months after the last training month. The test period extends up to 16 months after the last training month, so errors on the test set are likely larger than on the holdout, especially if the rent trend changes direction.
+Our holdout covers six months of flat rents, while the test period extends up to 16 months past the training data. To test the trend handling under other conditions, we moved the end of the fit window back and forecast 16 months ahead from four earlier dates (Table~\ref{tab:horizon}). The index target helps while rents keep rising: fitted to March 2022, LightGBM scores 762~SGD against 909~SGD raw on months 7 to 16. It hurts when they stop: fitted to March 2023, the line through the last 12 medians still rises by 70~SGD per month, and LightGBM scores 955~SGD against 569~SGD raw, with a bias of $+743$~SGD. The index is therefore a bet that the recent slope continues. For the final model the slope is only 5.3~SGD per month, so the index reaches SGD~3{,}246 at the end of the test period against a last observed median of SGD~3{,}200. This limits the risk, but errors on the test set are likely larger than on the holdout, especially if the rent trend changes direction.
 
 The market features (COE, CPI and stock values) use the value of the approval month, which would not be known when a future rent is predicted. They did not improve the holdout RMSE, and the final model does not use them.
 

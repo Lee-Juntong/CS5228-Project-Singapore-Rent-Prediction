@@ -5,6 +5,7 @@ monthly rent index, and writes:
 
 * results/member_a/trend/*.csv           tables behind the report
 * report/tables/{trend,split}.tex        LaTeX tables for the Methods section
+* report/tables/hyperparameters.tex      LaTeX table for the appendix
 * report/figures/{rent_index,monthly_rmse}.pdf
 
 Run the experiments first, for example:
@@ -14,6 +15,8 @@ then:
 """
 
 from __future__ import annotations
+
+import json
 
 import matplotlib
 
@@ -49,6 +52,13 @@ MODELS = {
 MONTHLY_PLOT = ["ridge", "random_forest", "lightgbm_tuned"]
 # Left out of the report split table to save space. They stay in split_comparison.csv.
 SPLIT_TABLE_SKIP = {"lightgbm_default", "catboost_default", "xgboost_default"}
+# Fixed baseline settings. They match src/baselines.py.
+BASELINE_SETTINGS = {
+    "Ridge": "alpha = 10",
+    "KNN": "k = 50, distance weights",
+    "Decision tree": "depth 16, 20 rows per leaf",
+    "Random forest": "300 trees, depth 20, 5 rows per leaf, max features 0.7",
+}
 
 
 def latest_time_runs(results: pd.DataFrame) -> pd.DataFrame:
@@ -111,6 +121,19 @@ def write_latex(trend: pd.DataFrame, split: pd.DataFrame) -> None:
     (TABLES / "split.tex").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
+def write_hyperparameters() -> None:
+    rows = dict(BASELINE_SETTINGS)
+    for model, name in (("lightgbm", "LightGBM"), ("catboost", "CatBoost"), ("xgboost", "XGBoost")):
+        params = json.loads((PROJECT_ROOT / "configs" / f"{model}_tuned.json").read_text(encoding="utf-8"))["params"]
+        rows[f"{name} (tuned)"] = ", ".join(f"{key} = {value:.3g}" if isinstance(value, float) else f"{key} = {value}"
+                                            for key, value in params.items())
+    lines = [r"\begin{tabular}{p{0.24\columnwidth}p{0.66\columnwidth}}", r"\hline",
+             r"\textbf{Model} & \textbf{Settings} \\", r"\hline"]
+    lines += [f"{name} & {settings}".replace("_", r"\_") + r" \\" for name, settings in rows.items()]
+    lines += [r"\hline", r"\end{tabular}"]
+    (TABLES / "hyperparameters.tex").write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
 def plot(index_frame: pd.DataFrame, monthly: pd.DataFrame) -> None:
     FIGURES.mkdir(parents=True, exist_ok=True)
     plt.rcParams.update({"font.size": 8})
@@ -170,6 +193,7 @@ def main() -> None:
     split.to_csv(OUT / "split_comparison.csv", index=False)
     index_frame.to_csv(OUT / "rent_index.csv", index=False)
     write_latex(trend, split)
+    write_hyperparameters()
     plot(index_frame, monthly)
 
     print(trend.round(1).to_string(index=False))

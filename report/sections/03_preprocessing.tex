@@ -28,6 +28,8 @@ Monthly rent & Target. Not transformed in the stored data. \\
 \end{tabular}
 \end{table}
 
-\todo{Derived location features (distances and counts for MRT, schools, malls, rail lines, campuses) and the external data (SingStat CPI, COE, URA rail geometry). Two short paragraphs.}
+After the join, each block has coordinates and a subzone. From these we compute the distance to the central business district, and distances and counts within 0.5 to 2~km for MRT stations, schools, malls, rail lines and tertiary campuses. MRT stations are split into open and planned ones.
 
-\todo{The about 50 suspicious rows (large flats with very low rent): what they are and why we kept them. Member C's ablation shows that removing them does not help.}
+The competition provides the block, MRT, school, mall, COE and stock market files. We added three sources: the URA Master Plan 2025 rail line layer, the SingStat CPI series and the coordinates of 13 tertiary campuses, which we checked against the OneMap search service. We froze the data sources after this step and added no others.
+
+We flagged 49 rows with a very low rent for their area, such as a 176~m$^2$ executive flat at SGD~750. We could not tell whether they are errors, so we kept them and tested their effect. Removing them from the fit rows changes the holdout RMSE of the final model by 0.1~SGD, so they stay in the data.
