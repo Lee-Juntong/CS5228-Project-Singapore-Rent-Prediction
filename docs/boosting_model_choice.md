@@ -147,7 +147,12 @@ extrapolate a trend on their own — the index supplies it. XGBoost on index
 
 ---
 
-## 5. Final model choice
+## 5. Final single model choice
+
+The team's final model is now the five model repeat-rent blend (holdout 431.0,
+public LB 415.01), which includes this LightGBM as one of its members. See
+[repeat_rent_blend.md](repeat_rent_blend.md). This section records the choice of
+the best single boosting model.
 
 **lightgbm_tuned, G0+G1, index target — time-holdout RMSE 445.8.**
 
@@ -206,7 +211,7 @@ decide (`decisions.md`, "Outlier handling"); this section runs that test.
 
 We drop only the flagged rows in the **fit window** (≤ Sep 2024), so the Oct
 2024–Mar 2025 validation set is identical to the baseline runs and the RMSE delta
-reflects only the cleaner training data. All runs use the final model
+reflects only the cleaner training data. All runs use the final single model
 (lightgbm_tuned, G0+G1). Reproduce with
 `python -m scripts.suspicious_row_ablation --flag {m2,both,m1}`.
 
