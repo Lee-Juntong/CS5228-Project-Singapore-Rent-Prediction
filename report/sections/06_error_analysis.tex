@@ -4,7 +4,7 @@
 
 This section analyses the five model blend on the holdout (RMSE 431.0, MAE 314.5, bias $-47.0$~SGD), with tuned LightGBM on the index target as the comparison (445.8, 323.9, $-24.5$~SGD). The case review and the comparison with Ridge use tuned LightGBM only. Residual means prediction minus observed rent.
 
-\subsection{Why the RMSE Is Not Lower}\label{sec:floor}
+\subsection{Why the Error Is Not Lower}\label{sec:floor}
 
 Rows in the same cell and month have identical inputs, including the lag features, so any model gives them one prediction. The spread of rent inside such a group is error that no model can remove. Even with the true mean of every group, the RMSE would stay at 178~SGD on all training rows, 165~SGD on the holdout and 187~SGD on the 16 month window. This bound is far too low to reach, because it counts the 74\% of rows with unique inputs as predicted perfectly.
 
@@ -16,11 +16,11 @@ Public leaderboard scores of about 160 to 180 sit near this bound. We infer that
 
 A few large errors carry much of the squared error. Absolute errors above SGD 1{,}000 occur in 3.3\% of holdout rows and give 34\% of the squared error, against 3.9\% and 38\% for tuned LightGBM (Fig.~\ref{fig:outliers}). The 585 rows with a rent below SGD 2{,}000 are 3.4\% of the rows and give 24\% of the squared error, with a bias of $+1{,}011$~SGD. Of the 20 largest errors, 19 are over-predictions, and eight have a rent below SGD 1{,}000. In two pairs of rows the recorded profile is identical while the rents are SGD 3{,}550 and 800, and SGD 2{,}880 and 700.
 
-\begin{figure}[htbp]
-\centerline{\includegraphics[width=\columnwidth]{validation_outliers}}
+\begin{figure*}[htbp]
+\centerline{\includegraphics[width=0.8\textwidth]{validation_outliers}}
 \caption{Predicted against observed rent on the holdout (left) and the share of rows and squared error by rent band (right), tuned LightGBM.}
 \label{fig:outliers}
-\end{figure}
+\end{figure*}
 
 The data cannot explain these rows. They may be a room or one tenant's share of the rent, while area and type describe the whole flat. They may also be discounted agreements or errors in the declared amount. One SGD 650 row matches the public HDB table~\cite{hdb2026renting}, so the amount was published. HDB states that owners declare these rents and that it does not verify them, so the match does not explain the amount.
 
@@ -49,8 +49,8 @@ Fig.~\ref{fig:importance} shows permutation importance for the blend. Flat type 
 
 Fig.~\ref{fig:pdp} compares tuned LightGBM with a Ridge model on the same 39 inputs and the index target (RMSE 467.1, slightly different from the baseline Ridge in Table~\ref{tab:results}). Ridge has a straight response to MRT distance. LightGBM falls 46~SGD from 0.18 to 0.40~km and 33~SGD from there to 1.15~km. When lease year moves together with age, a flat 43 years older loses 210~SGD under LightGBM and 581~SGD under Ridge. LightGBM has lower error in every MRT distance band, and its gain varies by segment: Bukit Merah 3-room flats improve from 545 to 479~SGD, while Jurong West executive flats worsen from 580 to 601~SGD. These gains fit a nonlinear response and interactions, but they do not show which of the two caused the improvement.
 
-\begin{figure}[htbp]
-\centerline{\includegraphics[width=\columnwidth]{partial_dependence}}
+\begin{figure*}[htbp]
+\centerline{\includegraphics[width=0.75\textwidth]{partial_dependence}}
 \caption{Partial dependence on 2{,}000 holdout rows. Dotted lines also update the columns derived from the changed input.}
 \label{fig:pdp}
-\end{figure}
+\end{figure*}
