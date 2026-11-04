@@ -1,13 +1,48 @@
-% Owner: member B, with member C for the boosting rows. Target length: 1.5 pages.
-% Sources: docs/baseline_results.md, docs/boosting_model_choice.md, results/results.csv.
+% Owner: member B, with member C for the boosting rows and member A for the blend. Target length: 1.5 pages.
+% Sources: docs/baseline_results.md, docs/boosting_model_choice.md, docs/repeat_rent_blend.md, results/results.csv.
+% Tables: python -m scripts.report_tables.
 \section{Evaluation}\label{sec:evaluation}
 
-\todo{Main results table: every model on the time holdout with G0+G1 features. Columns RMSE, MAE, MAPE, bias, fit time. Current numbers: global median 837.1, group median 754.9, linear regression 575.4, Ridge 576.1, KNN 482.3, decision tree 482.9, random forest 458.7, LightGBM default 457.3, XGBoost default 457.2, CatBoost default 452.7, CatBoost tuned 448.8, LightGBM tuned 449.9, XGBoost tuned 449.9. With the index target: random forest 444.3, XGBoost tuned 445.6, LightGBM tuned 445.8 (final model). Raw and index results for every model: Table~\ref{tab:trend}.}
+\subsection{Model Comparison}
 
-\todo{Paragraph on the gaps: how close the lookup and linear models get, and how much boosting adds over the random forest (about 9 to 13 SGD).}
+Table~\ref{tab:results} scores every model on the time holdout with the index target, and Table~\ref{tab:trend} has the raw target results. With the index target, the mean prediction of every model lies within 58~SGD of the mean rent.
 
-\todo{Feature group ablation table (member C): G0 460--463, G0+G1 449--450, G0+G1+G2 449--450, ALL 450--452. Only the location group helps clearly. The market group hurts slightly. The ablation covers LightGBM and CatBoost only. XGBoost was run on G0+G1 only.}
+\begin{table}[htbp]
+\caption{Time holdout results with G0+G1 features and the index target, best first. RMSE, MAE and bias are in SGD, MAPE in percent and fit time in seconds on one PC.}
+\label{tab:results}
+\centering
+\footnotesize
+\input{tables/results}
+\end{table}
 
-\todo{Suspicious row ablation in one or two sentences: removing the 49 low rent for area rows or the 12 rows flagged by both methods makes no difference. Removing the 331 rows that are extreme within their group makes the holdout RMSE 2.1~SGD worse and the public leaderboard 4.2~SGD worse.}
+The simple models get closer than we expected. With the index target, the group median lookup is 37~SGD behind tuned LightGBM and Ridge is 22~SGD behind, against 305 and 126~SGD on raw rent. Linear models and KNN use restricted inputs (34 and 4 columns), so these gaps do not isolate the algorithm alone. Boosting adds little over a forest on this data. On raw rent tuned boosting beats the forest by 9 to 10~SGD, and with the index target the untuned forest beats tuned boosting by 1 to 5~SGD. Tuning gains 4 to 7~SGD on raw rent. The top three models lie within 1.5~SGD of each other, and tuned XGBoost and LightGBM are 0.05~SGD apart on the public leaderboard, so we treat them as a tie.
 
-\todo{Kaggle public leaderboard as a secondary result: tuned LightGBM with index target 434.4 (final submission), tuned XGBoost with index target 434.5. The two best models are a tie on the test data too.}
+\subsection{Feature Group Ablation}
+
+Table~\ref{tab:ablation} adds the feature groups one at a time, with hyperparameters fixed at their G0+G1 values. Location is the only group that clearly helps, by 10 to 14~SGD. Block attributes add at most 0.3~SGD. Market values make LightGBM 2.6~SGD worse and CatBoost 1.6~SGD worse, so dropping them costs nothing. We ran this ablation for LightGBM and CatBoost only.
+
+\begin{table}[htbp]
+\caption{Time holdout RMSE (SGD) by feature set, raw target. Feature counts are in brackets.}
+\label{tab:ablation}
+\centering
+\footnotesize
+\input{tables/ablation}
+\end{table}
+
+\subsection{Suspicious Rows}\label{sec:suspicious}
+
+We retrained tuned LightGBM without flagged rows in the fit period, on the index target. Dropping the 49 rows with a low rent for their area changes the holdout RMSE by $-0.1$~SGD and the public score by $-0.4$~SGD. Dropping the 12 rows flagged by both of our rules adds 0.4~SGD. Dropping the 331 rows that are extreme within their flat type or town adds 2.2~SGD on the holdout and 4.2~SGD on the public leaderboard, probably because that rule also removes real premium rents. We keep all rows.
+
+\subsection{Final Model}
+
+Table~\ref{tab:blend} compares the blends on the holdout, the 16 month window and the public leaderboard. The repeat-rent features gain on all three: the five model blend beats tuned LightGBM by 14.8~SGD on the holdout, 18.3~SGD on the 16 month window and 19.4~SGD on the public score. On the 16 month window the index models over-predict by about 120~SGD, because the slope fitted in late 2023 was too steep. The mix of index and raw targets cuts this to 87~SGD and has the best 16 month score, but its public score is 4.6~SGD worse.
+
+\begin{table}[htbp]
+\caption{RMSE (SGD) of single models and blends, with the index target unless stated. The public score covers only part of the test set.}
+\label{tab:blend}
+\centering
+\footnotesize
+\input{tables/blend}
+\end{table}
+
+The five model blend is our final Kaggle submission, because it has the best public score and the best holdout score. We chose it on the same windows that it is scored on, and the public score was part of that choice, so all three of its scores are slightly optimistic.

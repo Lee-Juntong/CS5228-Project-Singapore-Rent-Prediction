@@ -75,7 +75,7 @@ def write_table(table: pd.DataFrame) -> None:
              r"\textbf{Fit to} & \textbf{Months} & Raw & Index & Raw & Index & Raw & Index \\", r"\hline"]
     for (origin, band), row in wide.iterrows():
         cells = [f"{row[(model, mode)]:.0f}" for model in MODELS for mode in ("raw", "index")]
-        lines.append(f"{origin} & {band.replace('-', '--')} & " + " & ".join(cells) + r" \\")
+        lines.append(f"{origin} & {band.replace('-', ' to ')} & " + " & ".join(cells) + r" \\")
     lines += [r"\hline", r"\end{tabular}"]
     TABLE.write_text("\n".join(lines) + "\n", encoding="utf-8")
 

@@ -1,7 +1,24 @@
 % Appendix: not counted in the 8 page limit.
 \section{Workload}\label{app:workload}
 
-\todo{Required workload table: one row per member with the tasks they did.}
+\begin{table}[htbp]
+\caption{Workload by member}
+\label{tab:workload}
+\centering
+\footnotesize
+\begin{tabular}{p{0.26\columnwidth}p{0.64\columnwidth}}
+\hline
+\textbf{Member} & \textbf{Tasks} \\
+\hline
+A (Zhuang Mengjin) & Shared pipeline, validation design, feature handling table, trend handling, split comparison, forecast backtest, repeat-rent features and blend, Methods section, report assembly. \\
+B (Shengxin Pei) & Baseline ladder and its evaluation, learning curves. \\
+C (John Min) & Boosting models, Optuna tuning, feature group and suspicious row ablations, Kaggle submissions and log. \\
+D (Yu Long Lim) & EDA, repeated profile analysis, residual and case review, permutation importance, partial dependence, report figures. \\
+\hline
+\end{tabular}
+\end{table}
+
+\todo{Each member checks their row. Add who did the preprocessing.}
 
 \section{Forecast Backtest}\label{app:backtest}
 
@@ -22,3 +39,23 @@
 \footnotesize
 \input{tables/hyperparameters}
 \end{table}
+
+\section{Extra Figures}\label{app:eda}
+
+\begin{figure*}[htbp]
+\centerline{\includegraphics[width=0.7\textwidth]{eda_flat_type}}
+\caption{Median and interquartile range of rent by flat type.}
+\label{fig:flat-type}
+\end{figure*}
+
+\begin{figure*}[htbp]
+\centerline{\includegraphics[width=0.7\textwidth]{eda_town}}
+\caption{Median and interquartile range of rent by town.}
+\label{fig:town}
+\end{figure*}
+
+\begin{figure*}[htbp]
+\centerline{\includegraphics[width=0.7\textwidth]{town_errors_contribution}}
+\caption{Holdout RMSE by town and each town's share of the squared error, tuned LightGBM with the index target.}
+\label{fig:town-errors}
+\end{figure*}

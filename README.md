@@ -112,7 +112,7 @@ Tuned boosting models (30 Optuna trials each on the time holdout). Time holdout 
 | catboost_tuned | G0+G1 | 448.8 | 449.0 |
 | catboost_tuned | G0+G1+G2 | 448.5 | 448.4 |
 
-Tuning cuts LightGBM from 457.3 to 449.9 and CatBoost from 452.7 to 448.8. The index target mode (dividing rent by a monthly rent index, decision 5) helps LightGBM by about 4 RMSE but barely moves CatBoost. **lightgbm_tuned on G0+G1 with index mode (445.8)** is the final submission model. Tuned XGBoost (445.6) and the untuned random forest (444.3) are within 1.5 RMSE of it, which is a tie on one holdout. Index mode lets a tree model predict above the training range, but [docs/trend_handling.md](docs/trend_handling.md) shows on earlier periods that it hurts when rents stop rising. Adding the block group (G2) does not help either model here. Build the configs with `python -m scripts.tune_boosting`; the best parameters are saved to `configs/<model>_tuned.json`.
+Tuning cuts LightGBM from 457.3 to 449.9 and CatBoost from 452.7 to 448.8. The index target mode (dividing rent by a monthly rent index, decision 5) helps LightGBM by about 4 RMSE but barely moves CatBoost. **lightgbm_tuned on G0+G1 with index mode (445.8)** is the best single submission. The final model and final Kaggle submission is the five model repeat-rent blend, `lag_blend5_G0G1_index.csv` (holdout 431.0, public 415.01, [docs/repeat_rent_blend.md](docs/repeat_rent_blend.md)). Tuned XGBoost (445.6) and the untuned random forest (444.3) are within 1.5 RMSE of it, which is a tie on one holdout. Index mode lets a tree model predict above the training range, but [docs/trend_handling.md](docs/trend_handling.md) shows on earlier periods that it hurts when rents stop rising. Adding the block group (G2) does not help either model here. Build the configs with `python -m scripts.tune_boosting`; the best parameters are saved to `configs/<model>_tuned.json`.
 
 Feature-group ablation (tuned models, time holdout, raw target). The tuned hyperparameters are held fixed at the `G0+G1` values while the feature set varies, so each row isolates the contribution of a feature group:
 
@@ -159,5 +159,7 @@ Fits the model on all training rows and saves the fitted model to `models/` (git
 * `src/features.py`, `src/evaluation.py`, `src/models.py`: shared experiment interface
 * `scripts/run_experiment.py`: command line runner
 * `scripts/trend_analysis.py`, `scripts/horizon_backtest.py`: trend tables, report figures and the 16 month backtest ([docs/trend_handling.md](docs/trend_handling.md))
+* `scripts/lag_blend_submission.py`: repeat-rent features, final five model blend and its validation ([docs/repeat_rent_blend.md](docs/repeat_rent_blend.md))
+* `scripts/report_tables.py`: Evaluation tables of the report
 * `notebooks/`: EDA
 * `templates/latex/`: course report template

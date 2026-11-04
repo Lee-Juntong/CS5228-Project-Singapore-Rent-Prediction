@@ -53,6 +53,14 @@ report/*.log
 report/*.out
 report/*.synctex.gz
 report/main.pdf
+report/*.toc
+report/*.lof
+report/*.lot
+report/sections/*.aux
+texput.log
+
+# CatBoost training logs
+catboost_info/
 
 # Regenerate analysis runs locally; commit only the compact reference results.
 results/analysis/*
