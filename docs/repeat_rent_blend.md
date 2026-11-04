@@ -12,9 +12,10 @@ Rents in the same block and flat type line up more strongly at gaps of 12, 24 an
 |---|---|---|---|
 | Tuned LightGBM, index | 445.8 | 511.0 | 434.43 |
 | Tuned LightGBM + regularised LightGBM with lags | 432.6 | 495.3 | 419.71 |
-| Five model blend (adds XGBoost, CatBoost, random forest with lags) | 431.0 | 492.8 | not submitted |
+| Five model blend (adds XGBoost, CatBoost, random forest with lags) | 431.0 | 492.8 | 415.01 |
+| Base and lag LightGBM on index and raw targets | 431.6 | 485.6 | 419.59 |
 
-The blend was chosen on these same two windows, so its gains are slightly optimistic.
+The blend was chosen on these same two windows, so its gains are slightly optimistic. The index and raw mix had the better 16 month score but the worse public score, so we keep the index target.
 
 ## Limit on any model
 
