@@ -29,7 +29,17 @@ Table~\ref{tab:ablation} adds the feature groups one at a time, with hyperparame
 \input{tables/ablation}
 \end{table}
 
-\subsection{Suspicious Rows}\label{sec:suspicious}
+\subsection{Potential Outlier Points}\label{sec:suspicious}
+
+The EDA flagged rows whose rent is arguably an outlier when put in correlation with other attributes, using the two rules in Table~\ref{tab:outliers}, and the decision was to run feature ablation against said rows as well.
+
+\begin{table}[htbp]
+\caption{Outlier flagging rules and the number of training rows each marks.}
+\label{tab:outliers}
+\centering
+\footnotesize
+\input{tables/outliers}
+\end{table}
 
 We retrained tuned LightGBM without flagged rows in the fit period, on the index target. Dropping the 49 rows with a low rent for their area changes the holdout RMSE by $-0.1$~SGD and the public score by $-0.4$~SGD. Dropping the 12 rows flagged by both of our rules adds 0.4~SGD. Dropping the 331 rows that are extreme within their flat type or town adds 2.2~SGD on the holdout and 4.2~SGD on the public leaderboard, probably because that rule also removes real premium rents. We keep all rows.
 
