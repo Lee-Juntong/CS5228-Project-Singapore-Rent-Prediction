@@ -1,30 +1,32 @@
 % Owner: member D, with member A for the limit on any model. Target length: 1.25 pages.
-% Sources: docs/analysis.md, docs/analysis_review.md, docs/repeat_rent_blend.md.
+% Sources: docs/analysis.md, docs/analysis_review.md, docs/repeat_rent_blend.md, results/member_a/repeat_rent/.
 \section{Error Analysis and Interpretation}\label{sec:errors}
 
-Sections~\ref{sec:residuals} and~\ref{sec:interpretation} analyse tuned LightGBM with the index target (holdout RMSE 445.8, MAE 323.9, bias $-24.5$~SGD), the base member of the blend. Residual means prediction minus observed rent.
+This section analyses the five model blend on the holdout (RMSE 431.0, MAE 314.5, bias $-47.0$~SGD), with tuned LightGBM on the index target as the comparison (445.8, 323.9, $-24.5$~SGD). The case review and the comparison with Ridge use tuned LightGBM only. Residual means prediction minus observed rent.
 
 \subsection{Why the RMSE Is Not Lower}\label{sec:floor}
 
 Rows with the same block, flat type and month have identical inputs, so any model gives them one prediction, and the spread of rent inside such a group is error that no model can remove. Even with the true mean of every group, the RMSE would stay at 178~SGD on all training rows, 165~SGD on the holdout and 187~SGD on the 16 month window. This bound is far too low to reach, because it counts the 74\% of rows with unique inputs as predicted perfectly.
 
-The spread inside the groups is a better guide. Rows that share inputs have a pooled standard deviation of SGD 449 on the holdout and SGD 468 on all training rows. On 4{,}207 repeated holdout rows, the mean rent of the other rows in the group scores 612~SGD against 446~SGD for the model, so even the rent of a near identical flat is a noisy guide. If rows with unique inputs have a similar spread, an RMSE of 431~SGD is close to what these inputs allow. We cannot prove this floor, and the repeat-rent features showed that earlier estimates of it were too high.
+The spread inside the groups is a better guide. Rows that share inputs have a pooled standard deviation of SGD 449 on the holdout and SGD 468 on all training rows. On 4{,}207 repeated holdout rows, the mean rent of the other rows in the group scores 612~SGD against 446~SGD for tuned LightGBM and 441~SGD for the blend, so even the rent of a near identical flat is a noisy guide. If rows with unique inputs have a similar spread, an RMSE of 431~SGD is close to what these inputs allow. We cannot prove this floor, and the repeat-rent features showed that earlier estimates of it were too high.
 
 Leaderboard scores of about 160 to 180 sit at this bound. We infer that those teams look up test rents in the public HDB rental table on data.gov.sg, which records month, town, block, street, flat type and rent and covers the test period. A lookup returns the rents of a group, so it can reach the bound but not pass it. From the given inputs alone, a score of 200 would need rows with unique inputs predicted within about 107~SGD, while rents in one group differ by about 450~SGD. Our models use no rents from this table.
 
 \subsection{Residuals}\label{sec:residuals}
 
-A few large errors carry much of the squared error. Absolute errors above SGD 1{,}000 occur in 3.9\% of holdout rows and give 38\% of the squared error (Fig.~\ref{fig:outliers}). The 585 rows with a rent below SGD 2{,}000 are 3.4\% of the rows and give 26\% of the squared error, with a bias of $+1{,}112$~SGD. The 20 largest errors are all over-predictions, and nine of them have a rent below SGD 1{,}000. In two pairs of rows the recorded profile is identical while the rents are SGD 3{,}550 and 800, and SGD 2{,}880 and 700.
+A few large errors carry much of the squared error. Absolute errors above SGD 1{,}000 occur in 3.3\% of holdout rows and give 34\% of the squared error, against 3.9\% and 38\% for tuned LightGBM (Fig.~\ref{fig:outliers}). The 585 rows with a rent below SGD 2{,}000 are 3.4\% of the rows and give 24\% of the squared error, with a bias of $+1{,}011$~SGD. Of the 20 largest errors, 19 are over-predictions, and eight have a rent below SGD 1{,}000. In two pairs of rows the recorded profile is identical while the rents are SGD 3{,}550 and 800, and SGD 2{,}880 and 700.
 
 \begin{figure}[htbp]
 \centerline{\includegraphics[width=\columnwidth]{validation_outliers}}
-\caption{Predicted against observed rent on the holdout (left) and the share of rows and squared error by rent band (right).}
+\caption{Predicted against observed rent on the holdout (left) and the share of rows and squared error by rent band (right), tuned LightGBM.}
 \label{fig:outliers}
 \end{figure}
 
 The data cannot explain these rows. They may be a room or one tenant's share of the rent, while area and type describe the whole flat. They may also be discounted agreements or errors in the declared amount. One SGD 650 row matches the public HDB rental table, so the amount was published. HDB states that owners declare these rents and that it does not verify them, so the match says nothing about the cause.
 
-Large flats and central areas do not carry most of the error. The 5-room and executive flats are 28\% of the rows and 31\% of the squared error, while 3-room and 4-room flats give 66\%. Rows within 5~km of Raffles Place are 12\% of the rows and 16\% of the squared error. Jurong West gives the largest share of any town (9.6\%), and it also has the most holdout rows (Fig.~\ref{fig:town-errors} in Appendix~\ref{app:eda}).
+Large flats and central areas do not carry most of the error. The 5-room and executive flats are 28\% of the rows and 31\% of the squared error, while 3-room and 4-room flats give 66\%. Rows within 5~km of Raffles Place are 12\% of the rows and 16\% of the squared error. Jurong West gives the largest share of any town (9.4\%), and it also has the most holdout rows (Fig.~\ref{fig:town-errors} in Appendix~\ref{app:eda}).
+
+The blend gains most on rows with unique inputs, where the RMSE falls from 445.8 to 427.8~SGD. On rows that share inputs it falls from 445.8 to 440.6~SGD. Lag features can move the prediction for a whole group, but they cannot separate rows inside it.
 
 % Generated by scripts/trend_analysis.py. Methods cites this figure.
 \begin{figure}[htbp]
@@ -33,15 +35,15 @@ Large flats and central areas do not carry most of the error. The 5-room and exe
 \label{fig:monthly}
 \end{figure}
 
-Fig.~\ref{fig:monthly} shows no growth in error across the six holdout months. Predicted rent deciles stay close to the observed means (bias $-39$ to $-9$~SGD), so the model is calibrated on average and misses at the two tails.
+Fig.~\ref{fig:monthly} shows no growth in error across the six holdout months for the single models, and the blend stays between 421 and 445~SGD per month. Its bias reaches $-67$~SGD in the last month, against a range of $-36$ to $-53$~SGD before it. Predicted rent deciles have a bias of $-74$ to $-18$~SGD, so the blend runs slightly low on average and misses most at the two tails.
 
 \subsection{Importance and Partial Dependence}\label{sec:interpretation}
 
-Fig.~\ref{fig:importance} shows permutation importance. Flat type ordinal (+166~SGD), subzone (+112~SGD) and floor area (+26~SGD) have the largest effects, and every other feature stays below 8~SGD. Month has the strongest numeric rank correlation with rent, but its effect here is only +0.06~SGD. The rent index carries the trend and is nearly flat over the holdout, so this result does not mean that time is unimportant. Related inputs can also share importance.
+Fig.~\ref{fig:importance} shows permutation importance for the blend. Flat type ordinal (+44~SGD) and the 24 month rent lags (+43~SGD) have the largest effects, ahead of flat type (+17~SGD), subzone (+13~SGD) and latitude (+12~SGD). The 12 month lags add +5~SGD and the 36 month lags +0.4~SGD, so the signal sits mostly at two years, and that feature set stays available through the test period. Tuned LightGBM alone puts more weight on fewer inputs: flat type ordinal +166~SGD, subzone +112~SGD and floor area +26~SGD. Related inputs share importance, and the blend spreads it further across its members. Month has the strongest numeric rank correlation with rent, but its effect here is only +0.1~SGD. The rent index carries the trend and is nearly flat over the holdout, so this result does not mean that time is unimportant.
 
 \begin{figure}[htbp]
-\centerline{\includegraphics[width=0.9\columnwidth]{permutation_importance}}
-\caption{Permutation importance on 2{,}000 holdout rows. Bars are the mean rise in RMSE over five repeats, and error bars show their standard deviation.}
+\centerline{\includegraphics[width=\columnwidth]{figures/blend_importance}}
+\caption{Permutation importance of the blend on 2{,}000 holdout rows, ten largest. Bars are the mean rise in RMSE over five repeats, and error bars show their standard deviation. Rent lag sets, in red, are shuffled as one group.}
 \label{fig:importance}
 \end{figure}
 

@@ -7,6 +7,11 @@
         Scores the blends on the time holdout and on a 16 month window, measures
         the limit on any model and the correlation of rents by gap. Writes
         results/member_a/repeat_rent/*.csv and report/figures/lag_correlation.pdf.
+
+    python -m scripts.lag_blend_submission --analyse
+        Repeats the residual and permutation importance analysis on the blend.
+        Writes results/member_a/repeat_rent/{error_analysis,permutation_importance}.csv
+        and report/figures/blend_importance.pdf.
 """
 
 from __future__ import annotations
@@ -22,7 +27,7 @@ import xgboost as xgb
 from catboost import CatBoostRegressor
 from sklearn.ensemble import RandomForestRegressor
 
-from src.config import PROJECT_ROOT, TARGET
+from src.config import PROJECT_ROOT, SEED, TARGET
 from src.evaluation import MonthlyRentIndex, regression_metrics
 from src.features import feature_columns, load_modeling_data
 
@@ -31,6 +36,18 @@ warnings.filterwarnings("ignore")
 OUT = PROJECT_ROOT / "results" / "member_a" / "repeat_rent"
 SUBMISSION = PROJECT_ROOT / "submissions" / "lag_blend5_G0G1_index.csv"
 FIGURE = PROJECT_ROOT / "report" / "figures" / "lag_correlation.pdf"
+IMPORTANCE_FIGURE = PROJECT_ROOT / "report" / "figures" / "blend_importance.pdf"
+IMPORTANCE_ROWS = 2000
+IMPORTANCE_REPEATS = 5
+LABELS = {
+    "FLAT_TYPE_ORDINAL": "Flat type ordinal",
+    "FLAT_TYPE": "Flat type",
+    "HDB_SUBZONE": "Subzone",
+    "HDB_LATITUDE": "Latitude",
+    "DISTANCE_TO_RAFFLES_PLACE_KM": "Distance to Raffles Place",
+    "FLOOR_AREA_SQM": "Floor area",
+    "FLAT_MODEL": "Flat model",
+}
 
 COLUMNS = feature_columns("G0+G1")
 CONFIGS = PROJECT_ROOT / "configs"
@@ -84,38 +101,53 @@ def lag_features(history: pd.DataFrame, target: pd.DataFrame, cut: int) -> pd.Da
     return out.loc[target.index]
 
 
-def as_numeric(frame: pd.DataFrame, categorical: list[str]) -> pd.DataFrame:
+def as_numeric(frame: pd.DataFrame) -> pd.DataFrame:
     frame = frame.copy()
-    for column in categorical:
+    for column in frame.columns[frame.dtypes == "category"]:
         frame[column] = frame[column].cat.codes
     return frame
 
 
-def fit_five(fit: pd.DataFrame, valid: pd.DataFrame, cut: int, target_mode: str = "index", only_lightgbm: bool = False) -> dict:
-    """Fit the blend members on `fit` and return their rent predictions for `valid`."""
+def fit_members(fit: pd.DataFrame, cut: int, target_mode: str = "index", only_lightgbm: bool = False) -> tuple:
+    """Fit the blend members. Returns the rent index, the fit rows with `a`, and the models."""
     index = MonthlyRentIndex().fit(fit.MONTH_INDEX, fit[TARGET])
     if target_mode == "index":
         fit = fit.assign(a=fit[TARGET].values / index.transform(fit.MONTH_INDEX))
-        scale = index.transform(valid.MONTH_INDEX)
     else:
         fit = fit.assign(a=fit[TARGET].values.astype(float))
-        scale = 1.0
-    fit_lags, valid_lags = lag_features(fit, fit, cut), lag_features(fit, valid, cut)
-    X, X_valid = pd.concat([fit[COLUMNS], fit_lags], axis=1), pd.concat([valid[COLUMNS], valid_lags], axis=1)
-    predictions = {
-        "base": lgb.LGBMRegressor(**LGBM).fit(fit[COLUMNS], fit.a).predict(valid[COLUMNS]) * scale,
-        "lag_reg": lgb.LGBMRegressor(**LGBM_LAG).fit(X, fit.a).predict(X_valid) * scale,
+    fit_lags = lag_features(fit, fit, cut)
+    X = pd.concat([fit[COLUMNS], fit_lags], axis=1)
+    models = {
+        "base": lgb.LGBMRegressor(**LGBM).fit(fit[COLUMNS], fit.a),
+        "lag_reg": lgb.LGBMRegressor(**LGBM_LAG).fit(X, fit.a),
     }
-    if only_lightgbm:
-        return predictions
-    categorical = [c for c in COLUMNS if str(fit[c].dtype) == "category"]
-    X_num, X_valid_num = as_numeric(X, categorical), as_numeric(X_valid, categorical)
-    predictions["xgb"] = xgb.XGBRegressor(**XGB).fit(X_num, fit.a).predict(X_valid_num) * scale
-    predictions["cat"] = CatBoostRegressor(**CATBOOST).fit(X_num, fit.a).predict(X_valid_num) * scale
-    predictions["rf"] = (
-        RandomForestRegressor(**FOREST).fit(X_num.fillna(-1), fit.a).predict(X_valid_num.fillna(-1)) * scale
-    )
+    if not only_lightgbm:
+        X_num = as_numeric(X)
+        models["xgb"] = xgb.XGBRegressor(**XGB).fit(X_num, fit.a)
+        models["cat"] = CatBoostRegressor(**CATBOOST).fit(X_num, fit.a)
+        models["rf"] = RandomForestRegressor(**FOREST).fit(X_num.fillna(-1), fit.a)
+    return index, fit, models
+
+
+def predict_members(models: dict, X_valid: pd.DataFrame, scale) -> dict:
+    predictions = {
+        "base": models["base"].predict(X_valid[COLUMNS]) * scale,
+        "lag_reg": models["lag_reg"].predict(X_valid) * scale,
+    }
+    if "xgb" in models:
+        X_valid_num = as_numeric(X_valid)
+        predictions["xgb"] = models["xgb"].predict(X_valid_num) * scale
+        predictions["cat"] = models["cat"].predict(X_valid_num) * scale
+        predictions["rf"] = models["rf"].predict(X_valid_num.fillna(-1)) * scale
     return predictions
+
+
+def fit_five(fit: pd.DataFrame, valid: pd.DataFrame, cut: int, target_mode: str = "index", only_lightgbm: bool = False) -> dict:
+    """Fit the blend members on `fit` and return their rent predictions for `valid`."""
+    index, fitted, models = fit_members(fit, cut, target_mode, only_lightgbm)
+    X_valid = pd.concat([valid[COLUMNS], lag_features(fitted, valid, cut)], axis=1)
+    scale = index.transform(valid.MONTH_INDEX) if target_mode == "index" else 1.0
+    return predict_members(models, X_valid, scale)
 
 
 def submission(train: pd.DataFrame, test: pd.DataFrame) -> None:
@@ -220,13 +252,133 @@ def validate(train: pd.DataFrame, test: pd.DataFrame) -> None:
     plot_gaps(gaps)
 
 
+def error_summary(valid: pd.DataFrame, prediction: np.ndarray) -> dict:
+    """The residual measures of docs/analysis.md, for one set of holdout predictions."""
+    y = valid[TARGET].values
+    error = prediction - y
+    squared = error**2
+    total = squared.sum()
+    share = lambda mask: float(squared[mask].sum() / total)
+    flat, town = valid.FLAT_TYPE.astype(str).values, valid.TOWN.astype(str).values
+    low, very_low = y < 2000, y < 1000
+    central = valid.DISTANCE_TO_RAFFLES_PLACE_KM.values < 5
+    big_flat, mid_flat = np.isin(flat, ["5-room", "executive"]), np.isin(flat, ["3-room", "4-room"])
+    largest = np.argsort(-np.abs(error))[:20]
+    towns = pd.Series(squared).groupby(town).sum().sort_values(ascending=False) / total
+    groups = valid[COLUMNS].astype(str).agg("|".join, axis=1).values
+    repeated = pd.Series(groups).duplicated(keep=False).values
+    deciles = pd.Series(error).groupby(pd.qcut(prediction, 10, labels=False, duplicates="drop")).mean()
+    result = regression_metrics(y, prediction)
+    result.update(
+        rows_error_over_1000=float((np.abs(error) > 1000).mean()),
+        squared_error_over_1000=share(np.abs(error) > 1000),
+        rows_rent_below_2000=int(low.sum()),
+        share_rent_below_2000=float(low.mean()),
+        squared_rent_below_2000=share(low),
+        bias_rent_below_2000=float(error[low].mean()),
+        squared_rent_below_1000=share(very_low),
+        top20_over_predictions=int((error[largest] > 0).sum()),
+        top20_rent_below_1000=int((y[largest] < 1000).sum()),
+        squared_5room_executive=share(big_flat),
+        squared_3room_4room=share(mid_flat),
+        share_within_5km=float(central.mean()),
+        squared_within_5km=share(central),
+        rmse_within_5km=float(np.sqrt(squared[central].mean())),
+        top_town=towns.index[0],
+        squared_top_town=float(towns.iloc[0]),
+        rows_repeated=int(repeated.sum()),
+        rmse_repeated=float(np.sqrt(squared[repeated].mean())),
+        rmse_unique=float(np.sqrt(squared[~repeated].mean())),
+        decile_bias_min=float(deciles.min()),
+        decile_bias_max=float(deciles.max()),
+    )
+    for month, group in pd.DataFrame({"m": valid.MONTH_INDEX.values, "e": error}).groupby("m").e:
+        result[f"rmse_month_{month}"] = float(np.sqrt((group**2).mean()))
+        result[f"bias_month_{month}"] = float(group.mean())
+    return result
+
+
+def blend_importance(valid: pd.DataFrame, fitted: pd.DataFrame, index, models: dict, cut: int) -> pd.DataFrame:
+    """Permutation importance of the blend on the sample used in docs/analysis.md."""
+    from src.analysis_interpretation import heldout_sample
+
+    sample = heldout_sample(valid, IMPORTANCE_ROWS, SEED)
+    X = pd.concat([sample[COLUMNS], lag_features(fitted, sample, cut)], axis=1)
+    y = sample[TARGET].values
+
+    def score(frame: pd.DataFrame) -> float:
+        scale = index.transform(frame.MONTH_INDEX)
+        return regression_metrics(y, np.mean(list(predict_members(models, frame, scale).values()), axis=0))["rmse"]
+
+    baseline = score(X)
+    inputs = {column: [column] for column in COLUMNS}
+    inputs.update({f"Rent lags: {name}": [f"{name}_{stat}" for stat in ("mean", "n", "min", "max")] for name in GAPS})
+    rng = np.random.default_rng(SEED)
+    rows = []
+    for name, columns in inputs.items():
+        rises = []
+        for _ in range(IMPORTANCE_REPEATS):
+            shuffled = X.copy()
+            order = rng.permutation(len(X))
+            for column in columns:
+                shuffled[column] = X[column].iloc[order].values
+            rises.append(score(shuffled) - baseline)
+        rows.append({"feature": name, "importance_mean_sgd": float(np.mean(rises)), "importance_std_sgd": float(np.std(rises, ddof=1))})
+        print(rows[-1], flush=True)
+    table = pd.DataFrame(rows).sort_values("importance_mean_sgd", ascending=False)
+    table["sample_rmse"] = baseline
+    return table
+
+
+def plot_importance(table: pd.DataFrame) -> None:
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    plt.rcParams.update({"font.size": 8})
+    top = table.head(10).iloc[::-1]
+    labels = [LABELS.get(name, name.replace("Rent lags: L", "Rent lags, ").replace("Rent lags: OFF", "Rent lags, other gaps")) for name in top.feature]
+    fig, ax = plt.subplots(figsize=(3.4, 2.1))
+    colors = ["tab:red" if name.startswith("Rent lags") else "tab:blue" for name in top.feature]
+    ax.barh(labels, top.importance_mean_sgd, xerr=top.importance_std_sgd, color=colors, error_kw={"linewidth": 0.7})
+    ax.set_xlabel("Rise in RMSE (SGD)")
+    fig.tight_layout()
+    fig.savefig(IMPORTANCE_FIGURE)
+    plt.close(fig)
+
+
+def analyse(train: pd.DataFrame) -> None:
+    """Repeat the residual and importance analysis on the blend. Holdout only."""
+    OUT.mkdir(parents=True, exist_ok=True)
+    cut = WINDOWS["holdout"]
+    fit, valid = train[train.MONTH_INDEX <= cut], train[train.MONTH_INDEX > cut]
+    index, fitted, models = fit_members(fit, cut)
+    X_valid = pd.concat([valid[COLUMNS], lag_features(fitted, valid, cut)], axis=1)
+    predictions = predict_members(models, X_valid, index.transform(valid.MONTH_INDEX))
+    summary = pd.DataFrame(
+        {
+            "lightgbm_tuned_index": error_summary(valid, predictions["base"]),
+            "lag_blend5": error_summary(valid, np.mean(list(predictions.values()), axis=0)),
+        }
+    )
+    summary.rename_axis("measure").to_csv(OUT / "error_analysis.csv")
+    print(summary.to_string())
+    table = blend_importance(valid, fitted, index, models, cut)
+    table.to_csv(OUT / "permutation_importance.csv", index=False)
+    plot_importance(table)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--validate", action="store_true", help="score the blends instead of writing a submission")
+    parser.add_argument("--analyse", action="store_true", help="repeat the error analysis on the blend")
     args = parser.parse_args()
     train, test = load_modeling_data()
     add_cell(train, "data/train.csv")
-    if args.validate:
+    if args.analyse:
+        analyse(train)
+    elif args.validate:
         validate(train, test)
     else:
         submission(train, test)

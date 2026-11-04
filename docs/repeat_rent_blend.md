@@ -17,6 +17,12 @@ Rents in the same block and flat type line up more strongly at gaps of 12, 24 an
 
 The 16 month window fits to November 2023 and scores December 2023 to March 2025. The blend was chosen on these same windows and on the public score, so its gains are slightly optimistic. The index and raw mix has the better 16 month score and the worse public score, so we keep the index target.
 
+## Error analysis on the blend
+
+On the holdout the blend has fewer large errors than tuned LightGBM: absolute errors above 1,000 fall from 3.9% to 3.3% of rows, and from 38% to 34% of squared error (`error_analysis.csv`). RMSE falls from 445.8 to 427.8 on rows with unique inputs and from 445.8 to 440.6 on rows that share inputs, because lag features cannot separate rows inside a group. Bias is larger, at -47.0 against -24.5.
+
+The 24 month lags are the second largest input in permutation importance (+43, flat type ordinal +44). The 12 month lags add +5 and the 36 month lags +0.4 (`permutation_importance.csv`). The case review and the comparison with Ridge in [analysis.md](analysis.md) stay on tuned LightGBM.
+
 ## Limit on any model
 
 Rows with the same block, flat type and month have identical features, so any model gives them the same prediction. Even with perfect means per group, RMSE stays at 178 on all training rows, 165 on the holdout and 187 on the 16 month window (`limit.csv`). The bound counts the 74% of rows with unique inputs as perfect. Rents within a group have a pooled standard deviation of 449 on the holdout and 468 on all rows, so an honest score near that bound is not reachable. Leaderboard scores near 160 to 180 sit at this bound, and we infer that those teams look up rents in the public data.gov.sg table. We did not use that table.
@@ -26,6 +32,7 @@ Rows with the same block, flat type and month have identical features, so any mo
 ```bash
 python -m scripts.lag_blend_submission
 python -m scripts.lag_blend_submission --validate
+python -m scripts.lag_blend_submission --analyse
 ```
 
-The first command writes `submissions/lag_blend5_G0G1_index.csv`. The second rebuilds every number on this page in [results/member_a/repeat_rent/](../results/member_a/repeat_rent/) and `report/figures/lag_correlation.pdf`.
+The first command writes `submissions/lag_blend5_G0G1_index.csv`. The other two rebuild every number on this page in [results/member_a/repeat_rent/](../results/member_a/repeat_rent/) and the figures `report/figures/lag_correlation.pdf` and `report/figures/blend_importance.pdf`.
