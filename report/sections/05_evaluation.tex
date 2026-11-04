@@ -8,7 +8,7 @@
 Table~\ref{tab:results} scores every model on the time holdout with the index target, and Table~\ref{tab:trend} has the raw target results. With the index target, the mean prediction of every model lies within 58~SGD of the mean rent.
 
 \begin{table}[htbp]
-\caption{Time holdout results with G0+G1 features and the index target, best first. RMSE, MAE and bias are in SGD, MAPE in percent and fit time in seconds on one PC.}
+\caption{Time holdout results with G0+G1 features and the index target, best first. RMSE, MAE and bias are in SGD, MAPE in percent and logged fit time in seconds (hardware dependent).}
 \label{tab:results}
 \centering
 \footnotesize
@@ -31,7 +31,7 @@ Table~\ref{tab:ablation} adds the feature groups one at a time, with hyperparame
 
 \subsection{Potential Outlier Points}\label{sec:suspicious}
 
-The EDA flagged rows whose rent is arguably an outlier when put in correlation with other attributes, using the two rules in Table~\ref{tab:outliers}, and the decision was to run feature ablation against said rows as well.
+The EDA flagged potentially unusual rents using the two rules in Table~\ref{tab:outliers}. We evaluated their effect through row-removal ablation, keeping the model's features and hyperparameters fixed.
 
 \begin{table}[htbp]
 \caption{Outlier flagging rules and the number of training rows each marks.}

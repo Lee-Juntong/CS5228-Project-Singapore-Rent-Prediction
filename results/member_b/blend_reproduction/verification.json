@@ -1,0 +1,146 @@
+{
+  "source_commit": "17d942963204a44fec97a4985eb405860bd0b09e",
+  "python": "3.10.22",
+  "platform": "Windows-10-10.0.19045-SP0",
+  "packages": {
+    "numpy": "1.26.4",
+    "pandas": "2.2.1",
+    "pyarrow": "19.0.1",
+    "scipy": "1.12.0",
+    "scikit-learn": "1.5.1",
+    "lightgbm": "4.6.0",
+    "catboost": "1.2.8",
+    "xgboost": "3.2.0",
+    "optuna": "5.0.0",
+    "matplotlib": "3.9.2",
+    "seaborn": "0.13.2",
+    "nbformat": "5.9.2",
+    "jupyter_client": "8.6.2",
+    "ipykernel": "6.29.5",
+    "torch": "2.7.0"
+  },
+  "input_sha256": {
+    "data/test.csv": "dfc407406d957bbf7c2f005e5d9852b1bfc6546cd4186f07e6824d8e03e64cfc",
+    "data/train.csv": "6d7a417de72112361f8353659ba6fe44a442b07465b488aff1b03f7ec1ea3ba6",
+    "data/auxiliary/sg-coe-prices.csv": "e32fccd39da32780b6b7f35d069c813ed3edb0c110ea60761656bcee58d501a5",
+    "data/auxiliary/sg-cpi.csv": "b6ef8811591ff0aaf8c132dc555149729a590ed23b5d5c4379341ab4d4a2028e",
+    "data/auxiliary/sg-hdb-block.csv": "e6ccc60c1f901f8f476eb6fe14c07ef5941d2afd06a081a1e4c00f717da27f83",
+    "data/auxiliary/sg-mrt-stations.csv": "899460b39fb251bd6883fffc9e6a772081f8e5217a657550afc3c49cfdcd3227",
+    "data/auxiliary/sg-schools.csv": "118c7ce8d96bbc934bd53655e73e6d0848c27853a625394ecc6a67a5af54f192",
+    "data/auxiliary/sg-shopping-malls.csv": "00e05b0176ac412695fc4ce1fc5a5338a1993593ffaffe26156dc2ea04ddf2c8",
+    "data/auxiliary/sg-stock-prices.csv": "c52fef9f33cfcb11285e2b9546124e02f32488e563af44e9fb3a505d10e2edff",
+    "data/auxiliary/sg-tertiary-institutions.csv": "ef13df353a52eb1e04270561ea1713845e0321a9af16e1f55168718cce0d0220",
+    "data/derived/block_extra_features.csv": "c1f2c6f1f8176aa6fe704342a0d3105b063d0b4650659070d6d89e2a4e4604b6"
+  },
+  "train_rows": 149575,
+  "test_rows": 50000,
+  "tests_passed": 39,
+  "reference_comparison": [
+    {
+      "file": "validation.csv",
+      "rows": 10,
+      "max_abs_differences": {
+        "rmse": 0.0,
+        "mae": 0.0,
+        "mape": 3.552713678800501e-15,
+        "bias": 7.105427357601002e-15,
+        "r2": 0.0
+      }
+    },
+    {
+      "file": "limit.csv",
+      "rows": 3,
+      "max_abs_differences": {
+        "n": 0.0,
+        "limit_identical_inputs": 0.0,
+        "limit_block_type_month": 0.0,
+        "share_rows_in_shared_group": 0.0,
+        "within_group_sd": 0.0,
+        "mean_sd_block_type_month": 0.0
+      }
+    },
+    {
+      "file": "gap_correlation.csv",
+      "rows": 36,
+      "max_abs_differences": {
+        "corr": 0.0,
+        "pairs": 0.0
+      }
+    },
+    {
+      "file": "test_lag_coverage.csv",
+      "rows": 17,
+      "max_abs_differences": {
+        "L12_n": 0.0,
+        "L24_n": 0.0,
+        "L36_n": 0.0,
+        "OFF_n": 0.0
+      }
+    },
+    {
+      "file": "error_analysis.csv",
+      "rows": 38,
+      "max_abs_differences": {
+        "lightgbm_tuned_index": 0.0,
+        "lag_blend5": 2.2737367544323206e-13
+      }
+    },
+    {
+      "file": "permutation_importance.csv",
+      "rows": 43,
+      "max_abs_differences": {
+        "importance_mean_sgd": 2.3092638912203256e-14,
+        "importance_std_sgd": 3.552713678800501e-14,
+        "sample_rmse": 0.0
+      }
+    }
+  ],
+  "reference_tolerance": 1e-10,
+  "max_abs_reference_difference": 2.2737367544323206e-13,
+  "passed": true,
+  "completed_date": "2026-11-05",
+  "support_packages": {
+    "joblib": "1.4.2",
+    "threadpoolctl": "3.7.0",
+    "tzdata": "2025.2",
+    "pillow": "12.3.0"
+  },
+  "pip_check_passed": true,
+  "report_tables_byte_identical": [
+    "results.tex",
+    "ablation.tex",
+    "blend.tex",
+    "trend.tex",
+    "split.tex",
+    "hyperparameters.tex",
+    "horizon.tex"
+  ],
+  "report": {
+    "compiled": true,
+    "pages": 10,
+    "conclusion_page": 6,
+    "last_body_figure_page": 7,
+    "evaluation_and_figures_visually_checked": true,
+    "unresolved_references": false,
+    "existing_todos": [
+      "three student IDs",
+      "workload confirmation and preprocessing attribution"
+    ]
+  },
+  "command_seconds": {
+    "validate": 264.3885431,
+    "submission": 108.1861726,
+    "analyse": 135.3886029
+  },
+  "submission": {
+    "rows": 50000,
+    "unique_complete_ids": true,
+    "finite_predictions": true,
+    "minimum": 1527.2571275456644,
+    "maximum": 5335.59922969463,
+    "mean": 3180.477570656578,
+    "sha256": "1f761c239779a018eebec65b6f2d9fce8f822d7d1eb3cdc219c95dafb87d179a",
+    "original_submission_available": false,
+    "kaggle_upload_performed": false
+  }
+}
