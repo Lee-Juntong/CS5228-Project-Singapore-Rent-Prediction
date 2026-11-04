@@ -1,7 +1,7 @@
 % Owner: member D (EDA rewrite). Target length: 1.5 pages.
 \section{Data and Exploratory Analysis}\label{sec:data}
 
-Each row of the Kaggle data is one approved HDB rental. The training file has 150{,}000 rows with the monthly rent, and the test file has 50{,}000 rows without it. Each row records the approval month, town, block, street, flat type, flat model, floor area, lease commencement year, a furnishing flag and a fee. The furnishing flag and the fee are constant in both files. Auxiliary files give HDB block attributes and the locations of MRT stations, schools and shopping malls.
+Each row of the Kaggle data is one approved HDB rental. The training file has 150{,}000 rows with the monthly rent, and the test file has 50{,}000 rows without it. Each row records the approval month, town, block, street, flat type, flat model, floor area, lease commencement year, a furnishing flag and a fee. The furnishing flag and the fee are constant in both files. Auxiliary files give HDB block attributes and the locations of Mass Rapid Transit (MRT) stations, schools and shopping malls.
 
 Rent has a mean of SGD 2{,}718, a median of SGD 2{,}650 and a standard deviation of SGD 750, and it ranges from SGD 300 to SGD 7{,}600 after cleaning (Fig.~\ref{fig:distribution}, left). The monthly median rose from SGD 2{,}000 in January 2021 to about SGD 3{,}100 in mid 2023 and then stayed nearly flat (right). Training rows cover January 2021 to March 2025 and test rows cover March 2025 to July 2026, at about 3{,}000 rows per month. Section~\ref{sec:validation} builds the validation split on this gap.
 

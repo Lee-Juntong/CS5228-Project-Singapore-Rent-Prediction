@@ -1,6 +1,6 @@
 # Repeat-rent blend
 
-Rents in the same block and flat type line up more strongly at gaps of 12, 24 and 36 months than at nearby gaps, most of all at 24 months (`gap_correlation.csv`). This looks like flats renewing, although the data has no unit number to confirm it. This method adds that signal as lag features, then blends models with and without them. It is the final model.
+Rents in the same block and flat type line up more strongly at gaps of 12, 24 and 36 months than at nearby gaps, most of all at 24 months (`gap_correlation.csv`). This looks like flats renewing, although the data has no unit number to confirm it. This method adds that signal as lag features, then blends models with and without them. It is the final model, and `lag_blend5_G0G1_index.csv` is the final Kaggle submission.
 
 ## Features
 

@@ -1,7 +1,7 @@
 % Owner: all members. Target length: 0.5 page.
 \section{Limitations and Future Work}\label{sec:limitations}
 
-The data does not record the floor of the unit, its condition or furnishing, or whether the whole flat or only some rooms are rented. These attributes explain part of the rent that no model in this report can recover.
+The data does not record the floor of the unit, its condition or furnishing, or whether the whole flat or only some rooms are rented. These attributes probably explain part of the rent, and no model in this report can recover that part.
 
 Our holdout covers six months of flat rents, while the test period extends up to 16 months past the training data. We therefore forecast up to 16 months ahead from five earlier dates (Table~\ref{tab:horizon}). The index target helps while rents keep rising: fitted to March 2022, LightGBM scores 762~SGD against 909~SGD raw on months 7 to 16. It hurts when they stop: fitted to March 2023, the line through the last 12 medians still rises by 70~SGD per month, and LightGBM scores 955~SGD against 569~SGD raw. With a low slope the two targets are close: fitted to March 2024 (9.8~SGD per month), LightGBM scores 451~SGD against 455~SGD raw on months 7 to 12. The final model has a slope of 5.3~SGD per month, which points to the low risk case, but test errors could be larger than on the holdout if the rent trend changes direction.
 
@@ -9,4 +9,4 @@ The market features (COE, CPI and stock values) use the value of the approval mo
 
 The repeat-rent features rest on an unverified reading of the data, that gaps of 12, 24 and 36 months are renewals. The 12 month features run out in the last three test months, although they add little. The 24 month features, which carry most of the signal, stay available. The public score of the blend covers only part of the test period.
 
-We froze the data sources early, so several ideas stayed out: rents by market segment, work pass counts, BTO completion schedules, travel times and the storey of the unit. The storey and a field for whole flat or room rental would probably help most, because they address the spread within a cell. We would also score the blend on a second forward window and tune its lag models.
+We froze the data sources early, so several ideas stayed out: rents by market segment, work pass counts, Build-To-Order (BTO) completion schedules, travel times and the storey of the unit. The storey and a field for whole flat or room rental would probably help most, because they address the spread within a group. We would also score the blend on a second forward window and tune its lag models.

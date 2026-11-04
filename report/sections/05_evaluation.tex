@@ -5,7 +5,7 @@
 
 \subsection{Model Comparison}
 
-Table~\ref{tab:results} scores every model on the time holdout with the index target, and Table~\ref{tab:trend} has the raw target results. With the index target, every model lies within 58~SGD of the mean rent.
+Table~\ref{tab:results} scores every model on the time holdout with the index target, and Table~\ref{tab:trend} has the raw target results. With the index target, the mean prediction of every model lies within 58~SGD of the mean rent.
 
 \begin{table}[htbp]
 \caption{Time holdout results with G0+G1 features and the index target, best first. RMSE, MAE and bias are in SGD, MAPE in percent and fit time in seconds on one PC.}
@@ -45,4 +45,4 @@ Table~\ref{tab:blend} compares the blends on the holdout, the 16 month window an
 \input{tables/blend}
 \end{table}
 
-We submit the five model blend, which has the best public score and the best holdout score. We chose it on the same windows that it is scored on, and the public score was part of that choice, so all three of its scores are slightly optimistic.
+The five model blend is our final Kaggle submission, because it has the best public score and the best holdout score. We chose it on the same windows that it is scored on, and the public score was part of that choice, so all three of its scores are slightly optimistic.

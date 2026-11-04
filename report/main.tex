@@ -27,6 +27,10 @@
 We forecast monthly HDB rents up to 16 months past the training data, and we select models on a time holdout because random cross-validation overrates the lookup and linear models by up to 264~SGD. Dividing rent by a monthly rent index closes most of the gap between simple and complex models, and all three boosting libraries and a random forest then stop near 445~SGD. Features built from the earlier rents of the same block and flat type lower the RMSE of a five model blend to 431.0~SGD on the holdout and 415.0~SGD on the public leaderboard.
 \end{abstract}
 
+\begin{IEEEkeywords}
+rent forecasting, time holdout, trend handling, gradient boosting, model blending, repeat rents
+\end{IEEEkeywords}
+
 \input{sections/01_introduction}
 \input{sections/02_data}
 \input{sections/03_preprocessing}
@@ -34,6 +38,7 @@ We forecast monthly HDB rents up to 16 months past the training data, and we sel
 \input{sections/05_evaluation}
 \input{sections/06_error_analysis}
 \input{sections/07_limitations}
+\input{sections/08_conclusion}
 
 \bibliographystyle{IEEEtran}
 \bibliography{references}
