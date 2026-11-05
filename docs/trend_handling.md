@@ -56,7 +56,7 @@ Plan decision 5 and the random CV check from decision 1. All runs use G0+G1 feat
 
    A model choice made with random CV would have ranked the group median (490.5) above KNN (508.6), although on the time holdout it is 270 SGD worse. The time holdout is the right split for this task.
 
-6. **The index target is a bet that the recent slope continues.** The holdout has flat rents, so we moved the end of the fit window back and forecast up to 16 months ahead from five earlier dates. The last date has only 12 months of data. `python -m scripts.horizon_backtest` takes about 15 minutes and writes [horizon_backtest.csv](../results/member_a/trend/horizon_backtest.csv). RMSE for tuned LightGBM:
+6. **The index target is a bet that the recent slope continues.** The holdout has flat rents, so we moved the end of the fit window back and forecast up to 16 months ahead from five earlier dates. Only 12 months of data follow the last date. `python -m scripts.horizon_backtest` takes about 15 minutes and writes [horizon_backtest.csv](../results/member_a/trend/horizon_backtest.csv). RMSE for tuned LightGBM:
 
    | Fit to | Slope (SGD per month) | Months 1 to 6, raw | Months 1 to 6, index | Months 7 to 16, raw | Months 7 to 16, index |
    |---|---:|---:|---:|---:|---:|
@@ -68,7 +68,7 @@ Plan decision 5 and the random CV check from decision 1. All runs use G0+G1 feat
 
    While rents kept rising, the index target won by up to 147 SGD. Once rents flattened, it lost by up to 386 SGD, because the line through the last 12 medians was still steep. Fitted to March 2023 it reaches SGD 4,171 after 16 months, when the observed median stayed near SGD 3,100, so bias is +743 SGD on months 7 to 16. XGBoost and the forest show the same pattern.
 
-   The March 2024 fit is the closest case to the final single model. Its slope is 9.8 SGD per month, and the index target is slightly better there (451 vs 455 on months 7 to 12, XGBoost 450 vs 452, forest 449 vs 462). At the end of the training data the slope is 5.3 SGD per month, so the index reaches SGD 3,246 at the end of the test period against a last median of SGD 3,200. This points to the low risk case, although five dates are too few to prove it. The public leaderboard agrees for now: tuned LightGBM scores 434.4 with the index target and 437.1 raw. That score covers only the public part of the test set.
+   The March 2024 fit is the closest case to the final single model. Its slope is 9.8 SGD per month, and the index target is slightly better there (451 vs 455 on months 7 to 12, XGBoost 450 vs 452, forest 449 vs 462). At the end of the training data the slope is 5.3 SGD per month, so the index reaches SGD 3,246 at the end of the test period against a last median of SGD 3,200. This points to the low risk case, although five dates are too few to prove it. The public leaderboard agrees for now: tuned LightGBM scores 434.43 with the index target and 437.15 raw. That score covers only the public part of the test set.
 
    With the index target, the forest beats LightGBM in 9 of 10 rows (by up to 25 SGD) and XGBoost in all 10 (by up to 10 SGD), although the two low slope rows are within about 2 SGD. The rows overlap in time, so this is weak evidence, but it does not support preferring LightGBM over the other two. Member C should weigh it in the open choice.
 

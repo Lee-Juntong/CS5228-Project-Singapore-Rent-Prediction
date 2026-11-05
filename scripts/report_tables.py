@@ -91,6 +91,7 @@ def blend_table(results: pd.DataFrame, validation: pd.DataFrame, log: pd.DataFra
     rows = [
         f"LightGBM (tuned), raw & {raw:.1f} & & {public('lightgbm_tuned', 'raw'):.2f}" + ROW_END,
         row("LightGBM (tuned)", "lightgbm_tuned_index", public("lightgbm_tuned")),
+        f"Regularised LightGBM & {scores.loc['lag_lightgbm_index', 'holdout']:.1f} & {scores.loc['lag_lightgbm_index', '16_month']:.1f} & " + ROW_END,
         row("Two model blend", "lag_blend2", public("lightgbm_lag_blend")),
         row("Index and raw, four models", "lag_blend_index_raw", public("lag_blend_index_raw", "index+raw")),
         row("Five model blend", "lag_blend5", public("lag_blend5"), bold=True),

@@ -3,7 +3,7 @@
 
 Renters, landlords and housing agencies all need a fair estimate of the monthly rent of a Housing and Development Board (HDB) flat. We predict the monthly rent of an HDB flat from its type, size, age and location, and from the month in which the rental was approved.
 
-The training data covers rentals approved from January 2021 to March 2025, and the test data covers March 2025 to July 2026. The task is therefore a forecast of future rents and not an interpolation between known months. The median rent rose from about 2{,}100 Singapore dollars (SGD) in 2021 to SGD 3{,}100 in 2024. Tree models cannot predict values beyond the range of the targets they saw, so the handling of this trend is a central design choice in this report.
+The training data covers rentals approved from January 2021 to March 2025, and the test data covers March 2025 to July 2026. The task is therefore a forecast of future rents and not an interpolation between known months. The median rent rose from about 2{,}000 Singapore dollars (SGD) in January 2021 to SGD 3{,}100 by mid 2023. Tree models cannot extend a trend past the months they saw in training, so the handling of this trend is a central design choice in this report.
 
 We ask three questions:
 \begin{enumerate}
@@ -12,4 +12,4 @@ We ask three questions:
 \item Which attributes drive rent, and what limits the accuracy of a prediction?
 \end{enumerate}
 
-Our best model is an equal blend of five tree models with repeat-rent features, which use the earlier rents of the same block and flat type. It scores 431.0~SGD on a six month holdout and 415.0~SGD on the public leaderboard, against 445.8 and 434.4 for tuned LightGBM alone. Once the trend is handled, Ridge is only 22~SGD behind tuned LightGBM, and the largest later gain came from a new feature. Flat type, the rent of the same block and type two years earlier, and location drive the predictions. The main limit is missing unit information: rents of rows with identical inputs have a standard deviation of about 450~SGD.
+Our best model is an equal blend of five tree models with repeat-rent features, which use the earlier rents of the same block and flat type. It scores 431.0~SGD on a six month holdout and 415.0~SGD on the public leaderboard, against 445.8 and 434.4 for tuned LightGBM alone. Once the trend is handled, Ridge is only 22~SGD behind tuned LightGBM, and the largest further gain came from the repeat-rent features. Flat type, the rent of the same block and type two years earlier, and location drive the predictions. The main limit is missing unit information: rents of rows with identical inputs have a standard deviation of about 450~SGD.
