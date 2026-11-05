@@ -29,10 +29,16 @@ Rows with the same block, flat type and month have identical features, so any mo
 
 ## Run
 
+Use Python 3.10 with the full root `requirements.txt`. Both raw CSVs and the processed feature files are required. Run from the repository root. The three modes below are separate commands and each trains fresh models:
+
 ```bash
 python -m scripts.lag_blend_submission
 python -m scripts.lag_blend_submission --validate
 python -m scripts.lag_blend_submission --analyse
 ```
 
-The first command writes `submissions/lag_blend5_G0G1_index.csv`. The other two rebuild every number on this page in [results/member_a/repeat_rent/](../results/member_a/repeat_rent/) and the figures `report/figures/lag_correlation.pdf` and `report/figures/blend_importance.pdf`.
+The first command writes `submissions/lag_blend5_G0G1_index.csv`. The other two rebuild every number on this page except the public leaderboard scores. They write the numbers to [results/member_a/repeat_rent/](../results/member_a/repeat_rent/) and the figures to `report/figures/lag_correlation.pdf` and `report/figures/blend_importance.pdf`.
+
+The commands perform 5, 14 and 5 fits respectively. All three overwrite committed files: the first rewrites the committed final submission, and the other two rewrite the CSVs and figures above. Use a separate checkout with its own copy of the data, or restore the files afterwards as shown in [the README](../README.md#kaggle-submission). A rerun of the submission is not byte identical, so compare it with the committed file numerically (maximum difference below 1e-9) and do not commit it. The script does not save model weights, upload predictions to Kaggle or update the Kaggle log.
+
+After regenerating results, run `python -m scripts.report_tables` to rebuild the results, ablation and blend tables, and follow [the report build instructions](../report/README.md). Public leaderboard values are read from the recorded Kaggle log, not recomputed locally.

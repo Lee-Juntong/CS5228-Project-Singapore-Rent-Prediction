@@ -123,7 +123,7 @@ Feature-group ablation (tuned models, time holdout, raw target). The tuned hyper
 | G0+G1+G2 (+block) | 44 | 448.5 | 449.8 |
 | ALL (+market) | 54 | 450.1 | 452.4 |
 
-Location (G1) is the only group that clearly helps: it cuts about 12 to 14 RMSE for both models. Block attributes (G2) add almost nothing (0.1 to 0.3). The market group (G3: current-month COE, CPI and stock values) makes both models worse, by 1.6 to 2.6 RMSE, even though those values would not be known at prediction time. The final selected recipe is `G0+G1` with index targets; the tiny raw-target improvement from G2 does not carry over to that LightGBM setup.
+Location (G1) is the only group that clearly helps: it cuts about 10 to 14 RMSE for both models. Block attributes (G2) add almost nothing (0.1 to 0.3). The market group (G3: current-month COE, CPI and stock values) makes both models worse, by 1.6 to 2.6 RMSE, even though those values would not be known at prediction time. The final selected recipe is `G0+G1` with index targets; the tiny raw-target improvement from G2 does not carry over to that LightGBM setup.
 
 ### Where results go
 
@@ -134,23 +134,33 @@ Location (G1) is the only group that clearly helps: it cuts about 12 to 14 RMSE 
 
 ### Kaggle submission
 
-```python
-from src.evaluation import make_submission
-from src.models import make_lightgbm_tuned
-# The final single model: tuned LightGBM on G0+G1 with index trend handling (val RMSE 445.8). The final model is the five model blend below.
-make_submission(make_lightgbm_tuned, "G0+G1", target_mode="index",
-                path="submissions/lightgbm_tuned_G0G1_index.csv")
+The final model is the five model repeat-rent blend. It needs the full `requirements.txt`, including LightGBM, XGBoost and CatBoost, because `requirements-analysis.txt` alone is not enough. Keep the raw `data/train.csv` and `data/test.csv` next to the processed files. The blend rebuilds the block, street and flat type key from the raw row order.
+
+Run these commands separately from the repository root:
+
+```bash
+python -m scripts.lag_blend_submission --validate
+python -m scripts.lag_blend_submission
+python -m scripts.lag_blend_submission --analyse
 ```
 
-The `submissions/` folder is created if it does not exist. Only the final submission, `submissions/lag_blend5_G0G1_index.csv`, is in git. Each submission is logged in `results/kaggle_log.csv` (date, model, feature set, target mode, validation RMSE, public leaderboard score, notes); record the validation RMSE before reading the public score so the leaderboard does not drive model selection. The final model is the one with the lowest time holdout RMSE. The five model blend scores 431.0, against 431.6 for the index and raw mix and 432.6 for the two model blend, and its public score agrees with that ranking.
+Each mode trains fresh models. Validation performs 14 fits: five index target models and two raw target LightGBM models in each of two time windows. The default command performs five fits on all training rows and writes `submissions/lag_blend5_G0G1_index.csv` with columns `Id,Predicted`. Analysis performs five holdout fits plus permutation scoring. None of them uploads to Kaggle or updates `results/kaggle_log.csv`.
+
+All three modes overwrite committed files. Validation and analysis rewrite `results/member_a/repeat_rent/` and two report figures. The default command rewrites the committed final submission. A rerun is not byte identical, so compare it with the committed file numerically (maximum difference below 1e-9) and do not commit it. A separate checkout needs its own copy of the data, because `data/` is mostly not in git (see [data/README.md](data/README.md)). Otherwise restore the generated files afterwards, which leaves other uncommitted work alone: `git checkout -- results/member_a/repeat_rent submissions/lag_blend5_G0G1_index.csv report/figures/lag_correlation.pdf report/figures/blend_importance.pdf`.
+
+`python -m scripts.report_tables` rebuilds `results.tex`, `ablation.tex` and `blend.tex` in `report/tables/`. In the same directory, `python -m scripts.trend_analysis` writes the trend, split and hyperparameter tables, and `python -m scripts.horizon_backtest --table-only` writes the horizon table. Run all three commands from the repository root. See [the report build instructions](report/README.md), [the blend guide](docs/repeat_rent_blend.md) and [the reproduction check](docs/blend_reproduction.md).
+
+The `submissions/` folder is created if it does not exist. Only the final submission, `submissions/lag_blend5_G0G1_index.csv`, is in git. Each submission is logged in `results/kaggle_log.csv` (date, model, feature set, target mode, validation RMSE, public leaderboard score, notes). Record the validation RMSE before reading the public score so the leaderboard does not drive model selection. The final model is the one with the lowest time holdout RMSE. The five model blend scores 431.0, against 431.6 for the index and raw mix and 432.6 for the two model blend, and its public score agrees with that ranking. Reproducing the CSV locally does not verify the public score.
 
 ### Saved model weights
+
+The following command saves the **single LightGBM reference**, not the final blend:
 
 ```bash
 python -m scripts.save_final_model --model lightgbm_tuned --features G0+G1 --target-mode index
 ```
 
-Fits the model on all training rows and saves the fitted model to `models/` (gitignored) with a JSON provenance sidecar, so a reported submission can be reloaded and replayed later. See `models/README.md` to reload one.
+It fits on all training rows and saves the fitted model to `models/` (gitignored) with a JSON provenance sidecar. See `models/README.md` to reload one. The blend script writes predictions only. It does not save its five estimators or the rent history behind the lag features, so reproducing the blend means running its script again.
 
 ## Layout
 

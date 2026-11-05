@@ -8,14 +8,14 @@
 Table~\ref{tab:results} scores every model on the time holdout with the index target, and Table~\ref{tab:trend} has the raw target results. With the index target, the mean prediction of every model lies within 58~SGD of the mean rent.
 
 \begin{table}[htbp]
-\caption{Time holdout results with G0+G1 features and the index target, best first. RMSE, MAE and bias are in SGD, MAPE in percent and fit time in seconds on one PC.}
+\caption{Time holdout results with G0+G1 features and the index target, best first. RMSE, MAE and bias are in SGD, MAPE in percent and logged fit time in seconds (hardware dependent).}
 \label{tab:results}
 \centering
 \footnotesize
 \input{tables/results}
 \end{table}
 
-The simple models get closer than we expected. With the index target, the group median lookup is 37~SGD behind tuned LightGBM and Ridge is 22~SGD behind, against 305 and 126~SGD on raw rent. Linear models and KNN use restricted inputs (34 and 4 columns), so these gaps do not isolate the algorithm alone. Boosting adds little over a forest on this data. On raw rent tuned boosting beats the forest by 9 to 10~SGD, and with the index target the untuned forest beats tuned boosting by 1 to 5~SGD. Tuning gains 4 to 7~SGD on raw rent. The top three models lie within 1.5~SGD of each other, and tuned XGBoost and LightGBM are 0.05~SGD apart on the public leaderboard, so we treat them as a tie.
+The simple models get closer than we expected. With the index target, the group median lookup is 37~SGD behind tuned LightGBM and Ridge is 22~SGD behind, against 305 and 126~SGD on raw rent. Linear models and KNN use restricted inputs (34 and 4 columns), so these gaps do not isolate the algorithm alone. Boosting adds little over a forest on this data. On raw rent tuned boosting beats the forest by 9 to 10~SGD, and with the index target the untuned forest beats tuned boosting by 1 to 5~SGD. Tuning gains 4 to 7~SGD on raw rent. The top three single models lie within 1.5~SGD of each other, and tuned XGBoost and LightGBM are 0.05~SGD apart on the public leaderboard, so we treat them as a tie.
 
 \subsection{Feature Group Ablation}
 
@@ -31,7 +31,7 @@ Table~\ref{tab:ablation} adds the feature groups one at a time, with hyperparame
 
 \subsection{Potential Outlier Points}\label{sec:suspicious}
 
-The EDA flagged rows whose rent is arguably an outlier when put in correlation with other attributes, using the two rules in Table~\ref{tab:outliers}, and the decision was to run feature ablation against said rows as well.
+The EDA flagged potentially unusual rents using the two rules in Table~\ref{tab:outliers}.
 
 \begin{table}[htbp]
 \caption{Outlier flagging rules and the number of training rows each marks.}
@@ -41,7 +41,7 @@ The EDA flagged rows whose rent is arguably an outlier when put in correlation w
 \input{tables/outliers}
 \end{table}
 
-We retrained tuned LightGBM without flagged rows in the fit period, on the index target. Dropping the 49 rows with a low rent for their area changes the holdout RMSE by $-0.1$~SGD and the public score by $-0.4$~SGD. Dropping the 12 rows flagged by both of our rules adds 0.4~SGD. Dropping the 331 rows that are extreme within their flat type or town adds 2.2~SGD on the holdout and 4.2~SGD on the public leaderboard, probably because that rule also removes real premium rents. We keep all rows.
+We retrained tuned LightGBM on the index target without the flagged rows in the fit period, with features and hyperparameters fixed. Dropping the 44 fit period rows (49 in all) with a low rent for their area changes the holdout RMSE by $-0.1$~SGD and the public score by $-0.4$~SGD. Dropping the 10 fit period rows (12 in all) flagged by both of our rules adds 0.4~SGD. Dropping the 276 fit period rows (331 in all) that are extreme within their flat type or town adds 2.2~SGD on the holdout and 4.2~SGD on the public leaderboard, probably because that rule also removes real premium rents. We keep all rows.
 
 \subsection{Final Model}
 
