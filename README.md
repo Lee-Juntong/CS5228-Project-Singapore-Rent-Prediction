@@ -137,7 +137,7 @@ Location (G1) is the only group that clearly helps: it cuts about 12 to 14 RMSE 
 ```python
 from src.evaluation import make_submission
 from src.models import make_lightgbm_tuned
-# The final model: tuned LightGBM on G0+G1 with index trend handling (val RMSE 445.8).
+# The final single model: tuned LightGBM on G0+G1 with index trend handling (val RMSE 445.8). The final model is the five model blend below.
 make_submission(make_lightgbm_tuned, "G0+G1", target_mode="index",
                 path="submissions/lightgbm_tuned_G0G1_index.csv")
 ```
