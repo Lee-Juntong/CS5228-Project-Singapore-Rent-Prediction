@@ -10,8 +10,6 @@ Rows in the same cell and month have identical inputs, including the lag feature
 
 The spread inside the groups is a better guide. Rows that share inputs have a pooled standard deviation of 449~SGD on the holdout and 468~SGD on all training rows. On 4{,}207 repeated holdout rows, the mean rent of the other rows in the group scores 612~SGD against 446~SGD for tuned LightGBM and 441~SGD for the blend, so even the rent of a near identical flat is a noisy guide. If rows with unique inputs have a similar spread, an RMSE of 431~SGD is close to what these inputs allow. This estimate is not a proven floor, and it holds only for a fixed set of inputs: the repeat-rent features lowered the RMSE because they add information that G0+G1 lacks.
 
-Public leaderboard scores of about 160 to 180 sit near this bound. We infer that those teams look up test rents in the public HDB rental table~\cite{hdb2026renting}, which records month, town, block, street, flat type and rent and covers the test period. A lookup returns the rents of a group, so it can reach the bound but not pass it. From the given inputs alone, a score of 200 would need rows with unique inputs predicted within about 107~SGD, while rents in one group have a standard deviation of about 450~SGD. Our models use no rents from this table.
-
 \subsection{Residuals}\label{sec:residuals}
 
 A few large errors carry much of the squared error. Absolute errors above SGD 1{,}000 occur in 3.3\% of holdout rows and give 34\% of the squared error, against 3.9\% and 38\% for tuned LightGBM (Fig.~\ref{fig:outliers}). The 585 rows with a rent below SGD 2{,}000 are 3.4\% of the rows and give 24\% of the squared error, with a bias of $+1{,}011$~SGD. Of the 20 largest errors, 19 are over-predictions, and eight have a rent below SGD 1{,}000. In two pairs of rows the recorded profile is identical while the rents are SGD 3{,}550 and 800, and SGD 2{,}880 and 700.
@@ -22,7 +20,7 @@ A few large errors carry much of the squared error. Absolute errors above SGD 1{
 \label{fig:outliers}
 \end{figure*}
 
-The data cannot explain these rows. They may be a room or one tenant's share of the rent, while area and type describe the whole flat. They may also be discounted agreements or errors in the declared amount. One SGD 650 row matches the public HDB table~\cite{hdb2026renting}, so the amount was published. HDB states that owners declare these rents and that it does not verify them, so the match does not explain the amount.
+The data cannot explain these rows. They may be a room or one tenant's share of the rent, while area and type describe the whole flat. They may also be discounted agreements or errors in the declared amount. One SGD 650 row matches the public HDB rental table~\cite{hdb2026renting}, so the amount was published. We used this table only for this check, and our models use no rents from it. HDB states that owners declare these rents and that it does not verify them, so the match does not explain the amount.
 
 Large flats and central areas do not carry most of the error. The 5-room and executive flats are 28\% of the rows and 31\% of the squared error, while 3-room and 4-room flats give 66\%. Rows within 5~km of Raffles Place are 12\% of the rows and 16\% of the squared error. Jurong West gives the largest share of any town (9.4\%), and it also has the most holdout rows (Fig.~\ref{fig:town-errors} in Appendix~\ref{app:eda}).
 

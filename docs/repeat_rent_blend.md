@@ -25,7 +25,7 @@ The 24 month lags are the second largest input in permutation importance (+43, f
 
 ## Limit on any model
 
-Rows with the same block, flat type and month have identical features, so any model gives them the same prediction. Even with perfect means per group, RMSE stays at 178 on all training rows, 165 on the holdout and 187 on the 16 month window (`limit.csv`). The bound counts the 74% of rows with unique inputs as perfect. Rents within a group have a pooled standard deviation of 449 on the holdout and 468 on all rows, so an honest score near that bound is not reachable. Leaderboard scores near 160 to 180 sit at this bound, and we infer that those teams look up rents in the public data.gov.sg table. We did not use that table.
+Rows with the same block, flat type and month have identical features, so any model gives them the same prediction. Even with perfect means per group, RMSE stays at 178 on all training rows, 165 on the holdout and 187 on the 16 month window (`limit.csv`). The bound counts the 74% of rows with unique inputs as perfect. Rents within a group have a pooled standard deviation of 449 on the holdout and 468 on all rows, so an honest score near that bound is not reachable.
 
 ## Run
 
