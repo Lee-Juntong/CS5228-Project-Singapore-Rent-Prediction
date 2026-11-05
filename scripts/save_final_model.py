@@ -1,4 +1,4 @@
-"""Fit the final model on all training rows and save its weights for replay.
+"""Fit a single model on all training rows and save its weights for replay.
 
 The shared `fit_predict` / `make_submission` throw the fitted model away after
 predicting, so a reported submission cannot be reloaded later. This script
