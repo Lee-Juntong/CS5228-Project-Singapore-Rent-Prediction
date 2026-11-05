@@ -48,9 +48,11 @@ The three blend modes performed 24 fits in total. On this machine, validation to
 
 ## Submission file
 
-The local `submissions/lag_blend5_G0G1_index.csv` has columns `Id,Predicted`, exactly 50,000 complete unique test IDs in order, and finite predictions throughout. Predicted rent ranges from 1,527.26 to 5,335.60 SGD, with mean 3,180.48 SGD. These three values match the uploaded submission, now committed at the same path, to full precision. The SHA-256 in the verification JSON belongs to this local file, not the committed one.
+The local `submissions/lag_blend5_G0G1_index.csv` has columns `Id,Predicted` and finite predictions throughout. Predicted rent ranges from 1,527.26 to 5,335.60 SGD, with mean 3,180.48 SGD. All three summary values match the uploaded submission to full precision.
 
-The uploaded file was committed after this run (PR #10). A second rerun of the default command on main `547d891`, on another Windows PC, matches the committed file on every Id. 12.2% of predictions differ, by at most 1.8e-12 SGD. File hashes differ because of float formatting and line endings, so compare predictions numerically. No Kaggle upload was performed, and the public score of 415.01 was not remeasured. The blend script does not save its fitted estimators.
+PR #10 added the uploaded CSV to main. We compared the saved output from this run (`17d9429`) with the Git copy at `547d891`, matching rows by `Id` and parsing `Predicted` as double precision. Both files contain the same 50,000 unique IDs. Of those, 7,152 predictions differ numerically. The largest absolute difference is 9.09e-13 SGD, so all 50,000 pass the 1e-9 SGD tolerance. The verification JSON records both file hashes.
+
+On another Windows PC, a second run at `547d891` also passed this comparison, with 12.2% of predictions differing by at most 1.8e-12 SGD. The public score of 415.01 comes from the original Kaggle submission.
 
 ## Report checks
 

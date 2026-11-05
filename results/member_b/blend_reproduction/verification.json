@@ -140,6 +140,16 @@
     "sha256": "1f761c239779a018eebec65b6f2d9fce8f822d7d1eb3cdc219c95dafb87d179a",
     "original_submission_available": true,
     "kaggle_upload_performed": false,
+    "original_run_comparison": {
+      "reference_commit": "547d891",
+      "reference_sha256": "aaed771aa3e5b54fa203a129065d9971a36fc33634fec1c90dffb1d001712340",
+      "method": "match Id and compare finite Predicted values as binary64 using absolute difference",
+      "matched_unique_ids": 50000,
+      "rows_with_nonzero_difference": 7152,
+      "max_abs_difference": 9.094947017729282e-13,
+      "absolute_tolerance_sgd": 1e-9,
+      "rows_within_tolerance": 50000
+    },
     "committed_file_comparison": {
       "compared_on_commit": "547d891",
       "method": "second rerun of the default command compared by Id with the committed uploaded file",
