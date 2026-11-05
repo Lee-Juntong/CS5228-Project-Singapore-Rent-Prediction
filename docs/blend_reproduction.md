@@ -56,4 +56,4 @@ The uploaded file was committed after this run (PR #10). A second rerun of the d
 
 The seven regenerated tables (`results`, `ablation`, `blend`, `trend`, `split`, `hyperparameters`, `horizon`) are byte identical to their committed references. The report compiles without unresolved references or overfull boxes. Evaluation tables and regenerated figures were visually checked.
 
-The PDF has 10 pages in total. The conclusion ends on page 6, the remaining main text figures are on page 7, and references and appendices follow, so the main content is within the eight page limit.
+The PDF has 11 pages in total. The conclusion ends on page 6. The remaining main text figures are on pages 7 and 8. References and appendices start on page 9, so the main content is within the eight page limit.

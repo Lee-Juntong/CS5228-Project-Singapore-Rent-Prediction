@@ -117,9 +117,9 @@
   ],
   "report": {
     "compiled": true,
-    "pages": 10,
+    "pages": 11,
     "conclusion_page": 6,
-    "last_body_figure_page": 7,
+    "last_body_figure_page": 8,
     "evaluation_and_figures_visually_checked": true,
     "unresolved_references": false
   },
