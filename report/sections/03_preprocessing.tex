@@ -17,7 +17,7 @@ Table~\ref{tab:feature-handling} lists the decision for every column of the orig
 \hline
 Approval date & Transformed into a month index (months since January 2021) and a cyclic month. Defines the time split. \\
 Town & Kept as a categorical feature (26 levels). \\
-Block, street & Used to build the address key for the block join and the cell key of the repeat-rent features (Section~\ref{sec:blend}). Not direct model inputs, because of high cardinality (2{,}720 and 1{,}146 levels), and because coordinates and subzone carry the location after the join. \\
+Block, street & Used to build the address key for the block join and the cell key of the repeat-rent features (Section~\ref{sec:blend}). Not direct model inputs, because of high cardinality (2{,}720 and 1{,}146 levels in training), and because coordinates and subzone carry the location after the join. \\
 Flat type & Spellings unified. Kept as a categorical and as an ordinal (1-room to executive). \\
 Flat model & Kept as a categorical feature (20 levels). \\
 Floor area & Kept, plus its logarithm and the area per room. \\
@@ -28,7 +28,7 @@ Monthly rent & Target. Not transformed in the stored data. \\
 \end{tabular}
 \end{table}
 
-After the join, each block has coordinates and a subzone. From these we compute the distance to the central business district, and distances and counts within 0.5 to 2~km for MRT stations, schools, malls, rail lines and tertiary campuses. MRT stations are split into open and planned ones.
+After the join, each block has coordinates and a subzone. From these we compute distances to the central business district, MRT stations, schools, malls, rail lines and tertiary campuses, plus counts of nearby stations, schools, malls and campuses within 0.5 to 2~km. MRT stations are split into open and planned ones.
 
 The competition provides the block, MRT, school, mall, COE and stock market files. We added three sources: the Urban Redevelopment Authority Master Plan 2025 rail line layer, the SingStat consumer price index (CPI) series and the coordinates of 13 tertiary campuses, which we checked against the OneMap search service. We froze the data sources after this step and added no others.
 

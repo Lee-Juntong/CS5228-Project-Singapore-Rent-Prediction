@@ -2,11 +2,11 @@
 % Numbers: results/results.csv. Tables and figures: python -m scripts.trend_analysis.
 \section{Methods}\label{sec:methods}
 
-All single models go through one shared evaluation function. It selects the feature columns, fits the model, scores the holdout and logs one row of metrics, so all models are compared on the same rows, features and metrics. The random seed is 5228 for these fits. The blend of Section~\ref{sec:blend} has its own script, which uses the same split and metrics, with a separate fixed seed for each added model.
+All single models go through one shared evaluation function. It selects the candidate feature columns, fits the model, scores the holdout and logs one row of metrics, so all models are compared on the same rows and metrics. Section~\ref{sec:models} gives the input choices for each model. The random seed is 5228 for these fits. The blend of Section~\ref{sec:blend} has its own script, which uses the same split and metrics, with a separate fixed seed for each added model.
 
 \subsection{Validation Design}\label{sec:validation}
 
-The test set lies after the training set in time, so we use a time holdout that copies this setup~\cite{hyndman2021forecasting,bergmeir2012use}. Models are fitted on rentals approved from January 2021 to September 2024 (132{,}538 rows) and scored on October 2024 to March 2025 (17{,}037 rows). Encodings, imputation values, scalers and the rent index of Section~\ref{sec:trend} use fit rows only.
+The test period extends beyond the training period, so we use a time holdout to assess future rents~\cite{hyndman2021forecasting,bergmeir2012use}. Models are fitted on rentals approved from January 2021 to September 2024 (132{,}538 rows) and scored on October 2024 to March 2025 (17{,}037 rows). Imputation values, scalers, one-hot encoders and the rent index of Section~\ref{sec:trend} use fit rows only. Native categorical inputs use a shared vocabulary across train and test.
 
 To show what a random split would have told us, we also run shuffled 5-fold cross-validation (CV). We score its predictions only on the October 2024 to March 2025 rows, so both splits cover the same rows and the gap in Table~\ref{tab:split} measures only the effect of the split.
 
