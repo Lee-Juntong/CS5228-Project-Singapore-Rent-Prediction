@@ -30,6 +30,6 @@ Monthly rent & Target. Not transformed in the stored data. \\
 
 After the join, each block has coordinates and a subzone. From these we compute the distance to the central business district, and distances and counts within 0.5 to 2~km for MRT stations, schools, malls, rail lines and tertiary campuses. MRT stations are split into open and planned ones.
 
-The competition provides the block, MRT, school, mall, COE and stock market files. We added three sources: the Urban Redevelopment Authority (URA) Master Plan 2025 rail line layer, the SingStat consumer price index (CPI) series and the coordinates of 13 tertiary campuses, which we checked against the OneMap search service. We froze the data sources after this step and added no others.
+The competition provides the block, MRT, school, mall, COE and stock market files. We added three sources: the Urban Redevelopment Authority Master Plan 2025 rail line layer, the SingStat consumer price index (CPI) series and the coordinates of 13 tertiary campuses, which we checked against the OneMap search service. We froze the data sources after this step and added no others.
 
-We flagged 49 rows with a very low rent for their area, such as a 176~m$^2$ executive flat at SGD~750. We could not tell whether they are errors, so we kept them and tested their effect. Section~\ref{sec:suspicious} shows that removing them changes little, so they stay in the data.
+We flagged 49 rows with a very low rent for their area, such as a 176~m$^2$ executive flat at SGD~750. We could not tell whether they are errors, so we kept them and tested their effect (Section~\ref{sec:suspicious}).

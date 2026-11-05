@@ -15,11 +15,11 @@ Table~\ref{tab:results} scores every model on the time holdout with the index ta
 \input{tables/results}
 \end{table}
 
-The simple models get closer than we expected. With the index target, the group median lookup is 37~SGD behind tuned LightGBM and Ridge is 22~SGD behind, against 305 and 126~SGD on raw rent. Linear models and KNN use restricted inputs (34 and 4 columns), so these gaps do not isolate the algorithm alone. Boosting adds little over a forest on these data. On raw rent tuned boosting beats the forest by 9 to 10~SGD, and with the index target the untuned forest beats tuned boosting by 1 to 5~SGD. Tuning gains 4 to 7~SGD on raw rent. The top three single models lie within 1.5~SGD of each other, and tuned XGBoost and LightGBM are 0.05~SGD apart on the public leaderboard, so we treat them as a tie.
+The simple models get closer than we expected. With the index target, the group median lookup is 37~SGD behind tuned LightGBM and Ridge is 22~SGD behind, against 305 and 126~SGD on raw rent. Linear models and KNN use restricted inputs (34 and 4 columns), so these gaps do not isolate the algorithm alone. Boosting adds little over a forest on these data. On raw rent tuned boosting beats the forest by 9 to 10~SGD, and with the index target the untuned forest beats tuned boosting by 1 to 5~SGD. Tuning gains 4 to 7~SGD on raw rent. The untuned random forest (444.3~SGD), tuned XGBoost (445.6~SGD) and tuned LightGBM (445.8~SGD) lie within 1.5~SGD of each other, and tuned XGBoost and LightGBM are 0.05~SGD apart on the public leaderboard, so we treat them as a tie.
 
 \subsection{Feature Group Ablation}
 
-Table~\ref{tab:ablation} adds the feature groups one at a time, with hyperparameters fixed at their G0+G1 values. Location is the only group that clearly helps, by 10 to 14~SGD. Block attributes add at most 0.3~SGD. Market values make LightGBM 2.6~SGD worse and CatBoost 1.6~SGD worse, so dropping them costs nothing. We ran this ablation for LightGBM and CatBoost only.
+Table~\ref{tab:ablation} adds the feature groups one at a time. Location is the only group that clearly helps, by 10 to 14~SGD. Block attributes add at most 0.3~SGD. Market values make LightGBM 2.6~SGD worse and CatBoost 1.6~SGD worse, so dropping them costs nothing.
 
 \begin{table}[htbp]
 \caption{Time holdout RMSE (SGD) by feature set, raw target. Feature counts are in brackets.}
@@ -48,7 +48,7 @@ We retrained tuned LightGBM on the index target without the flagged rows in the 
 Table~\ref{tab:blend} compares the blends on the holdout, the 16 month window and the public leaderboard. The two model blend is tuned LightGBM plus the regularised LightGBM, and the index and raw mix fits these two models on both targets. The repeat-rent features and the blend gain on all three: the five model blend beats tuned LightGBM by 14.8~SGD on the holdout, 18.3~SGD on the 16 month window and 19.4~SGD on the public score. The regularised LightGBM alone gains 9.9 and 13.2~SGD on the first two. On the 16 month window the index models over-predict by about 120~SGD, because the slope fitted in late 2023 was too steep. The mix of index and raw targets cuts this to 87~SGD and has the best 16 month score, but its public score is 4.6~SGD worse.
 
 \begin{table}[htbp]
-\caption{RMSE (SGD) of single models and blends, with the index target unless stated. The public score covers only part of the test set.}
+\caption{RMSE (SGD) of single models and blends, with the index target unless stated.}
 \label{tab:blend}
 \centering
 \footnotesize
