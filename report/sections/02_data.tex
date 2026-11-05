@@ -3,7 +3,7 @@
 
 Each row of the Kaggle files is one approved HDB rental. The training file has 150{,}000 rows with the monthly rent, and the test file has 50{,}000 rows without it. Each row records the approval month, town, block, street, flat type, flat model, floor area, lease commencement year, a furnishing flag and a fee. The furnishing flag and the fee are constant in both files. Auxiliary files give HDB block attributes, the locations of Mass Rapid Transit (MRT) stations, schools and shopping malls, and monthly Certificate of Entitlement (COE) and stock market series.
 
-Rent has a mean of SGD 2{,}718, a median of SGD 2{,}650 and a standard deviation of SGD 750, and it ranges from SGD 300 to SGD 7{,}600 after removing duplicates (Fig.~\ref{fig:distribution}, left). The monthly median rose from SGD 2{,}000 in January 2021 to about SGD 3{,}100 in mid 2023 and then stayed nearly flat (right). Test rows follow training rows in time, with about 3{,}000 rows per month. Section~\ref{sec:validation} builds the validation split on this order.
+Rent has a mean of SGD 2{,}718, a median of SGD 2{,}650 and a standard deviation of SGD 750, and it ranges from SGD 300 to SGD 7{,}600 after removing duplicates (Fig.~\ref{fig:distribution}, left). The monthly median rose until mid 2023 and then stayed nearly flat (right). Test rows follow training rows in time, with about 3{,}000 rows per month. Section~\ref{sec:validation} builds the validation split on this order.
 
 \begin{figure*}[htbp]
 \centerline{\includegraphics[width=0.8\textwidth]{eda_distribution_trend}}
