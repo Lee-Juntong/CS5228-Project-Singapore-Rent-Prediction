@@ -20,9 +20,10 @@ D (Yu Long Lim) & EDA, repeated profile analysis, residual and case review, perm
 
 \todo{Each member checks their row.}
 
+\newpage
 \section{Forecast Backtest}\label{app:backtest}
 
-\begin{table}[htbp]
+\begin{table}[!h]
 \caption{RMSE (SGD) when the fit window ends earlier, by months ahead, G0+G1 features. Only 12 months follow the 2024-03 fit, so its last row covers months 7 to 12. Hyperparameters are the final ones, so these runs borrow some information from later data.}
 \label{tab:horizon}
 \centering
@@ -32,7 +33,7 @@ D (Yu Long Lim) & EDA, repeated profile analysis, residual and case review, perm
 
 \section{Hyperparameters}\label{app:hyperparameters}
 
-\begin{table}[htbp]
+\begin{table}[!h]
 \caption{Hyperparameters of the single models. Section~\ref{sec:blend} gives the blend members. Models not listed use the library defaults with seed 5228.}
 \label{tab:hyperparameters}
 \centering
@@ -40,22 +41,23 @@ D (Yu Long Lim) & EDA, repeated profile analysis, residual and case review, perm
 \input{tables/hyperparameters}
 \end{table}
 
+\onecolumn
 \section{Extra Figures}\label{app:eda}
 
-\begin{figure*}[htbp]
-\centerline{\includegraphics[width=0.7\textwidth]{eda_flat_type}}
+\begin{figure}[!h]
+\centerline{\includegraphics[width=0.6\textwidth]{eda_flat_type}}
 \caption{Median and interquartile range of rent by flat type.}
 \label{fig:flat-type}
-\end{figure*}
+\end{figure}
 
-\begin{figure*}[htbp]
-\centerline{\includegraphics[width=0.7\textwidth]{eda_town}}
+\begin{figure}[!h]
+\centerline{\includegraphics[width=0.6\textwidth]{eda_town}}
 \caption{Median and interquartile range of rent by town.}
 \label{fig:town}
-\end{figure*}
+\end{figure}
 
-\begin{figure*}[htbp]
-\centerline{\includegraphics[width=0.7\textwidth]{town_errors_contribution}}
+\begin{figure}[!h]
+\centerline{\includegraphics[width=0.6\textwidth]{town_errors_contribution}}
 \caption{Holdout RMSE by town and each town's share of the squared error, tuned LightGBM with the index target.}
 \label{fig:town-errors}
-\end{figure*}
+\end{figure}
