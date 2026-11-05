@@ -8,14 +8,14 @@
 Table~\ref{tab:results} scores every model on the time holdout with the index target, and Table~\ref{tab:trend} has the raw target results. With the index target, the mean prediction of every model lies within 58~SGD of the mean rent.
 
 \begin{table}[htbp]
-\caption{Time holdout results with G0+G1 features and the index target, best first. The blend also uses the lag features. RMSE, MAE and bias are in SGD, MAPE in percent and logged fit time in seconds (hardware dependent).}
+\caption{Time holdout results with G0+G1 features and the index target, best first. The blend also uses the lag features. RMSE, MAE and bias are in SGD, MAPE in percent and fit time in seconds.}
 \label{tab:results}
 \centering
 \footnotesize
 \input{tables/results}
 \end{table}
 
-The simple models get closer than we expected. With the index target, the group median lookup is 37~SGD behind tuned LightGBM and Ridge is 22~SGD behind, against 305 and 126~SGD on raw rent. Linear models and KNN use restricted inputs (34 and 4 columns), so these gaps do not isolate the algorithm alone. Boosting adds little over a forest on these data. On raw rent tuned boosting beats the forest by 9 to 10~SGD, and with the index target the untuned forest beats tuned boosting by 1 to 5~SGD. Tuning gains 4 to 7~SGD on raw rent. The untuned random forest (444.3~SGD), tuned XGBoost (445.6~SGD) and tuned LightGBM (445.8~SGD) lie within 1.5~SGD of each other, and tuned XGBoost and LightGBM are 0.05~SGD apart on the public leaderboard, so we treat them as a tie.
+The simple models get closer than we expected. With the index target, the group median lookup is 37~SGD behind tuned LightGBM and Ridge is 22~SGD behind, against 305 and 126~SGD on raw rent. Boosting adds little over a forest on these data. On raw rent tuned boosting beats the forest by 9 to 10~SGD, and with the index target the untuned forest beats tuned boosting by 1 to 5~SGD. Tuning gains 4 to 7~SGD on raw rent. The untuned random forest (444.3~SGD), tuned XGBoost (445.6~SGD) and tuned LightGBM (445.8~SGD) lie within 1.5~SGD of each other, and tuned XGBoost and LightGBM are 0.05~SGD apart on the public leaderboard, so we treat them as a tie.
 
 \subsection{Feature Group Ablation}
 

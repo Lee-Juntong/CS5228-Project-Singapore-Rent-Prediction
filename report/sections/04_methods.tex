@@ -18,7 +18,7 @@ To show what a random split would have told us, we also run shuffled 5-fold cros
 \input{tables/split}
 \end{table}
 
-Random CV does not flatter the tree models, whose gap lies between $-8$ and $+2$~SGD. It does flatter the models that handle time poorly. The group median gains 264~SGD, because random folds contain fit rows from the holdout quarters, so the lookup no longer falls back to medians over all past months. Linear regression and Ridge gain 73~SGD, because a random split hides the error of extending a straight time trend into new months. All other results in this report use the time holdout. The final model was tuned and selected on this holdout, so its holdout RMSE is slightly optimistic. We did not keep a second untouched period, because it would have removed the most recent months from training.
+Random CV changes the tree models little, with gaps between $-8$ and $+2$~SGD, and it flatters the models that handle time poorly. The group median gains 264~SGD, because random folds contain fit rows from the holdout quarters, so the lookup no longer falls back to medians over all past months. Linear regression and Ridge gain 73~SGD, because a random split hides the error of extending a straight time trend into new months. All other results in this report use the time holdout. The final model was tuned and selected on this holdout, so its holdout RMSE is slightly optimistic.
 
 \subsection{Metrics and Feature Groups}\label{sec:groups}
 
@@ -32,7 +32,7 @@ Tree models predict from leaf averages, so they cannot extend a rising trend pas
 \begin{equation}
 \hat{y}_i = f(x_i)\, I_{t_i},
 \end{equation}
-where $I_t$ is a monthly rent index. Inside the fit period $I_t$ is the median rent of the fit rows approved in month $t$. For later months it comes from a least squares line through the last 12 monthly medians. The model keeps the month index as a feature, so it can still learn changes in the rent ratio over time. Fig.~\ref{fig:index} shows the index. Rents were nearly flat from mid 2023, so the extrapolated index rises by only 2.4~SGD per month and stays within 73~SGD of the observed median in the holdout months (mean difference $-16$~SGD).
+where $I_t$ is a monthly rent index. Inside the fit period $I_t$ is the median rent of the fit rows approved in month $t$. For later months it comes from a least squares line through the last 12 monthly medians. The model keeps the month index as a feature, so it can still learn changes in the rent ratio over time. Rents were nearly flat from mid 2023 (Fig.~\ref{fig:index}), so the extrapolated index rises by only 2.4~SGD per month and stays within 73~SGD of the observed median in the holdout months (mean difference $-16$~SGD).
 
 \begin{figure}[htbp]
 \centerline{\includegraphics[width=\columnwidth]{figures/rent_index}}
