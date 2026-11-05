@@ -39,6 +39,6 @@ python -m scripts.lag_blend_submission --analyse
 
 The first command writes `submissions/lag_blend5_G0G1_index.csv`. The other two rebuild every number on this page in [results/member_a/repeat_rent/](../results/member_a/repeat_rent/) and the figures `report/figures/lag_correlation.pdf` and `report/figures/blend_importance.pdf`.
 
-The commands perform 5, 14 and 5 fits respectively. Preserve reference outputs or use a separate checkout, since validation and analysis overwrite the committed CSVs and figures. The script does not save model weights, upload predictions to Kaggle or update the Kaggle log. Check the generated submission's 50,000 unique test IDs and finite predictions before use.
+The commands perform 5, 14 and 5 fits respectively. All three overwrite committed files: the first rewrites the committed final submission, and the other two rewrite the CSVs and figures above. Use a separate checkout or restore the files afterwards. A rerun of the submission is not byte identical, so compare it with the committed file numerically (maximum difference below 1e-9) and do not commit it. The script does not save model weights, upload predictions to Kaggle or update the Kaggle log.
 
-After regenerating results, run `python -m scripts.report_tables` and follow [the report build instructions](../report/README.md). Public leaderboard values are read from the recorded Kaggle log, not recomputed locally.
+After regenerating results, run `python -m scripts.report_tables` to rebuild the results, ablation and blend tables, and follow [the report build instructions](../report/README.md). Public leaderboard values are read from the recorded Kaggle log, not recomputed locally.

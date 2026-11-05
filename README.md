@@ -134,30 +134,23 @@ Location (G1) is the only group that clearly helps: it cuts about 12 to 14 RMSE 
 
 ### Kaggle submission
 
-The final model is the five model repeat-rent blend. Use the full `requirements.txt`, including LightGBM, XGBoost and CatBoost; `requirements-analysis.txt` alone is insufficient. Keep the raw `data/train.csv` and `data/test.csv` as well as the processed files, because the blend reconstructs block/street/flat-type keys from the original row order.
+The final model is the five model repeat-rent blend. It needs the full `requirements.txt`, including LightGBM, XGBoost and CatBoost, because `requirements-analysis.txt` alone is not enough. Keep the raw `data/train.csv` and `data/test.csv` next to the processed files. The blend rebuilds the block, street and flat type key from the raw row order.
 
 Run these commands separately from the repository root:
 
 ```bash
-python -m unittest discover -s checks -v
 python -m scripts.lag_blend_submission --validate
 python -m scripts.lag_blend_submission
-```
-
-Validation performs 14 fits: five index-target models and two raw-target LightGBM models in each of two time windows. The default command performs five full-data fits and writes `submissions/lag_blend5_G0G1_index.csv` with columns `Id,Predicted`. Check for 50,000 rows, complete unique test IDs and finite predictions. These commands generate local files; they do not upload to Kaggle or update `results/kaggle_log.csv`.
-
-To reproduce the blend's error analysis and rebuild report tables:
-
-```bash
 python -m scripts.lag_blend_submission --analyse
-python -m scripts.report_tables
 ```
 
-Analysis performs another five holdout fits plus permutation scoring. Validation and analysis overwrite files in `results/member_a/repeat_rent/` and generated report figures; use a separate checkout or preserve the committed references before comparison. Run all three blend modes separately: they do not reuse fitted models. See [the blend guide](docs/repeat_rent_blend.md) for reference scores and [report build instructions](report/README.md).
+Each mode trains fresh models. Validation performs 14 fits: five index target models and two raw target LightGBM models in each of two time windows. The default command performs five fits on all training rows and writes `submissions/lag_blend5_G0G1_index.csv` with columns `Id,Predicted`. Analysis performs five holdout fits plus permutation scoring. None of them uploads to Kaggle or updates `results/kaggle_log.csv`.
 
-The [independent reproduction check](docs/blend_reproduction.md) records environment versions, numerical agreement, submission checks and report validation.
+All three modes overwrite committed files. Validation and analysis rewrite `results/member_a/repeat_rent/` and two report figures. The default command rewrites the committed final submission. A rerun is not byte identical, so compare it with the committed file numerically (maximum difference below 1e-9) and do not commit it. Use a separate checkout, or restore the files with `git checkout -- results submissions report/figures` afterwards.
 
-The `submissions/` folder is not in Git. After an actual Kaggle upload, record its score and provenance in `results/kaggle_log.csv`. Reproducing the local CSV does not verify the public leaderboard score.
+`python -m scripts.report_tables` then rebuilds `tables/results.tex`, `tables/ablation.tex` and `tables/blend.tex`. The other report tables come from `scripts.trend_analysis` and `scripts.horizon_backtest --table-only`, as listed in [the report build instructions](report/README.md). See [the blend guide](docs/repeat_rent_blend.md) for reference scores and [the reproduction check](docs/blend_reproduction.md) for an independent rerun.
+
+The `submissions/` folder is created if it does not exist. Only the final submission, `submissions/lag_blend5_G0G1_index.csv`, is in git. Each submission is logged in `results/kaggle_log.csv` (date, model, feature set, target mode, validation RMSE, public leaderboard score, notes). Record the validation RMSE before reading the public score so the leaderboard does not drive model selection. The final model is the one with the lowest time holdout RMSE. The five model blend scores 431.0, against 431.6 for the index and raw mix and 432.6 for the two model blend, and its public score agrees with that ranking. Reproducing the CSV locally does not verify the public score.
 
 ### Saved model weights
 
@@ -167,7 +160,7 @@ The following command saves the **single LightGBM reference**, not the final ble
 python -m scripts.save_final_model --model lightgbm_tuned --features G0+G1 --target-mode index
 ```
 
-It fits on all training rows and saves the fitted model to `models/` (gitignored) with a JSON provenance sidecar. See `models/README.md` to reload one. The blend script currently writes predictions only; it does not persist its five estimators or the rent history needed for lag features. Reproducing the blend therefore requires running its script again.
+It fits on all training rows and saves the fitted model to `models/` (gitignored) with a JSON provenance sidecar. See `models/README.md` to reload one. The blend script writes predictions only. It does not save its five estimators or the rent history behind the lag features, so reproducing the blend means running its script again.
 
 ## Layout
 

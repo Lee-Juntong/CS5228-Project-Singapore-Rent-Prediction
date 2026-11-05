@@ -121,11 +121,7 @@
     "conclusion_page": 6,
     "last_body_figure_page": 7,
     "evaluation_and_figures_visually_checked": true,
-    "unresolved_references": false,
-    "existing_todos": [
-      "three student IDs",
-      "workload confirmation and preprocessing attribution"
-    ]
+    "unresolved_references": false
   },
   "command_seconds": {
     "validate": 264.3885431,
@@ -140,7 +136,14 @@
     "maximum": 5335.59922969463,
     "mean": 3180.477570656578,
     "sha256": "1f761c239779a018eebec65b6f2d9fce8f822d7d1eb3cdc219c95dafb87d179a",
-    "original_submission_available": false,
-    "kaggle_upload_performed": false
+    "original_submission_available": true,
+    "kaggle_upload_performed": false,
+    "committed_file_comparison": {
+      "compared_on_commit": "547d891",
+      "method": "second rerun of the default command compared by Id with the committed uploaded file",
+      "max_abs_difference": 1.8e-12,
+      "share_rows_different": 0.122,
+      "local_min_max_mean_match_committed": true
+    }
   }
 }
