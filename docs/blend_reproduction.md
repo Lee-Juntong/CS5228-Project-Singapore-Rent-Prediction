@@ -48,12 +48,12 @@ The three blend modes performed 24 fits in total. On this machine, validation to
 
 ## Submission file
 
-The local `submissions/lag_blend5_G0G1_index.csv` has columns `Id,Predicted`, exactly 50,000 complete unique test IDs in order, and finite predictions throughout. Predicted rent ranges from 1,527.26 to 5,335.60 SGD, with mean 3,180.48 SGD. These three values match the uploaded submission, now committed at the same path, to full precision.
+The local `submissions/lag_blend5_G0G1_index.csv` has columns `Id,Predicted`, exactly 50,000 complete unique test IDs in order, and finite predictions throughout. Predicted rent ranges from 1,527.26 to 5,335.60 SGD, with mean 3,180.48 SGD. These three values match the uploaded submission, now committed at the same path, to full precision. The SHA-256 in the verification JSON belongs to this local file, not the committed one.
 
 The uploaded file was committed after this run (PR #10). A second rerun of the default command on main `547d891`, on another Windows PC, matches the committed file on every Id. 12.2% of predictions differ, by at most 1.8e-12 SGD. File hashes differ because of float formatting and line endings, so compare predictions numerically. No Kaggle upload was performed, and the public score of 415.01 was not remeasured. The blend script does not save its fitted estimators.
 
 ## Report checks
 
-The seven regenerated tables (`results`, `ablation`, `blend`, `trend`, `split`, `hyperparameters`, `horizon`) are byte identical to their committed references. The report compiles without unresolved references or overfull boxes. Evaluation tables and regenerated figures were visually checked.
+In the run above, the seven regenerated tables (`results`, `ablation`, `blend`, `trend`, `split`, `hyperparameters`, `horizon`) are byte identical to their committed references. The report compiled without unresolved references or overfull boxes. Evaluation tables and regenerated figures were visually checked.
 
-The PDF has 11 pages in total. The conclusion ends on page 6. The remaining main text figures are on pages 7 and 8. References and appendices start on page 9, so the main content is within the eight page limit.
+After the merge with main and the figure fix (`31828a9`), the PDF has 11 pages in total. The conclusion ends on page 6. The remaining main text figures are on pages 7 and 8. References and appendices start on page 9, so the main content is within the eight page limit.

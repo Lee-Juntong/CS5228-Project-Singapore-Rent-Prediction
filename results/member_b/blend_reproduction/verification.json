@@ -117,6 +117,7 @@
   ],
   "report": {
     "compiled": true,
+    "page_facts_commit": "31828a9",
     "pages": 11,
     "conclusion_page": 6,
     "last_body_figure_page": 8,
@@ -135,6 +136,7 @@
     "minimum": 1527.2571275456644,
     "maximum": 5335.59922969463,
     "mean": 3180.477570656578,
+    "sha256_file": "local file from the run on source_commit, not the committed uploaded file",
     "sha256": "1f761c239779a018eebec65b6f2d9fce8f822d7d1eb3cdc219c95dafb87d179a",
     "original_submission_available": true,
     "kaggle_upload_performed": false,

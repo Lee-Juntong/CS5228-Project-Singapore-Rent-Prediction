@@ -123,7 +123,7 @@ Feature-group ablation (tuned models, time holdout, raw target). The tuned hyper
 | G0+G1+G2 (+block) | 44 | 448.5 | 449.8 |
 | ALL (+market) | 54 | 450.1 | 452.4 |
 
-Location (G1) is the only group that clearly helps: it cuts about 12 to 14 RMSE for both models. Block attributes (G2) add almost nothing (0.1 to 0.3). The market group (G3: current-month COE, CPI and stock values) makes both models worse, by 1.6 to 2.6 RMSE, even though those values would not be known at prediction time. The final selected recipe is `G0+G1` with index targets; the tiny raw-target improvement from G2 does not carry over to that LightGBM setup.
+Location (G1) is the only group that clearly helps: it cuts about 10 to 14 RMSE for both models. Block attributes (G2) add almost nothing (0.1 to 0.3). The market group (G3: current-month COE, CPI and stock values) makes both models worse, by 1.6 to 2.6 RMSE, even though those values would not be known at prediction time. The final selected recipe is `G0+G1` with index targets; the tiny raw-target improvement from G2 does not carry over to that LightGBM setup.
 
 ### Where results go
 
@@ -146,7 +146,7 @@ python -m scripts.lag_blend_submission --analyse
 
 Each mode trains fresh models. Validation performs 14 fits: five index target models and two raw target LightGBM models in each of two time windows. The default command performs five fits on all training rows and writes `submissions/lag_blend5_G0G1_index.csv` with columns `Id,Predicted`. Analysis performs five holdout fits plus permutation scoring. None of them uploads to Kaggle or updates `results/kaggle_log.csv`.
 
-All three modes overwrite committed files. Validation and analysis rewrite `results/member_a/repeat_rent/` and two report figures. The default command rewrites the committed final submission. A rerun is not byte identical, so compare it with the committed file numerically (maximum difference below 1e-9) and do not commit it. Use a separate checkout, or restore the files with `git checkout -- results submissions report/figures` afterwards.
+All three modes overwrite committed files. Validation and analysis rewrite `results/member_a/repeat_rent/` and two report figures. The default command rewrites the committed final submission. A rerun is not byte identical, so compare it with the committed file numerically (maximum difference below 1e-9) and do not commit it. A separate checkout needs its own copy of the data, because `data/` is mostly not in git (see [data/README.md](data/README.md)). Otherwise restore the generated files afterwards, which leaves other uncommitted work alone: `git checkout -- results/member_a/repeat_rent submissions/lag_blend5_G0G1_index.csv report/figures/lag_correlation.pdf report/figures/blend_importance.pdf`.
 
 `python -m scripts.report_tables` then rebuilds `tables/results.tex`, `tables/ablation.tex` and `tables/blend.tex`. The other report tables come from `scripts.trend_analysis` and `scripts.horizon_backtest --table-only`, as listed in [the report build instructions](report/README.md). See [the blend guide](docs/repeat_rent_blend.md) for reference scores and [the reproduction check](docs/blend_reproduction.md) for an independent rerun.
 
