@@ -10,7 +10,8 @@ data/auxiliary/*
 # Per run validation predictions are large. Rows in results/runs and the
 # combined results/results.csv are committed.
 results/predictions/
-submissions/
+submissions/*
+!submissions/lag_blend5_G0G1_index.csv
 
 # Saved model weights are large binaries; rebuild them with
 # scripts/save_final_model.py. See models/README.md.

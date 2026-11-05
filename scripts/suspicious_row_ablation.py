@@ -13,7 +13,7 @@ each other, via two methods:
   candidates and its recommended review subset.
 
 The team decided to keep + flag these and let a with/without RMSE comparison
-decide. This script runs that A/B for the final model (lightgbm_tuned, G0+G1).
+decide. This script runs that A/B for the final single model (lightgbm_tuned, G0+G1).
 Rows are dropped from the TRAINING fit window only; the Oct 2024–Mar 2025
 validation window is left untouched, so the "with" (baseline, already logged)
 and "without" runs score the identical rows and the RMSE delta reflects only the

@@ -15,7 +15,7 @@ Rents in the same block and flat type line up more strongly at gaps of 12, 24 an
 | Five model blend (adds XGBoost, CatBoost, random forest with lags) | 431.0 | 492.8 | 415.01 |
 | Base and lag LightGBM on index and raw targets | 431.6 | 485.6 | 419.59 |
 
-The 16 month window fits to November 2023 and scores December 2023 to March 2025. The blend was chosen on these same windows and on the public score, so its gains are slightly optimistic. The index and raw mix has the better 16 month score and the worse public score, so we keep the index target.
+The 16 month window fits to November 2023 and scores December 2023 to March 2025. We chose the blend by its time holdout score, where it is best, and the public score agrees. The blend was designed on these same windows, so its gains are slightly optimistic. The index and raw mix has the better 16 month score but slightly worse holdout and public scores, so we keep the index target.
 
 ## Error analysis on the blend
 
