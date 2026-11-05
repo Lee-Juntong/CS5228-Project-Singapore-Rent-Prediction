@@ -1,7 +1,7 @@
 % Appendix: not counted in the 8 page limit.
 \section{Workload}\label{app:workload}
 
-\begin{table}[htbp]
+\begin{table}[H]
 \caption{Workload by member}
 \label{tab:workload}
 \centering
@@ -20,9 +20,10 @@ D (Yu Long Lim) & EDA, repeated profile analysis, residual and case review, perm
 
 \todo{Each member checks their row. Add who did the preprocessing.}
 
+\FloatBarrier
 \section{Forecast Backtest}\label{app:backtest}
 
-\begin{table}[htbp]
+\begin{table}[H]
 \caption{RMSE (SGD) when the fit window ends earlier, by months ahead, G0+G1 features. Only 12 months follow the 2024-03 fit, so its last row covers months 7 to 12. Hyperparameters are the final ones, so these runs borrow some information from later data.}
 \label{tab:horizon}
 \centering
@@ -30,9 +31,10 @@ D (Yu Long Lim) & EDA, repeated profile analysis, residual and case review, perm
 \input{tables/horizon}
 \end{table}
 
+\FloatBarrier
 \section{Hyperparameters}\label{app:hyperparameters}
 
-\begin{table}[htbp]
+\begin{table}[H]
 \caption{Hyperparameters of the single models. Section~\ref{sec:blend} gives the blend members. Models not listed use the library defaults with seed 5228.}
 \label{tab:hyperparameters}
 \centering
@@ -40,6 +42,9 @@ D (Yu Long Lim) & EDA, repeated profile analysis, residual and case review, perm
 \input{tables/hyperparameters}
 \end{table}
 
+\FloatBarrier
+\clearpage
+\onecolumn
 \section{Extra Figures}\label{app:eda}
 
 \begin{figure*}[htbp]
