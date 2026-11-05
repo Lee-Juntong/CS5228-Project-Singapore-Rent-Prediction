@@ -8,7 +8,7 @@ This section analyses the five model blend on the holdout, with tuned LightGBM o
 
 Rows in the same cell and month have identical inputs, including the lag features, so any model gives them one prediction. The spread of rent inside such a group is error that no model can remove. Even with the true mean of every group, the RMSE would stay at 178~SGD on all training rows, 165~SGD on the holdout and 187~SGD on the 16 month window. This bound is far too low to reach, because it counts the 74\% of rows with unique inputs as predicted perfectly.
 
-The spread inside the groups is a better guide. Rows that share inputs have a pooled standard deviation of 449~SGD on the holdout and 468~SGD on all training rows. On 4{,}207 repeated holdout rows, the mean rent of the other rows in the group scores 612~SGD against 446~SGD for tuned LightGBM and 441~SGD for the blend, so even the rent of a near identical flat is a noisy guide. If rows with unique inputs have a similar spread, an RMSE of 431~SGD is close to what these inputs allow. This estimate is not a proven floor, and it holds only for a fixed set of inputs: the repeat-rent features lowered the RMSE because they add information that G0+G1 lacks.
+The spread inside the groups is a better guide. Rows that share inputs have a pooled standard deviation of 449~SGD on the holdout and 468~SGD on all training rows. On 4{,}207 repeated holdout rows, the mean rent of the other rows in the group scores 612~SGD against 446~SGD for tuned LightGBM and 441~SGD for the blend, so even the rent of a near identical flat is a noisy guide. If rows with unique inputs have a similar spread, an RMSE of 431~SGD is close to what these inputs allow.
 
 \subsection{Residuals}\label{sec:residuals}
 
@@ -37,7 +37,7 @@ Like the single models in Fig.~\ref{fig:monthly}, the blend shows no growth in e
 
 \subsection{Importance and Partial Dependence}\label{sec:interpretation}
 
-Fig.~\ref{fig:importance} shows permutation importance for the blend. Flat type ordinal (+44~SGD) and the 24 month rent lags (+43~SGD) have the largest effects, ahead of flat type (+17~SGD), subzone (+13~SGD) and latitude (+12~SGD). The 12 month lags add +5~SGD and the 36 month lags +0.4~SGD, so the signal sits mostly at two years. Tuned LightGBM alone puts more weight on fewer inputs: flat type ordinal +166~SGD, subzone +112~SGD and floor area +26~SGD. Related inputs share importance, and the blend spreads it further across its members. Month has the strongest numeric rank correlation with rent, but its effect here is only +0.1~SGD. The rent index carries the trend and is nearly flat over the holdout, so this result does not mean that time is unimportant.
+Fig.~\ref{fig:importance} shows permutation importance for the blend. Flat type ordinal (+44~SGD) and the 24 month rent lags (+43~SGD) have the largest effects, ahead of flat type (+17~SGD), subzone (+13~SGD) and latitude (+12~SGD). The 12 month lags add +5~SGD and the 36 month lags +0.4~SGD, so the signal sits mostly at two years. Tuned LightGBM alone puts more weight on fewer inputs: flat type ordinal +166~SGD, subzone +112~SGD and floor area +26~SGD. Related inputs share importance, and the blend spreads it further across its members. Month has the strongest numeric rank correlation with rent, but its effect here is only +0.1~SGD, because the rent index carries the trend and is nearly flat over the holdout.
 
 \begin{figure}[htbp]
 \centerline{\includegraphics[width=\columnwidth]{figures/blend_importance}}
@@ -45,7 +45,7 @@ Fig.~\ref{fig:importance} shows permutation importance for the blend. Flat type 
 \label{fig:importance}
 \end{figure}
 
-Fig.~\ref{fig:pdp} compares tuned LightGBM with a Ridge model on the same 39 inputs and the index target (RMSE 467.1, slightly different from the baseline Ridge in Table~\ref{tab:results}). Ridge has a straight response to MRT distance. The LightGBM prediction falls 46~SGD from 0.18 to 0.40~km and 33~SGD from there to 1.15~km. When lease year moves together with age, a flat 43 years older loses 210~SGD under LightGBM and 581~SGD under Ridge. LightGBM has lower error in every MRT distance band, and its gain varies by segment: Bukit Merah 3-room flats improve from 545 to 479~SGD, while Jurong West executive flats worsen from 580 to 601~SGD. These gains fit a nonlinear response and interactions, but they do not show which of the two caused the improvement.
+Fig.~\ref{fig:pdp} compares tuned LightGBM with a Ridge model on the same 39 inputs and the index target (RMSE 467.1, slightly different from the baseline Ridge in Table~\ref{tab:results}). Ridge has a straight response to MRT distance. The LightGBM prediction falls 46~SGD from 0.18 to 0.40~km and 33~SGD from there to 1.15~km. When lease year moves together with age, a flat 43 years older loses 210~SGD under LightGBM and 581~SGD under Ridge. LightGBM has lower error in every MRT distance band, and its gain varies by segment: Bukit Merah 3-room flats improve from 545 to 479~SGD, while Jurong West executive flats worsen from 580 to 601~SGD. These gains fit a nonlinear response and interactions.
 
 \begin{figure*}[htbp]
 \centerline{\includegraphics[width=0.75\textwidth]{partial_dependence}}

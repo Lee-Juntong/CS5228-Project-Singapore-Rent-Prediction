@@ -1,9 +1,9 @@
 % Owner: all members. Target length: 0.75 page.
 \section{Introduction}\label{sec:intro}
 
-Renters, landlords and housing agencies all need a fair estimate of the monthly rent of a Housing and Development Board (HDB) flat. We predict this rent from the type, size, age and location of the flat, and from the month in which the rental was approved.
+Renters and landlords need a fair estimate of the monthly rent of a Housing and Development Board (HDB) flat. We predict this rent from the type, size, age and location of the flat, and from the month in which the rental was approved.
 
-The training data covers rentals approved from January 2021 to March 2025, and the test data covers March 2025 to July 2026. The task is therefore a forecast of future rents and not an interpolation between known months. The median rent rose from about 2{,}000 Singapore dollars (SGD) in January 2021 to SGD 3{,}100 by mid 2023. Tree models cannot extend a trend past the months they saw in training, so the handling of this trend is a central design choice in this report.
+The training data covers rentals approved from January 2021 to March 2025, and the test data covers March 2025 to July 2026. The task is therefore a forecast of future rents. The median rent rose from about 2{,}000 Singapore dollars (SGD) in January 2021 to SGD 3{,}100 by mid 2023. Tree models cannot extend a trend past the months they saw in training, so we handle this trend explicitly.
 
 We ask three questions:
 \begin{enumerate}
