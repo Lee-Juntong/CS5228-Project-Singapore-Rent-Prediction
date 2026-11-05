@@ -20,7 +20,7 @@ A few large errors carry much of the squared error. Absolute errors above SGD 1{
 \label{fig:outliers}
 \end{figure*}
 
-The data cannot explain these rows. They may be a room or one tenant's share of the rent, while area and type describe the whole flat. They may also be discounted agreements or errors in the declared amount. One SGD 650 row matches the public HDB rental table~\cite{hdb2026renting}, so the amount was published. We used this table only for this check, and our models use no rents from it. HDB states that owners declare these rents and that it does not verify them, so the match does not explain the amount.
+The data cannot explain these rows. They may be a room or one tenant's share of the rent, while area and type describe the whole flat. They may also be discounted agreements or errors in the declared amount. One SGD 650 row matches the public HDB rental table~\cite{hdb2026renting}, so the amount was published. Our models use no rents from this table. HDB states that owners declare these rents and that it does not verify them, so the match does not explain the amount.
 
 Large flats and central areas do not carry most of the error. The 5-room and executive flats are 28\% of the rows and 31\% of the squared error, while 3-room and 4-room flats give 66\%. Rows within 5~km of Raffles Place are 12\% of the rows and 16\% of the squared error. Jurong West gives the largest share of any town (9.4\%), and it also has the most holdout rows (Fig.~\ref{fig:town-errors} in Appendix~\ref{app:eda}).
 
