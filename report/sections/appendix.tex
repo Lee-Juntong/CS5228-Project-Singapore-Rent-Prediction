@@ -6,11 +6,11 @@
 \label{tab:workload}
 \centering
 \footnotesize
-\begin{tabular}{p{0.26\columnwidth}p{0.64\columnwidth}}
+\begin{tabular}{p{0.31\columnwidth}p{0.59\columnwidth}}
 \hline
 \textbf{Member} & \textbf{Tasks} \\
 \hline
-A (Zhuang Mengjin) & Shared pipeline, validation design, feature handling table, trend handling, split comparison, forecast backtest, repeat-rent features and blend, Methods section, report assembly. \\
+A (Zhuang Mengjin) & Shared pipeline, preprocessing, validation design, feature handling table, trend handling, split comparison, forecast backtest, repeat-rent features and blend, Methods section, report assembly. \\
 B (Shengxin Pei) & Baseline ladder and its evaluation, learning curves. \\
 C (John Min) & Boosting models, Optuna tuning, feature group and suspicious row ablations, Kaggle submissions and log. \\
 D (Yu Long Lim) & EDA, repeated profile analysis, residual and case review, permutation importance, partial dependence, report figures. \\
@@ -18,11 +18,12 @@ D (Yu Long Lim) & EDA, repeated profile analysis, residual and case review, perm
 \end{tabular}
 \end{table}
 
-\todo{Each member checks their row. Add who did the preprocessing.}
+\todo{Each member checks their row.}
 
+\newpage
 \section{Forecast Backtest}\label{app:backtest}
 
-\begin{table}[htbp]
+\begin{table}[!h]
 \caption{RMSE (SGD) when the fit window ends earlier, by months ahead, G0+G1 features. Only 12 months follow the 2024-03 fit, so its last row covers months 7 to 12. Hyperparameters are the final ones, so these runs borrow some information from later data.}
 \label{tab:horizon}
 \centering
@@ -32,7 +33,7 @@ D (Yu Long Lim) & EDA, repeated profile analysis, residual and case review, perm
 
 \section{Hyperparameters}\label{app:hyperparameters}
 
-\begin{table}[htbp]
+\begin{table}[!h]
 \caption{Hyperparameters of the single models. Section~\ref{sec:blend} gives the blend members. Models not listed use the library defaults with seed 5228.}
 \label{tab:hyperparameters}
 \centering
@@ -40,22 +41,23 @@ D (Yu Long Lim) & EDA, repeated profile analysis, residual and case review, perm
 \input{tables/hyperparameters}
 \end{table}
 
+\onecolumn
 \section{Extra Figures}\label{app:eda}
 
-\begin{figure*}[htbp]
+\begin{figure}[!h]
 \centerline{\includegraphics[width=0.7\textwidth]{eda_flat_type}}
 \caption{Median and interquartile range of rent by flat type.}
 \label{fig:flat-type}
-\end{figure*}
+\end{figure}
 
-\begin{figure*}[htbp]
+\begin{figure}[!h]
 \centerline{\includegraphics[width=0.7\textwidth]{eda_town}}
 \caption{Median and interquartile range of rent by town.}
 \label{fig:town}
-\end{figure*}
+\end{figure}
 
-\begin{figure*}[htbp]
+\begin{figure}[!h]
 \centerline{\includegraphics[width=0.7\textwidth]{town_errors_contribution}}
 \caption{Holdout RMSE by town and each town's share of the squared error, tuned LightGBM with the index target.}
 \label{fig:town-errors}
-\end{figure*}
+\end{figure}
