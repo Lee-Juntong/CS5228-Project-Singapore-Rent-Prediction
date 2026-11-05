@@ -137,12 +137,12 @@ Location (G1) is the only group that clearly helps: it cuts about 12 to 14 RMSE 
 ```python
 from src.evaluation import make_submission
 from src.models import make_lightgbm_tuned
-# The final model: tuned LightGBM on G0+G1 with index trend handling (val RMSE 445.8).
+# The final single model: tuned LightGBM on G0+G1 with index trend handling (val RMSE 445.8). The final model is the five model blend below.
 make_submission(make_lightgbm_tuned, "G0+G1", target_mode="index",
                 path="submissions/lightgbm_tuned_G0G1_index.csv")
 ```
 
-The `submissions/` folder is created if it does not exist. It is not in git. Each submission is logged in `results/kaggle_log.csv` (date, model, feature set, target mode, validation RMSE, public leaderboard score, notes); record the validation RMSE before reading the public score so the leaderboard does not drive model selection.
+The `submissions/` folder is created if it does not exist. Only the final submission, `submissions/lag_blend5_G0G1_index.csv`, is in git. Each submission is logged in `results/kaggle_log.csv` (date, model, feature set, target mode, validation RMSE, public leaderboard score, notes); record the validation RMSE before reading the public score so the leaderboard does not drive model selection. The final model is the one with the lowest time holdout RMSE. The five model blend scores 431.0, against 431.6 for the index and raw mix and 432.6 for the two model blend, and its public score agrees with that ranking.
 
 ### Saved model weights
 

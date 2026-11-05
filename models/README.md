@@ -1,6 +1,6 @@
 # Saved model weights
 
-Fitted final models for replay. The weight files (`*.joblib`) are **not in git**
+Fitted single models for replay. The weight files (`*.joblib`) are **not in git**
 (large binaries, tied to the pinned library versions in `requirements.txt`);
 only this README is committed. Rebuild them from the shared data in one command.
 
