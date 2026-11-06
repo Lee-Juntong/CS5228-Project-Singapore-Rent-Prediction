@@ -32,6 +32,19 @@ Then put the Kaggle files in `data/` and build the processed data as described i
 * Commit only your own files in `results/runs/` and `results/breakdowns/`.
 * Pass your member letter as `--member` (or `member=` in Python) so every run shows who made it.
 
+## Final model: repeat-rent blend
+
+The final model is a five model blend, and `submissions/lag_blend5_G0G1_index.csv` is the final Kaggle submission (time holdout RMSE 431.0, public score 415.01). The prediction is the plain mean of five models on G0+G1 with the index target: tuned LightGBM, plus LightGBM, XGBoost, CatBoost and random forest with repeat-rent lag features. The lag features use earlier rents in the same block, street and flat type at gaps of about 12, 24 and 36 months.
+
+To reproduce it, finish [Setup](#setup) with the full `requirements.txt`, then run from the repository root:
+
+```bash
+python -c "from src.data_preprocessing import run_pipeline; run_pipeline()"
+python -m scripts.lag_blend_submission
+```
+
+The second command takes about a minute and a half on Juntong's PC, and overwrites the committed CSV with a numerically matching one. See [Kaggle submission](#kaggle-submission) for validation, how to compare and restore the files, and [docs/repeat_rent_blend.md](docs/repeat_rent_blend.md) for the method and results.
+
 ## Baseline ladder (Phase 1)
 
 Seven baselines are registered in the shared model registry. Run `python -m scripts.run_baselines --output results/member_b/new_run` for seven holdout fits and comparison plots. Learning curves, random CV and one selected final refit are optional. See the [pipeline guide](docs/pipeline_guide.md#baseline-ladder) for commands and hyperparameters, and the [baseline results](docs/baseline_results.md) for the recorded scores and figure locations.
