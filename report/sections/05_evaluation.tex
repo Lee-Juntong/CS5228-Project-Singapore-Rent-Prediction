@@ -5,10 +5,10 @@
 
 \subsection{Model Comparison}
 
-Table~\ref{tab:results} scores every model on the time holdout with the index target, and Table~\ref{tab:trend} has the raw target results. With the index target, the mean prediction of every model lies within 58~SGD of the mean rent.
+Table~\ref{tab:results} compares models on the six-month holdout using the index target. Table~\ref{tab:trend} gives the corresponding raw-target results for the single models. On the same holdout with the index target, adding rental history reduced RMSE from 467.9 to 449.0~SGD for Ridge, from 481.9 to 451.2~SGD for KNN, and from 444.3 to 440.2~SGD for the random forest. For the single decision tree, RMSE rose from 473.3 to 492.0~SGD.
 
 \begin{table}[htbp]
-\caption{Time holdout results with G0+G1 features and the index target, best first. The blend also uses the lag features. RMSE, MAE and bias are in SGD, MAPE in percent and fit time in seconds.}
+\caption{Time holdout results with G0+G1 features and the index target, best first. The blend additionally uses the lag features. RMSE, MAE and bias are in SGD, MAPE in percent and fit time in seconds.}
 \label{tab:results}
 \centering
 \footnotesize
@@ -19,13 +19,14 @@ The simple models get closer than we expected. With the index target, the group 
 
 \subsection{Feature Group Ablation}
 
-Table~\ref{tab:ablation} adds the feature groups one at a time. Location is the only group that clearly helps, by 10 to 14~SGD. Block attributes add at most 0.3~SGD. Market values make LightGBM 2.6~SGD worse and CatBoost 1.6~SGD worse, so dropping them costs nothing.
+Adding location features reduced raw-target RMSE by 10 to 14~SGD for the two boosting models in Table~\ref{tab:ablation} and by 10.1~SGD for the random forest. KNN gained the most from location: adding latitude and longitude reduced its RMSE from 545.5 to 482.3~SGD. The effect of market indicators depended on the model. Adding them raised RMSE by 2.6~SGD for LightGBM and 1.6~SGD for CatBoost, but lowered it from 575.8 to 479.5~SGD for Ridge. These indicators describe the approval month and may be unavailable when a forecast is made, so we excluded them from the final model.
 
 \begin{table}[htbp]
-\caption{Time holdout RMSE (SGD) by feature set, raw target. Feature counts are in brackets.}
+\caption{Time holdout RMSE (SGD) by feature set, raw target. Parentheses give the number of available features. KNN uses only floor area, month and, when available, latitude and longitude.}
 \label{tab:ablation}
 \centering
 \footnotesize
+\setlength{\tabcolsep}{2.2pt}
 \input{tables/ablation}
 \end{table}
 
@@ -34,14 +35,16 @@ Table~\ref{tab:ablation} adds the feature groups one at a time. Location is the 
 The EDA flagged potentially unusual rents using the two rules in Table~\ref{tab:outliers}.
 
 \begin{table}[htbp]
-\caption{Outlier flagging rules and the number of training rows each marks.}
+\caption{Outlier counts. The original thresholds use all labelled rows; the fit-only thresholds use only rows through September 2024. Both experiments retain every holdout row.}
 \label{tab:outliers}
 \centering
 \footnotesize
 \input{tables/outliers}
 \end{table}
 
-We retrained tuned LightGBM on the index target without the flagged rows in the fit period, with features and hyperparameters fixed. Dropping the 44 fit period rows (49 in all) with a low rent for their area changes the holdout RMSE by $-0.1$~SGD and the public score by $-0.4$~SGD. Dropping the 10 fit period rows (12 in all) flagged by both of our rules adds 0.4~SGD. Dropping the 276 fit period rows (331 in all) that are extreme within their flat type or town adds 2.2~SGD on the holdout and 4.2~SGD on the public leaderboard, probably because that rule also removes real premium rents. We keep all rows.
+We retrained tuned LightGBM on the index target without the flagged rows in the fit period, with features and hyperparameters fixed. Dropping the 44 fit period rows (49 in all) with a low rent for their area changes the holdout RMSE by $-0.1$~SGD and the public score by $-0.4$~SGD. Dropping the 10 fit period rows (12 in all) flagged by both of our rules adds 0.4~SGD. Dropping the 276 fit period rows (331 in all) that are extreme within their flat type or town adds 2.2~SGD on the holdout and 4.2~SGD on the public leaderboard, probably because that rule also removes real premium rents.
+
+The original flags used thresholds estimated from all labelled records. When we estimated the thresholds using only the fitting period, the low-rent-for-area rule removed 36 rows instead of 44. On the same holdout, this changed RMSE from 445.8 to 446.2~SGD for tuned LightGBM and from 444.3 to 443.9~SGD for the random forest. Given these small changes in opposite directions, we retained all fitting rows in the final model.
 
 \subsection{Final Model}
 

@@ -43,6 +43,7 @@ results/member_b/**/test_predictions.csv
 results/member_b/**/fit_ids.csv
 results/member_b/**/holdout_truth.csv
 results/member_b/**/random5_predictions.parquet
+results/member_b/extensions/macro_index/ratios.parquet
 
 # LaTeX build output
 report/*.aux

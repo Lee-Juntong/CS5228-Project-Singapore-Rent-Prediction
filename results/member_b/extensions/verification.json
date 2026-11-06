@@ -1,0 +1,30 @@
+{
+  "python": "3.10.22",
+  "packages": {
+    "numpy": "1.26.4",
+    "pandas": "2.2.1",
+    "scikit-learn": "1.5.1",
+    "lightgbm": "4.6.0",
+    "xgboost": "3.2.0",
+    "catboost": "1.2.8",
+    "pyarrow": "19.0.1"
+  },
+  "input_sha256": {
+    "data\\processed\\train_features.parquet": "03ecd45f827aebc8e547f15fd71ca15405edf9b4772f799467f73eaaab0cea6d",
+    "data\\train.csv": "6d7a417de72112361f8353659ba6fe44a442b07465b488aff1b03f7ec1ea3ba6",
+    "data\\official_forecasts\\sg_forecast_vintages.csv": "7430fc2f6371d4131e0358d0bfd37c9c6899bacd979b79ab2c5421d94521fa2d",
+    "results\\results.csv": "d59093d4aa014f6d0d1bf8d418021467f3d38a1fa3fd5cfeb8d476993c08ab99",
+    "results\\member_a\\trend\\horizon_backtest.csv": "b75b618ecc1a0a6fd88d172140157f20b00da90d62b32733243eaeaee4ec0280"
+  },
+  "coverage": {
+    "feature_rows": 28,
+    "outlier_rows": 28,
+    "fit_only_outlier_rows": 32,
+    "lag_rows": 14,
+    "feature_aware_medians": 2,
+    "horizon_rows": 140,
+    "macro_monthly_forecasts_scored": 72,
+    "macro_rental_comparison_rows": 182
+  },
+  "checked": "Unique configurations, validation counts, outlier fit counts, monthly score arithmetic, and forecast release cutoffs."
+}

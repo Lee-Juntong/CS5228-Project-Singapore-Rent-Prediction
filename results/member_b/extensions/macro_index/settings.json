@@ -1,0 +1,20 @@
+{
+  "alpha": 5.0,
+  "half_life_months": 1.5,
+  "fit_months": 33,
+  "fit_end": "2024-09",
+  "macro_series": [
+    "annual real GDP growth",
+    "annual CPI-All Items inflation"
+  ],
+  "grid_origins": [
+    "2022-12",
+    "2023-03",
+    "2023-06",
+    "2023-09",
+    "2023-12",
+    "2024-03"
+  ],
+  "fixed_fit_rows": 132538,
+  "valid_rows": 17037
+}
