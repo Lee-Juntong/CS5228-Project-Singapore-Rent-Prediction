@@ -59,7 +59,7 @@ python -m unittest discover -s checks -v
 
 Use fresh analysis output names for reruns. These commands work in PowerShell, macOS and Linux after activation. Checks use synthetic fixtures and can run without Kaggle data.
 
-The preprocessing command rebuilds the shared `data/processed/train_features.parquet` and `test_features.parquet`; skip it when current processed features are already available. The shared raw-data loader handles padded CSV headers while preserving the original files. The command writes its audit under ignored `data/processed/analysis_audit/` to preserve the committed audit. The analysis uses the committed `configs/lightgbm_tuned.json` selected by [Member C](boosting_model_choice.md#5-final-model-choice), with source run `20261025-210800_lightgbm_tuned_G0+G1_time_index`; it does not retune the model.
+The preprocessing command rebuilds the shared `data/processed/train_features.parquet` and `test_features.parquet`; skip it when current processed features are already available. The shared raw-data loader handles padded CSV headers while preserving the original files. The command writes its audit under ignored `data/processed/analysis_audit/` to preserve the committed audit. The analysis uses the committed `configs/lightgbm_tuned.json` selected by [Member C](boosting_model_choice.md#5-final-single-model-choice), with source run `20261025-210800_lightgbm_tuned_G0+G1_time_index`; it does not retune the model.
 
 Each run produces `report.md`, `sections.tex`, EDA/residual/interpretation figures and source tables beneath its output directory. `manifest.json` records configuration, inputs, environment and reference agreement. Generated runs, predictions and model bundles stay ignored. The repository keeps the compact reference snapshot, archived prose, lossless WebP previews and PDF copies converted from those previews.
 
@@ -77,4 +77,4 @@ python -m scripts.export_report_figures --input results/analysis/reproduction
 
 The runner checks source protocol and RMSE/MAE/MAPE/bias agreement within 0.05 in each metric's units before interpretation. Original teammate row predictions were unavailable, so archived agreement is aggregate-only. A rerun regenerates calculations and figures; its cases need a separate manual review.
 
-For the team report, keep Data/EDA near 1.5 pages and Error Analysis/Interpretation near 1.25 pages. Compile the assembled report and check its eight-page limit; names, student IDs, workload allocation and final proofreading remain shared tasks.
+For the team report, keep Data/EDA near 1.5 pages and Error Analysis/Interpretation near 1.25 pages. Compile the assembled report and check its eight-page limit.

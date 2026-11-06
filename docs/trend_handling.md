@@ -28,7 +28,7 @@ Plan decision 5 and the random CV check from decision 1. All runs use G0+G1 feat
    | CatBoost (tuned) | 448.8 | 449.0 | +0.2 |
    | XGBoost (tuned) | 449.9 | 445.6 | −4.3 |
 
-2. **The untuned random forest with the index target (444.3) is the best single result.** It beats tuned XGBoost (445.6) and the final single model, tuned LightGBM (445.8), both with the index target. The three are within 1.5 SGD, and the difference comes from one six month holdout, so it does not by itself justify a change of the final single model. Member C already treats XGBoost and LightGBM as a tie (public leaderboard 434.5 and 434.4) and keeps LightGBM. The same reasoning covers the forest, but Member C should confirm it. LightGBM fits in about 18 seconds and the forest in about 97 seconds on Juntong's PC.
+2. **The untuned random forest with the index target (444.3) is the best single result.** It beats tuned XGBoost (445.6) and the final single model, tuned LightGBM (445.8), both with the index target. The three are within 1.5 SGD, and the difference comes from one six month holdout, so it does not by itself justify a change of the final single model. Member C already treats XGBoost and LightGBM as a tie (public leaderboard 434.5 and 434.4) and keeps LightGBM. The same reasoning covers the forest, and the final model is now the blend, which uses all three. LightGBM fits in about 18 seconds and the forest in about 97 seconds on Juntong's PC.
 
 3. **Most of the gap between simple and complex models is the trend, not the model.** On raw rent Ridge is 126 SGD behind tuned LightGBM. With the index target it is 22 SGD behind. Ridge on raw rent over-predicts by 330 SGD on average, because its month coefficient extends the average rise from 2021 to 2024 into a flat period. The medians on raw rent under-predict by more than 500 SGD.
 
@@ -70,7 +70,7 @@ Plan decision 5 and the random CV check from decision 1. All runs use G0+G1 feat
 
    The March 2024 fit is the closest case to the final single model. Its slope is 9.8 SGD per month, and the index target is slightly better there (451 vs 455 on months 7 to 12, XGBoost 450 vs 452, forest 449 vs 462). At the end of the training data the slope is 5.3 SGD per month, so the index reaches SGD 3,246 at the end of the test period against a last median of SGD 3,200. This points to the low risk case, although five dates are too few to prove it. The public leaderboard agrees for now: tuned LightGBM scores 434.43 with the index target and 437.15 raw. That score covers only the public part of the test set.
 
-   With the index target, the forest beats LightGBM in 9 of 10 rows (by up to 25 SGD) and XGBoost in all 10 (by up to 10 SGD), although the two low slope rows are within about 2 SGD. The rows overlap in time, so this is weak evidence, but it does not support preferring LightGBM over the other two. Member C should weigh it in the open choice.
+   With the index target, the forest beats LightGBM in 9 of 10 rows (by up to 25 SGD), and XGBoost beats LightGBM in all 10 (by up to 10 SGD), although the two low slope rows are within about 2 SGD. The rows overlap in time, so this is weak evidence, but it does not support preferring LightGBM over the other two. The final model is now the blend, which uses all three.
 
 ## Caveats
 

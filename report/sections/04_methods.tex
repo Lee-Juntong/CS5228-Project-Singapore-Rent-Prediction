@@ -60,7 +60,7 @@ Each boosting model got a fixed budget of 30 Optuna~\cite{akiba2019optuna} trial
 
 \subsection{Repeat-Rent Features and Blend}\label{sec:blend}
 
-All three boosting libraries and the forest stop near 445~SGD on the index target, so a further gain needed new information. We define a cell as all rows with the same block, street and flat type. Within a cell, rents at gaps of 12, 24 and 36 months are more alike than rents at nearby gaps, most of all at 24 months (Fig.~\ref{fig:lags}). This looks like flats renewing a lease, although the data have no unit number to confirm it.
+All three boosting libraries and the forest stop between 444 and 449~SGD on the index target, so a further gain needed new information. We define a cell as all rows with the same block, street and flat type. Within a cell, rents at gaps of 12, 24 and 36 months are more alike than rents at nearby gaps, most of all at 24 months (Fig.~\ref{fig:lags}). This looks like flats renewing a lease, although the data have no unit number to confirm it.
 
 \begin{figure}[htbp]
 \centerline{\includegraphics[width=\columnwidth]{figures/lag_correlation}}

@@ -1,7 +1,7 @@
 """A/B test: does dropping EDA-flagged suspicious rows help the model?
 
-EDA (../cs5228/project/preprocessing/correlations.ipynb, findings.md,
-decisions.md) flags rows that are individually plausible but inconsistent with
+EDA notes kept outside this repository (correlations.ipynb, findings.md,
+decisions.md) flag rows that are individually plausible but inconsistent with
 each other, via two methods:
 
 * **M1** (`suspect_m1`) — rent extreme *within* its FLAT_TYPE group, and within

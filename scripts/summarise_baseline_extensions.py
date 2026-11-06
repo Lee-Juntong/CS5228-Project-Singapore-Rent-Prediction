@@ -122,7 +122,8 @@ def main():
         prospective=detector(flags_input.loc[fm])
         audit.append(dict(flag=flag,published_fit_drops=int(retrospective.sum()),
                           fit_only_threshold_drops=int(prospective.sum()),
-                          different_fit_flags=int((retrospective!=prospective).sum())))
+                          different_fit_flags=int((retrospective!=prospective).sum()),
+                          all_rows_flags=int(detector(flags_input).sum())))
     pd.DataFrame(audit).to_csv(OUT/"flag_threshold_audit.csv",index=False)
     (OUT/"verification.json").write_text(json.dumps({
         "python":platform.python_version(),"packages":{k:version(k) for k in env},
