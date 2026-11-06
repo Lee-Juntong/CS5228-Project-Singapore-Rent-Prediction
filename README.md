@@ -36,6 +36,15 @@ Then put the Kaggle files in `data/` and build the processed data as described i
 
 The final model is a five model blend, and `submissions/lag_blend5_G0G1_index.csv` is the final Kaggle submission (time holdout RMSE 431.0, public score 415.01). The prediction is the plain mean of five models on G0+G1 with the index target: tuned LightGBM, plus LightGBM, XGBoost, CatBoost and random forest with repeat-rent lag features. The lag features use earlier rents in the same block, street and flat type at gaps of about 12, 24 and 36 months.
 
+Blend results, all on G0+G1. The time holdout is Oct 2024 to Mar 2025, and the 16 month backtest scores Dec 2023 to Mar 2025. The final model is in bold.
+
+| model | target | time holdout RMSE | 16 month backtest RMSE | public score |
+|---|---|---|---|---|
+| lightgbm_tuned (no blend, for comparison) | index | 445.8 | 511.0 | 434.43 |
+| two model blend: lightgbm_tuned + LightGBM with lags | index | 432.6 | 495.3 | 419.71 |
+| **five model blend: the two above + XGBoost, CatBoost, random forest with lags** | index | **431.0** | **492.8** | **415.01** |
+| index and raw mix: base and lag LightGBM on both targets | index + raw | 431.6 | 485.6 | 419.59 |
+
 To reproduce it, finish [Setup](#setup) with the full `requirements.txt`, then run from the repository root:
 
 ```bash
