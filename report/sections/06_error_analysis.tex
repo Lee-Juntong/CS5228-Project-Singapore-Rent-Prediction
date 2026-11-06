@@ -41,8 +41,6 @@ A few large errors carry much of the squared error. For the blend, absolute erro
 
 The data cannot explain the very low rents. They may be for a room or one tenant's share of the rent, while area and type describe the whole flat. They may also be discounted agreements or errors in the recorded amount.
 
-We found a matching HDB public record for a 5-room flat at 112A Depot Road in March 2025 with rent SGD~650~\cite{hdb_rental_records}. We used this table only to check the record. HDB describes the amounts as agreed rents declared by owners and says it does not verify their accuracy~\cite{hdb_rental_description}. This confirms that the low amount was published. The table has no unit number or room rental indicator, so the match cannot explain the rent or establish a recording error.
-
 Tuned LightGBM also misses some high rents. Its ten largest under-predictions have observed rents of SGD~4{,}400 to 6{,}000 and give 0.95\% of its squared error. These include adjoined flats and a terrace flat model with only 14 fit rows. Their recorded areas are positive and their lease flags are valid. Sparse examples and missing unit details may limit prediction, but the review establishes no data error in these cases.
 
 Large flats and central areas do not carry most of the blend's error. The 5-room and executive flats are 28\% of the rows and 31\% of the squared error, while 3-room and 4-room flats give 66\%. Rows within 5~km of Raffles Place are 12\% of the rows and 16\% of the squared error. Jurong West gives the largest share of any town (9.4\% for the blend, 9.6\% for tuned LightGBM), and it also has the most holdout rows (Fig.~\ref{fig:town-errors} in Appendix~\ref{app:eda}).
