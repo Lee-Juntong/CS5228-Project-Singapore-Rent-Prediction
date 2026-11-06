@@ -5,7 +5,7 @@
 
 \subsection{Model Comparison}
 
-Table~\ref{tab:results} compares models on the six-month holdout using the index target. Table~\ref{tab:trend} gives the corresponding raw-target results for the single models. On the same holdout with the index target, adding rental history reduced RMSE from 467.9 to 449.0~SGD for Ridge, from 481.9 to 451.2~SGD for KNN, and from 444.3 to 440.2~SGD for the random forest. For the single decision tree, RMSE rose from 473.3 to 492.0~SGD.
+Table~\ref{tab:results} compares models on the six-month holdout using the index target. Table~\ref{tab:trend} gives the corresponding raw-target results for the single models. On the same holdout with the index target, adding rental history (Table~\ref{tab:baseline-lags}) reduced RMSE from 467.9 to 449.0~SGD for Ridge, from 481.9 to 451.2~SGD for KNN, and from 444.3 to 440.2~SGD for the random forest. For the single decision tree, RMSE rose from 473.3 to 492.0~SGD.
 
 \begin{table}[htbp]
 \caption{Time holdout results with G0+G1 features and the index target, best first. The blend additionally uses the lag features. RMSE, MAE and bias are in SGD, MAPE in percent and fit time in seconds.}
