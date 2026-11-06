@@ -209,6 +209,8 @@ decide (`decisions.md`, "Outlier handling"); this section runs that test.
 | **M2 high** (`suspect_rent_high_for_area`) | same fit, residual z > +3 | "expensive for area" — usually legit prime-location premiums | 506 |
 | **both** (`suspect_both`) | M1 ∩ M2 low | flagged by both → high-confidence errors | 12 |
 
+> **Update 2026-11-06.** The runs below estimated the flag thresholds from all labelled rows, so validation rents shaped which fit rows were dropped. `scripts/suspicious_row_ablation.py` now estimates them from the fit window only. Fit-only results (36 / 374 / 9 rows dropped for M2 low / M1 / both, val RMSE 446.2 / 449.1 / 446.2) are in `results/member_b/extensions/outliers_fit_only.csv`. The public LB runs train on all labelled rows, so their thresholds are unaffected.
+
 We drop only the flagged rows in the **fit window** (≤ Sep 2024), so the Oct
 2024–Mar 2025 validation set is identical to the baseline runs and the RMSE delta
 reflects only the cleaner training data. All runs use the final single model
