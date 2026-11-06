@@ -9,6 +9,19 @@
 \usepackage{xcolor}
 \usepackage{url}
 
+% Keep figures close together and align float-only pages at the top.
+\setlength{\textfloatsep}{12pt plus 2pt minus 2pt}
+\setlength{\dbltextfloatsep}{12pt plus 2pt minus 2pt}
+\setlength{\floatsep}{8pt plus 2pt minus 2pt}
+\setlength{\dblfloatsep}{8pt plus 2pt minus 2pt}
+\setlength{\intextsep}{8pt plus 2pt minus 2pt}
+\makeatletter
+\setlength{\@fptop}{0pt}
+\setlength{\@dblfptop}{0pt}
+\setlength{\@fpsep}{10pt}
+\setlength{\@dblfpsep}{10pt}
+\makeatother
+
 % Marks text that still needs work. Remove every \todo before submission.
 \newcommand{\todo}[1]{\textcolor{red}{[TODO: #1]}}
 
@@ -39,7 +52,7 @@ A0184990N}
 \IEEEauthorblockA{\textit{Team 55, CS5228} \\
 \textit{National University of Singapore}\\
 Singapore \\
-\todo{student ID}}}
+A0217967M}}
 
 \maketitle
 

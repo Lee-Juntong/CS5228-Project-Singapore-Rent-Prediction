@@ -1,7 +1,8 @@
 % Appendix: not counted in the 8 page limit.
+\newpage
 \section{Workload}\label{app:workload}
 
-\begin{table}[htbp]
+\begin{table}[!h]
 \caption{Workload by member}
 \label{tab:workload}
 \centering
@@ -45,19 +46,19 @@ D (Yu Long Lim) & EDA, repeated profile analysis, residual and case review, perm
 \section{Extra Figures}\label{app:eda}
 
 \begin{figure}[!h]
-\centerline{\includegraphics[width=0.7\textwidth]{eda_flat_type}}
+\centerline{\includegraphics[width=0.75\textwidth]{eda_flat_type}}
 \caption{Median and interquartile range of rent by flat type.}
 \label{fig:flat-type}
 \end{figure}
 
 \begin{figure}[!h]
-\centerline{\includegraphics[width=0.7\textwidth]{eda_town}}
+\centerline{\includegraphics[width=0.78\textwidth]{eda_town}}
 \caption{Median and interquartile range of rent by town.}
 \label{fig:town}
 \end{figure}
 
-\begin{figure}[!h]
-\centerline{\includegraphics[width=0.7\textwidth]{town_errors_contribution}}
+\begin{figure}[!ht]
+\centerline{\includegraphics[width=0.85\textwidth]{town_errors_contribution}}
 \caption{Holdout RMSE by town and each town's share of the squared error, tuned LightGBM with the index target.}
 \label{fig:town-errors}
 \end{figure}
