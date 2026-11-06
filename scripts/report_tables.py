@@ -1,7 +1,7 @@
 """Build the Evaluation tables of the report from the logged results.
 
 Reads results/results.csv, results/kaggle_log.csv and
-results/member_a/repeat_rent/validation.csv, and writes
+results/member_a/repeat_rent/validation.csv and results/member_b/extensions/features.csv, and writes
 report/tables/{results,ablation,blend}.tex.
 
     python -m scripts.report_tables
@@ -17,6 +17,7 @@ from src.evaluation import RESULTS_CSV
 TABLES = PROJECT_ROOT / "report" / "tables"
 VALIDATION = PROJECT_ROOT / "results" / "member_a" / "repeat_rent" / "validation.csv"
 KAGGLE_LOG = PROJECT_ROOT / "results" / "kaggle_log.csv"
+BASELINE_FEATURES = PROJECT_ROOT / "results" / "member_b" / "extensions" / "features.csv"
 
 MODELS = {
     "global_median": "Global median",
@@ -66,13 +67,17 @@ def results_table(results: pd.DataFrame, validation: pd.DataFrame) -> str:
     return table("lrrrrr", header, lines)
 
 
-def ablation_table(results: pd.DataFrame) -> str:
+def ablation_table(results: pd.DataFrame, features: pd.DataFrame) -> str:
+    groups = ["G0", "G0+G1", "G0+G1+G2", "ALL"]
+    baseline = features.loc[features["mode"] == "raw"].pivot(index="model", columns="case", values="rmse")
     rows = []
-    for feature_set, label in [("G0", "G0 (13)"), ("G0+G1", "G0+G1 (39)"), ("G0+G1+G2", "G0+G1+G2 (44)"), ("ALL", "All groups (54)")]:
-        light = latest(results, "lightgbm_tuned", feature_set, "raw").rmse
-        cat = latest(results, "catboost_tuned", feature_set, "raw").rmse
-        rows.append(f"{label} & {light:.1f} & {cat:.1f}" + ROW_END)
-    return table("lrr", r"\textbf{Features} & \textbf{LightGBM} & \textbf{CatBoost}", rows)
+    for model in ("ridge", "knn", "random_forest", "lightgbm_tuned", "catboost_tuned"):
+        scores = (baseline.loc[model, groups] if model in baseline.index else
+                  [latest(results, model, group, "raw").rmse for group in groups])
+        rows.append(" & ".join([MODELS[model], *(f"{score:.1f}" for score in scores)]) + ROW_END)
+    header = (r"\textbf{Model} & \shortstack{\textbf{G0}\\(13)} & \shortstack{\textbf{G0+G1}\\(39)}"
+              r" & \shortstack{\textbf{G0+G1+G2}\\(44)} & \shortstack{\textbf{All groups}\\(54)}")
+    return table("@{}lrrrr@{}", header, rows)
 
 
 def blend_table(results: pd.DataFrame, validation: pd.DataFrame, log: pd.DataFrame) -> str:
@@ -104,7 +109,7 @@ def main() -> None:
     validation = pd.read_csv(VALIDATION)
     log = pd.read_csv(KAGGLE_LOG)
     (TABLES / "results.tex").write_text(results_table(results, validation), encoding="utf-8")
-    (TABLES / "ablation.tex").write_text(ablation_table(results), encoding="utf-8")
+    (TABLES / "ablation.tex").write_text(ablation_table(results, pd.read_csv(BASELINE_FEATURES)), encoding="utf-8")
     (TABLES / "blend.tex").write_text(blend_table(results, validation, log), encoding="utf-8")
 
 

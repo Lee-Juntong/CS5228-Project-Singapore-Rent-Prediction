@@ -14,6 +14,11 @@ each other, via two methods:
 
 The team decided to keep + flag these and let a with/without RMSE comparison
 decide. This script runs that A/B for the final single model (lightgbm_tuned, G0+G1).
+The flag thresholds (group quartiles, means, standard deviations and the
+rent ~ area line) are estimated from the fit window only, so validation rents
+cannot influence which rows are dropped. Runs logged before 2026-11-06 estimated
+them from all labelled rows. The fit-only results are in
+results/member_b/extensions/outliers_fit_only.csv.
 Rows are dropped from the TRAINING fit window only; the Oct 2024–Mar 2025
 validation window is left untouched, so the "with" (baseline, already logged)
 and "without" runs score the identical rows and the RMSE delta reflects only the
@@ -97,15 +102,13 @@ def main() -> None:
     name, detector = FLAGS[args.flag]
 
     train, test = load_modeling_data()
-    flag = detector(train)
-    fit_mask, valid_mask = time_holdout_masks(train)
-    print(f"{name}: {int(flag.sum())} rows "
-          f"({int((flag & fit_mask).sum())} in fit window, "
-          f"{int((flag & valid_mask).sum())} in valid window)")
-
-    # Drop only the flagged rows in the fit window, so the Oct 2024–Mar 2025
-    # validation set is identical to the baseline runs.
-    drop_mask = flag & fit_mask
+    fit_mask, _ = time_holdout_masks(train)
+    # Estimate the thresholds on the fit window alone and drop only flagged fit
+    # rows, so the Oct 2024–Mar 2025 validation set is identical to the
+    # baseline runs and its rents never shape the flags.
+    drop_mask = np.zeros(len(train), dtype=bool)
+    drop_mask[fit_mask] = detector(train.loc[fit_mask])
+    print(f"{name}: {int(drop_mask.sum())} rows flagged in fit window")
     train_clean = train.loc[~drop_mask].reset_index(drop=True)
     print(f"training rows: {len(train)} -> {len(train_clean)} "
           f"(dropped {len(train) - len(train_clean)})")

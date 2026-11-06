@@ -1,0 +1,3 @@
+model,case,mode,rmse,mae,mape,bias,r2,n_fit,n_valid,with_history,source
+global_median,L24_shrink5,index,572.1827471516045,430.5560277439453,15.852777904355017,-14.969745198082629,0.20452635829324395,132538,17037,12314,median plus local 24-month mean; fixed prior strength 5
+group_median,L24_shrink5,index,454.8703101138059,326.0632340101822,12.447825665046276,20.214005785868647,0.49727387061909445,132538,17037,12314,median plus local 24-month mean; fixed prior strength 5

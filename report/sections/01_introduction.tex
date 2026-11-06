@@ -7,9 +7,9 @@ The training data covers rentals approved from January 2021 to March 2025, and t
 
 We ask three questions:
 \begin{enumerate}
-\item How well can we predict rent for future months from flat, location and market attributes?
+\item How well can we predict rent for future months from flat attributes, location and earlier rents?
 \item Do complex models (gradient boosting) clearly beat simple ones (lookup tables, linear models, nearest neighbours) on this task?
 \item Which attributes drive rent, and what limits the accuracy of a prediction?
 \end{enumerate}
 
-Our best model is an equal blend of five tree models with repeat-rent features, which use the earlier rents of the same block and flat type. It scores 431.0~SGD on a six month holdout and 415.0~SGD on the public leaderboard, against 445.8 and 434.4 for tuned LightGBM alone. Once the trend is handled, Ridge is only 22~SGD behind tuned LightGBM, and the largest further gain came from the repeat-rent features. Flat type, the rent of the same block and type two years earlier, and location drive the predictions. Repeated holdout profiles have a pooled within-group standard deviation of about 450~SGD. Missing unit and tenancy details may contribute to this spread.
+Our best model is an equal blend of five tree models with repeat-rent features, which use the earlier rents of the same block and flat type. It scores 431.0~SGD on a six month holdout and 415.0~SGD on the public leaderboard, against 445.8 and 434.4 for tuned LightGBM alone. When trained to predict rent relative to the monthly market median, Ridge is only 22~SGD behind tuned LightGBM in holdout RMSE. Adding repeat-rent features further reduced Ridge's RMSE by 18.9~SGD, while a more strongly regularised LightGBM using the same features improved on tuned LightGBM by 9.9~SGD. Flat type, the rent of the same block and type two years earlier, and location drive the predictions. Repeated holdout profiles have a pooled within-group standard deviation of about 450~SGD. Missing unit and tenancy details may contribute to this spread.

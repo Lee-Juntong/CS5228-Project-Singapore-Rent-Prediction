@@ -12,16 +12,13 @@
 \textbf{Member} & \textbf{Tasks} \\
 \hline
 A (Zhuang Mengjin) & Shared pipeline, preprocessing, validation design, feature handling table, trend handling, split comparison, forecast backtest, repeat-rent features and blend, Methods section, report assembly. \\
-B (Shengxin Pei) & Baseline ladder and its evaluation, learning curves. \\
+B (Shengxin Pei) & Implemented and evaluated seven baselines, produced learning curves, extended the ablation and backtest experiments to the baselines, tested a macroeconomic rent index, and independently reproduced the final blend. \\
 C (John Min) & Boosting models, Optuna tuning, feature group and suspicious row ablations, Kaggle submissions and log. \\
 D (Yu Long Lim) & EDA, repeated profile analysis, residual and case review, permutation importance, partial dependence, report figures. \\
 \hline
 \end{tabular}
 \end{table}
 
-\todo{Each member checks their row.}
-
-\newpage
 \section{Forecast Backtest}\label{app:backtest}
 
 \begin{table}[!h]
@@ -32,6 +29,15 @@ D (Yu Long Lim) & EDA, repeated profile analysis, residual and case review, perm
 \input{tables/horizon}
 \end{table}
 
+\begin{table}[!ht]
+\caption{Baseline RMSE (SGD), averaged with equal weight over the five training cutoffs in Table~\ref{tab:horizon}. Near covers months 1--6 and far covers months 7--16 (7--12 for March 2024).}
+\label{tab:baseline-horizon}
+\centering
+\footnotesize
+\input{tables/baseline_horizon}
+\end{table}
+
+\clearpage
 \section{Hyperparameters}\label{app:hyperparameters}
 
 \begin{table}[!h]
@@ -40,6 +46,26 @@ D (Yu Long Lim) & EDA, repeated profile analysis, residual and case review, perm
 \centering
 \footnotesize
 \input{tables/hyperparameters}
+\end{table}
+
+\newpage
+\section{Rent History and Index Forecasts}
+
+\begin{table}[!ht]
+\caption{Baseline RMSE (SGD) on the six-month holdout with the index target. Change is the effect of adding rent history, calculated before rounding. The two fixed median baselines ignore extra input columns.}
+\label{tab:baseline-lags}
+\centering
+\footnotesize
+\input{tables/baseline_lags}
+\end{table}
+
+\begin{table}[!ht]
+\caption{RMSE (SGD) of the six monthly median rent forecasts, October 2024--March 2025. The fixed forecast uses information available at the September cutoff. Monthly updates use the previous month's observed median and the latest available official forecasts. The weighting half-life was 1.5 months and the Ridge penalty was 5.}
+\label{tab:macro-medians}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\input{tables/macro_medians}
 \end{table}
 
 \onecolumn

@@ -1,10 +1,11 @@
-\begin{tabular}{lrr}
+\begin{tabular}{@{}lrrrr@{}}
 \hline
-\textbf{Features} & \textbf{LightGBM} & \textbf{CatBoost} \\
+\textbf{Model} & \shortstack{\textbf{G0}\\(13)} & \shortstack{\textbf{G0+G1}\\(39)} & \shortstack{\textbf{G0+G1+G2}\\(44)} & \shortstack{\textbf{All groups}\\(54)} \\
 \hline
-G0 (13) & 460.2 & 462.7 \\
-G0+G1 (39) & 449.9 & 448.8 \\
-G0+G1+G2 (44) & 449.8 & 448.5 \\
-All groups (54) & 452.4 & 450.1 \\
+Ridge & 583.6 & 576.1 & 575.8 & 479.5 \\
+KNN & 545.5 & 482.3 & 482.3 & 482.3 \\
+Random forest & 468.8 & 458.7 & 458.6 & 458.9 \\
+LightGBM (tuned) & 460.2 & 449.9 & 449.8 & 452.4 \\
+CatBoost (tuned) & 462.7 & 448.8 & 448.5 & 450.1 \\
 \hline
 \end{tabular}
