@@ -12,6 +12,8 @@ cd CS5228-Project-Singapore-Rent-Prediction
 python3.10 -m venv .venv
 ```
 
+If `python3.10` is not found, as with Anaconda on Windows, check that `python --version` reports 3.10 and run `python -m venv .venv` instead.
+
 Activate the environment. On Windows run `.venv\Scripts\activate`. On macOS or Linux run `source .venv/bin/activate`. Then install the packages:
 
 ```bash
@@ -146,7 +148,7 @@ python -m scripts.lag_blend_submission --analyse
 
 Each mode trains fresh models. Validation performs 14 fits: five index target models and two raw target LightGBM models in each of two time windows. The default command performs five fits on all training rows and writes `submissions/lag_blend5_G0G1_index.csv` with columns `Id,Predicted`. Analysis performs five holdout fits plus permutation scoring. None of them uploads to Kaggle or updates `results/kaggle_log.csv`.
 
-All three modes overwrite committed files. Validation and analysis rewrite `results/member_a/repeat_rent/` and two report figures. The default command rewrites the committed final submission. A rerun is not byte identical, so compare it with the committed file numerically (maximum difference below 1e-9) and do not commit it. A separate checkout needs its own copy of the data, because `data/` is mostly not in git (see [data/README.md](data/README.md)). Otherwise restore the generated files afterwards, which leaves other uncommitted work alone: `git checkout -- results/member_a/repeat_rent submissions/lag_blend5_G0G1_index.csv report/figures/lag_correlation.pdf report/figures/blend_importance.pdf`.
+All three modes overwrite committed files. Validation and analysis rewrite `results/member_a/repeat_rent/` and two report figures. The default command rewrites the committed final submission. Other steps rewrite committed files too: preprocessing rewrites `artifacts/data_audit/audit_summary.json`, `python -m scripts.trend_analysis` rewrites `report/figures/rent_index.pdf` and `report/figures/monthly_rmse.pdf`, and `python -m scripts.run_baselines` adds rows to `results/results.csv` and new files under `results/runs/` and `results/breakdowns/`. A rerun is not byte identical, so compare it with the committed file numerically (maximum difference below 1e-9) and do not commit it. A separate checkout needs its own copy of the data, because `data/` is mostly not in git (see [data/README.md](data/README.md)). Otherwise restore the generated files afterwards, which leaves other uncommitted work alone: `git checkout -- results/member_a/repeat_rent submissions/lag_blend5_G0G1_index.csv report/figures/lag_correlation.pdf report/figures/blend_importance.pdf report/figures/rent_index.pdf report/figures/monthly_rmse.pdf artifacts/data_audit/audit_summary.json results/results.csv`. Delete any new files under `results/runs/` and `results/breakdowns/` yourself.
 
 `python -m scripts.report_tables` rebuilds `results.tex`, `ablation.tex` and `blend.tex` in `report/tables/`. In the same directory, `python -m scripts.trend_analysis` writes the trend, split and hyperparameter tables, and `python -m scripts.horizon_backtest --table-only` writes the horizon table. Run all three commands from the repository root. See [the report build instructions](report/README.md), [the blend guide](docs/repeat_rent_blend.md) and [the reproduction check](docs/blend_reproduction.md).
 
