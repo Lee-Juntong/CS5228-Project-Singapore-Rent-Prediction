@@ -20,7 +20,7 @@ Activate the environment. On Windows run `.venv\Scripts\activate`. On macOS or L
 pip install -r requirements.txt
 ```
 
-This includes torch for neural models such as TabM. For analysis only, use `python -m pip install -r requirements-analysis.txt` instead.
+This includes torch, which no current model uses. For analysis only, use `python -m pip install -r requirements-analysis.txt` instead.
 
 On macOS, LightGBM also needs OpenMP (`brew install libomp`).
 
@@ -72,7 +72,7 @@ Every model goes through one function, so all results are comparable. [docs/pipe
 * **Metrics.** RMSE (primary, as on Kaggle), MAE, MAPE and mean bias. For the time split, RMSE per flat type and per validation month is saved too.
 * **Feature groups.** Fixed in `src/features.py`. G0 core, G1 location, G2 block, G3 market. Named sets are `G0`, `G0+G1`, `G0+G1+G2` and `ALL`. Phase 1 uses `G0+G1`.
 * **Trend handling.** `target_mode="raw"` trains on rent directly. `target_mode="index"` divides rent by a monthly rent index (training median per month, extended by a straight line fitted to the last 12 months), then multiplies back.
-* **Seed.** 5228, set before every fit.
+* **Seed.** 5228, set before every fit. The four added blend members have their own fixed seeds.
 * **Feature handling table.** [docs/feature_handling.md](docs/feature_handling.md).
 
 ### Run a registered model
@@ -136,7 +136,7 @@ Tuned boosting models (30 Optuna trials each on the time holdout). Time holdout 
 | catboost_tuned | G0+G1 | 448.8 | 449.0 |
 | catboost_tuned | G0+G1+G2 | 448.5 | 448.4 |
 
-Tuning cuts LightGBM from 457.3 to 449.9 and CatBoost from 452.7 to 448.8. The index target mode (dividing rent by a monthly rent index, decision 5) helps LightGBM by about 4 RMSE but barely moves CatBoost. **lightgbm_tuned on G0+G1 with index mode (445.8)** is the best single submission. The final model and final Kaggle submission is the five model repeat-rent blend, `lag_blend5_G0G1_index.csv` (holdout 431.0, public 415.01, [docs/repeat_rent_blend.md](docs/repeat_rent_blend.md)). Tuned XGBoost (445.6) and the untuned random forest (444.3) are within 1.5 RMSE of it, which is a tie on one holdout. Index mode lets a tree model predict above the training range, but [docs/trend_handling.md](docs/trend_handling.md) shows on earlier periods that it hurts when rents stop rising. Adding the block group (G2) does not help either model here. Build the configs with `python -m scripts.tune_boosting`; the best parameters are saved to `configs/<model>_tuned.json`.
+Tuning cuts LightGBM from 457.3 to 449.9 and CatBoost from 452.7 to 448.8. The index target mode (dividing rent by a monthly rent index, decision 5) helps LightGBM by about 4 RMSE but barely moves CatBoost. **lightgbm_tuned on G0+G1 with index mode (445.8)** is the chosen single model. The final model and final Kaggle submission is the five model repeat-rent blend, `lag_blend5_G0G1_index.csv` (holdout 431.0, public 415.01, [docs/repeat_rent_blend.md](docs/repeat_rent_blend.md)). Tuned XGBoost (445.6) and the untuned random forest (444.3) are within 1.5 RMSE of it, which is a tie on one holdout. Index mode lets a tree model predict above the training range, but [docs/trend_handling.md](docs/trend_handling.md) shows on earlier periods that it hurts when rents stop rising. Adding the block group (G2) does not help either model here. Build the configs with `python -m scripts.tune_boosting`; the best parameters are saved to `configs/<model>_tuned.json`.
 
 Feature-group ablation (tuned models, time holdout, raw target). The tuned hyperparameters are held fixed at the `G0+G1` values while the feature set varies, so each row isolates the contribution of a feature group:
 
@@ -172,9 +172,9 @@ Each mode trains fresh models. Validation performs 14 fits: five index target mo
 
 All three modes overwrite committed files. Validation and analysis rewrite `results/member_a/repeat_rent/` and two report figures. The default command rewrites the committed final submission. Other steps rewrite committed files too: preprocessing rewrites `artifacts/data_audit/audit_summary.json`, `python -m scripts.trend_analysis` rewrites `report/figures/rent_index.pdf` and `report/figures/monthly_rmse.pdf`, and `python -m scripts.run_baselines` adds rows to `results/results.csv` and new files under `results/runs/` and `results/breakdowns/`. A rerun is not byte identical, so compare it with the committed file numerically (maximum difference below 1e-9) and do not commit it. A separate checkout needs its own copy of the data, because `data/` is mostly not in git (see [data/README.md](data/README.md)). Otherwise restore the generated files afterwards, which leaves other uncommitted work alone: `git checkout -- results/member_a/repeat_rent submissions/lag_blend5_G0G1_index.csv report/figures/lag_correlation.pdf report/figures/blend_importance.pdf report/figures/rent_index.pdf report/figures/monthly_rmse.pdf artifacts/data_audit/audit_summary.json results/results.csv`. Delete any new files under `results/runs/` and `results/breakdowns/` yourself.
 
-`python -m scripts.report_tables` rebuilds `results.tex`, `ablation.tex` and `blend.tex` in `report/tables/`. In the same directory, `python -m scripts.trend_analysis` writes the trend, split and hyperparameter tables, and `python -m scripts.horizon_backtest --table-only` writes the horizon table. Run all three commands from the repository root. See [the report build instructions](report/README.md), [the blend guide](docs/repeat_rent_blend.md) and [the reproduction check](docs/blend_reproduction.md).
+`python -m scripts.report_tables` rebuilds `results.tex`, `ablation.tex` and `blend.tex` in `report/tables/`. In the same directory, `python -m scripts.trend_analysis` writes the trend, split and hyperparameter tables, and `python -m scripts.horizon_backtest --table-only` writes the horizon table, and `python -m scripts.report_appendix_tables` writes the baseline backtest, rent history and monthly index tables. Run all four commands from the repository root. See [the report build instructions](report/README.md), [the blend guide](docs/repeat_rent_blend.md) and [the reproduction check](docs/blend_reproduction.md).
 
-The `submissions/` folder is created if it does not exist. Only the final submission, `submissions/lag_blend5_G0G1_index.csv`, is in git. Each submission is logged in `results/kaggle_log.csv` (date, model, feature set, target mode, validation RMSE, public leaderboard score, notes). Record the validation RMSE before reading the public score so the leaderboard does not drive model selection. The final model is the one with the lowest time holdout RMSE. The five model blend scores 431.0, against 431.6 for the index and raw mix and 432.6 for the two model blend, and its public score agrees with that ranking. Reproducing the CSV locally does not verify the public score.
+The `submissions/` folder is created if it does not exist. Only the final submission, `submissions/lag_blend5_G0G1_index.csv`, is in git. Each submission is logged in `results/kaggle_log.csv` (date, member, model, feature set, target mode, validation RMSE, public leaderboard score, notes). Record the validation RMSE before reading the public score so the leaderboard does not drive model selection. The final model is the one with the lowest time holdout RMSE. The five model blend scores 431.0, against 431.6 for the index and raw mix and 432.6 for the two model blend, and its public score agrees with that ranking. Reproducing the CSV locally does not verify the public score.
 
 ### Saved model weights
 
@@ -195,5 +195,6 @@ It fits on all training rows and saves the fitted model to `models/` (gitignored
 * `scripts/trend_analysis.py`, `scripts/horizon_backtest.py`: trend tables, report figures and the 16 month backtest ([docs/trend_handling.md](docs/trend_handling.md))
 * `scripts/lag_blend_submission.py`: repeat-rent features, final five model blend and its validation ([docs/repeat_rent_blend.md](docs/repeat_rent_blend.md))
 * `scripts/report_tables.py`: Evaluation tables of the report
+* `scripts/report_appendix_tables.py`: Appendix tables of the report
 * `notebooks/`: EDA
 * `templates/latex/`: course report template

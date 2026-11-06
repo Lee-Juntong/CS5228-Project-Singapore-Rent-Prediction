@@ -1,6 +1,6 @@
 # Boosting model selection (Member C)
 
-How the boosting models (LightGBM, CatBoost) were built, tuned and chosen, with
+How the boosting models (LightGBM, CatBoost, XGBoost) were built, tuned and chosen, with
 the results and the reasoning behind each decision. Condensed from the working
 log for the whole team.
 
@@ -24,7 +24,7 @@ handling), G0+G1, raw target.
 | lightgbm_default | 457.3 | 334.7 | 12.6% |
 | xgboost_default | 457.2 | 335.4 | 12.6% |
 
-For reference on the same split: ridge 574.9, global-median floor 837.1. All
+For reference on the same split: ridge_default 574.9 (alpha 1), global-median floor 837.1. All
 three boosting families clear the linear and naive baselines by a wide margin.
 LightGBM and XGBoost start about level (~457); CatBoost is ~5 RMSE ahead out of
 the box.
@@ -81,7 +81,7 @@ Split comparison (G0+G1, raw) — see `optimism` for generalization behaviour:
 |---|---|---|---|---|
 | catboost_tuned | 448.8 | 475.4 | 451.0 | -2.1 |
 | lightgbm_tuned | 449.9 | 478.8 | 451.9 | -2.0 |
-| xgboost_tuned | 449.9 | 477.4 | 450.8 | -0.9 |
+| xgboost_tuned | 449.9 | 477.3 | 450.8 | -0.9 |
 | catboost_default | 452.7 | 476.4 | 451.6 | 1.2 |
 | lightgbm_default | 457.3 | 478.9 | 455.3 | 2.0 |
 | xgboost_default | 457.2 | 479.9 | 456.5 | 0.7 |
@@ -108,11 +108,11 @@ varies, so each row isolates one feature group. Raw target, time holdout.
 | G0+G1+G2 (+block) | 44 | 448.5 | 449.8 |
 | ALL (+market) | 54 | 450.1 | 452.4 |
 
-- **G1 location** is the only clear win (~12–14 RMSE).
+- **G1 location** is the only clear win (~10–14 RMSE).
 - **G2 block** adds almost nothing (0.1–0.3).
 - **G3 market** (current-month COE, CPI, stocks) *hurts* both models (+1.6–2.6),
-  even though those values would not be known at prediction time — supports plan
-  decision 6: drop the leaky macro features.
+  even though those values would not be known at prediction time, so the final
+  model excludes G3.
 
 The feature-group ablation was run for **LightGBM and CatBoost only**. XGBoost
 was added later and run only on the best LightGBM/CatBoost combination (G0+G1),
@@ -171,7 +171,9 @@ Reasoning:
 - **Trend handling fits the task.** The Kaggle test spans Mar 2025–Jul 2026,
   further into the future than our holdout. Index mode is the only mechanism that
   lets a tree model follow a continuing rent trend, so its edge should be at
-  least as large on the real horizon as on the holdout.
+  least as large on the real horizon as on the holdout. Verdict 6 in
+  [trend_handling.md](trend_handling.md) later showed that this edge can reverse when rents
+  stop rising.
 - **G0+G1, not G0+G1+G2.** Adding block features (G2) did not help (it slightly
   hurt index-mode LightGBM: 445.8 → 446.2), so the simpler feature set wins.
 - **Low optimism.** Tuned LightGBM's optimism ≈ −2 says the honest score is not
@@ -197,8 +199,8 @@ python -m scripts.save_final_model --model lightgbm_tuned --features G0+G1 --tar
 
 ## 6. Suspicious-row ablation
 
-EDA (`preprocessing/findings.md`, `decisions.md`, `correlations.ipynb`) flags
-rows that are individually plausible but inconsistent with each other, using two
+EDA notes kept outside this repository (`preprocessing/findings.md`,
+`decisions.md`, `correlations.ipynb`) flag rows that are individually plausible but inconsistent with each other, using two
 methods. The team decided to keep + flag them and let a with/without RMSE test
 decide (`decisions.md`, "Outlier handling"); this section runs that test.
 
@@ -279,9 +281,9 @@ a tree model.
 | dropped | rows | val RMSE | public LB | vs baseline |
 |---|---|---|---|---|
 | — (baseline) | 0 | 445.8 | 434.4 | — |
-| M2 low | 49 | 445.7 | 434.0 | ~0 (noise) |
-| both (M1 ∩ M2) | 12 | 446.1 | — | +0.3 val |
-| M1 | 331 | 447.9 | 438.6 | **+2.2 val / +4.2 LB** |
+| M2 low | 49 (44 in the fit window) | 445.7 | 434.0 | ~0 (noise) |
+| both (M1 ∩ M2) | 12 (10 in the fit window) | 446.1 | — | +0.3 val |
+| M1 | 331 (276 in the fit window) | 447.9 | 438.6 | **+2.2 val / +4.2 LB** |
 
 Removing flagged rows ranges from harmless (M2 low, both) to clearly harmful
 (M1), and never helps — so we **keep all rows**. The M1 result shows *why*: its
@@ -340,7 +342,7 @@ removal hurts, because M1 discards legitimate premium rents (e.g. central 5-room
 The prediction range also compressed (max 5637 → 5073), the model losing its grip
 on high rents.
 
-### Sat 1 Nov 2026 — xgboost_tuned, G0+G1, index (third-family comparison)
+### Sun 1 Nov 2026 — xgboost_tuned, G0+G1, index (third-family comparison)
 
 | field | value |
 |---|---|

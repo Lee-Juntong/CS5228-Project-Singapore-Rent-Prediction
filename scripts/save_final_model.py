@@ -9,7 +9,6 @@ library versions). It reuses the exact pipeline primitives (`set_seed`, the
 `MonthlyRentIndex` trend handling) so the saved model's predictions match the
 logged run bit for bit.
 
-    python -m scripts.save_final_model --model catboost_tuned --features G0+G1+G2
     python -m scripts.save_final_model --model lightgbm_tuned --features G0+G1 --target-mode index
 
 Weights land in `models/` (gitignored). See models/README.md to reload one.

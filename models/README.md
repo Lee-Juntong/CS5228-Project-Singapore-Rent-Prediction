@@ -9,11 +9,10 @@ only this README is committed. Rebuild them from the shared data in one command.
 From the project root, after the processed data is built (see `data/README.md`):
 
 ```bash
-python -m scripts.save_final_model --model catboost_tuned --features G0+G1+G2
 python -m scripts.save_final_model --model lightgbm_tuned --features G0+G1 --target-mode index
 ```
 
-Each call fits the model on all training rows with the shared seed (5228) and
+This fits the model on all training rows with the shared seed (5228) and
 the same trend handling the evaluation pipeline uses, then writes:
 
 * `<model>_<features>_<target_mode>.joblib` — the fitted model plus the feature
@@ -28,7 +27,7 @@ the same trend handling the evaluation pipeline uses, then writes:
 import joblib
 from src.features import load_modeling_data
 
-bundle = joblib.load("models/catboost_tuned_G0G1G2_raw.joblib")
+bundle = joblib.load("models/lightgbm_tuned_G0G1_index.joblib")
 model, columns, target_mode, rent_index = (
     bundle["model"], bundle["columns"], bundle["target_mode"], bundle["rent_index"]
 )
@@ -39,5 +38,7 @@ if target_mode == "index":           # undo the trend removal
     pred = pred * rent_index.transform(test["MONTH_INDEX"])
 ```
 
-This reproduces the submission predictions exactly, since the model was fit with
-the same seed, columns and trend handling as the reported run.
+This reproduces the predictions of the single LightGBM run exactly, since the model
+was fit with the same seed, columns and trend handling as the reported run. It is
+not the final submission, which is the five model blend from
+`scripts/lag_blend_submission.py`.

@@ -59,3 +59,5 @@ On another Windows PC, a second run at `547d891` also passed this comparison, wi
 In the run above, the seven regenerated tables (`results`, `ablation`, `blend`, `trend`, `split`, `hyperparameters`, `horizon`) are byte identical to their committed references. The report compiled without unresolved references or overfull boxes. Evaluation tables and regenerated figures were visually checked.
 
 After the merge with main and the figure fix (`31828a9`), the PDF has 11 pages in total. The conclusion ends on page 6. The remaining main text figures are on pages 7 and 8. References and appendices start on page 9, so the main content is within the eight page limit.
+
+After later report changes, the build on 6 November 2026 has 12 pages. The conclusion is on page 8 and references start on page 9, so the main content is still within the limit.
