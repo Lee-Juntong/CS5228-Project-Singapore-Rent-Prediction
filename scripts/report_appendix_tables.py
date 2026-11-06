@@ -1,4 +1,4 @@
-"""Build the three extended-experiment appendix tables from saved scores."""
+"""Build the four extended-experiment appendix tables from saved results."""
 import pandas as pd
 
 from scripts.report_tables import MODELS, ROW_END, TABLES, signed, table
@@ -39,6 +39,15 @@ def main():
             for key, label in methods.items()]
     header = r"\textbf{Index method} & \shortstack{Fixed at\\Sep 2024} & \shortstack{Updated\\monthly}"
     (TABLES / "macro_medians.tex").write_text(table("@{}lrr@{}", header, rows), encoding="utf-8")
+
+    audit = pd.read_csv(source / "flag_threshold_audit.csv").set_index("flag")
+    rules = {"m2": r"Low rent for floor area (residual $z<-3$ of a rent\,$\sim$\,area line)",
+             "m1": r"Extreme within its flat type or flat type\,$\times$\,town group (IQR fence and $|z|>3$)",
+             "both": "Flagged by both rules"}
+    rows = [f"{label} & {audit.loc[flag, 'all_rows_flags']} & {audit.loc[flag, 'fit_only_threshold_drops']}" + ROW_END
+            for flag, label in rules.items()]
+    header = r"\textbf{Rule} & \shortstack{\textbf{All}\\\textbf{rows}} & \shortstack{\textbf{Fit}\\\textbf{rows}}"
+    (TABLES / "outliers.tex").write_text(table(r"@{}p{0.62\columnwidth}rr@{}", header, rows), encoding="utf-8")
 
 
 if __name__ == "__main__":
